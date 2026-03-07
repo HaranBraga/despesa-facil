@@ -16,9 +16,11 @@ const api = {
     });
     const data = await res.json().catch(() => ({}));
     if (res.status === 401) {
+      const hadToken = !!localStorage.getItem('token');
       localStorage.removeItem('token');
       renderLogin();
-      throw new Error('Sessão expirada. Faça login novamente.');
+      if (hadToken) throw new Error('Sessão expirada. Faça login novamente.');
+      throw new Error(''); // Silent failure for first load
     }
     if (!res.ok) throw new Error(data.error || 'Erro na requisição');
     return data;
