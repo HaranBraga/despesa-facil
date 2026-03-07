@@ -12,13 +12,13 @@ async function createAdmin() {
         if (res.rows.length === 0) {
             // User doesn't exist, create them
             await client.query(
-                'INSERT INTO users (name, email, password, is_admin) VALUES ($1, $2, $3, true)',
+                'INSERT INTO users (name, email, password_hash, is_admin) VALUES ($1, $2, $3, true)',
                 ['Admin HQ', email, hash]
             );
             console.log('✅ Usuário admin criado: admin@despesafacil.com / admin123');
         } else {
             // Ensure existing is admin
-            await client.query('UPDATE users SET is_admin = true, password = $2 WHERE email = $1', [email, hash]);
+            await client.query('UPDATE users SET is_admin = true, password_hash = $2 WHERE email = $1', [email, hash]);
             console.log('✅ Usuário admin atualizado: admin@despesafacil.com / admin123');
         }
     } catch (err) {
