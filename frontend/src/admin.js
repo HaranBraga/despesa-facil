@@ -52,7 +52,7 @@ async function render() {
     }
     renderDashboard(me);
   } catch (e) {
-    showToast(e.message, 'error');
+    if (e.message) showToast(e.message, 'error');
     renderLogin();
   }
 }
