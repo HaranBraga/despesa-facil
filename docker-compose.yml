@@ -4,6 +4,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile.prod
     restart: unless-stopped
+    networks:
+      - easypanel
     environment:
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET:-INSERIR_SECRET_AQUI}
@@ -16,5 +18,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.prod
     restart: unless-stopped
+    networks:
+      - easypanel
     depends_on:
       - backend
+
+networks:
+  easypanel:
+    external: true
