@@ -28,8 +28,8 @@ export default defineConfig({
                 name: 'Despesa Fácil',
                 short_name: 'Despesa Fácil',
                 description: 'Sistema de lançamento de despesas por CNPJ',
-                theme_color: '#1a1f2e',
-                background_color: '#1a1f2e',
+                theme_color: '#ffffff',
+                background_color: '#f4f6fb',
                 display: 'standalone',
                 orientation: 'portrait',
                 start_url: '/',
@@ -39,7 +39,14 @@ export default defineConfig({
                 ]
             },
             workbox: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+                globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+                navigateFallbackDenylist: [/^\/api\//],
+                runtimeCaching: [
+                    {
+                        urlPattern: /^\/api\//,
+                        handler: 'NetworkOnly'
+                    }
+                ]
             }
         })
     ]
