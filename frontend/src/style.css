@@ -546,3 +546,170 @@ body {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* =============================================
+   DESKTOP RESPONSIVE LAYOUT (PC WEB)
+   ============================================= */
+@media (min-width: 768px) {
+  body {
+    display: flex;
+    justify-content: center;
+    background: #0b0c10;
+  }
+
+  .app-shell {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 
+      "nav header"
+      "nav main";
+    background: var(--bg-primary);
+    box-shadow: 0 0 40px rgba(0,0,0,0.5);
+  }
+
+  /* Header */
+  .app-header {
+    grid-area: header;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    padding: 32px 48px 16px;
+    background: rgba(15,17,23,0.95);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Sidebar (Bottom Nav turned into Sidebar) */
+  .bottom-nav {
+    grid-area: nav;
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 260px;
+    height: 100vh;
+    transform: none;
+    border-top: none;
+    border-right: 1px solid var(--border);
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 32px 20px;
+    background: var(--bg-secondary);
+  }
+
+  /* Nav Items in Sidebar */
+  .nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 14px 20px;
+    margin-bottom: 8px;
+    flex: none;
+    border-radius: var(--radius-md);
+  }
+  .nav-item .nav-icon {
+    font-size: 1.25rem;
+  }
+  .nav-item .nav-label {
+    font-size: 0.95rem;
+    margin-left: 16px;
+  }
+  .nav-item.nav-primary {
+    max-width: 100%;
+    margin-top: 32px;
+    margin-bottom: 32px;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    padding: 16px;
+  }
+  .nav-item.nav-primary .nav-label {
+    margin-left: 12px;
+    font-size: 1.05rem;
+  }
+
+  /* Main Content Area */
+  .page-content {
+    grid-area: main;
+    padding: 24px 48px 80px;
+    overflow-y: visible;
+  }
+
+  /* Adjustments for grids and cards */
+  .category-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  #diario-grid, #mensal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* Auth Pages */
+  .auth-page {
+    justify-content: center;
+    padding: 40px;
+  }
+  .auth-card {
+    max-width: 440px;
+    padding: 40px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    align-items: center; /* Center vertically */
+  }
+  .modal {
+    margin: auto;
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border);
+    max-width: 540px;
+    transform: scale(0.95);
+    opacity: 0; /* Keep JS opacity toggle logic */
+    transition: all 0.25s ease;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  }
+  .modal-overlay.show .modal {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .modal-handle { display: none; } /* Hide drag handle */
+
+  /* Toast */
+  .toast {
+    bottom: 40px;
+    right: 40px;
+    left: auto;
+    transform: translateY(20px);
+    padding: 16px 24px;
+    font-size: 1rem;
+    border-radius: var(--radius-lg);
+  }
+  .toast.show {
+    transform: translateY(0);
+  }
+
+  /* Sticky Save Bar */
+  .sticky-save-bar {
+    position: sticky;
+    bottom: 0px;
+    left: auto;
+    right: auto;
+    background: transparent;
+    border-top: none;
+    padding: 24px 0 0;
+    justify-content: flex-end;
+  }
+  .sticky-save-bar .btn {
+    width: auto !important;
+    min-width: 250px;
+    max-width: 300px;
+    box-shadow: 0 8px 24px rgba(16,185,129,0.3) !important;
+  }
+}
+

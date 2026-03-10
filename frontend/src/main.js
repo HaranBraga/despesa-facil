@@ -450,7 +450,7 @@ function lancamentoHtml(cnpjs, categories, today, now) {
       </div>
       
       <!-- Sticky Save Button -->
-      <div style="position:fixed;bottom:70px;left:0;right:0;padding:12px 20px;background:var(--bg-app);border-top:1px solid var(--border);z-index:10;display:flex;justify-content:center;">
+      <div class="sticky-save-bar">
         <button class="btn btn-primary" id="btn-salvar-lancamento" style="width:100%;max-width:500px;box-shadow:0 4px 12px rgba(16,185,129,0.3);display:flex;align-items:center;justify-content:center;gap:8px;">
           <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Salvar Despesas
         </button>
