@@ -16,13 +16,13 @@ app.get('/health', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/offices', require('./routes/offices'));
-app.use('/api/cnpjs', require('./routes/cnpjs'));
-app.use('/api/categories', require('./routes/categories'));
-app.use('/api/preferences', require('./routes/preferences'));
-app.use('/api/expenses', require('./routes/expenses'));
-app.use('/api/reports', require('./routes/reports'));
+app.use('/auth', require('./routes/auth'));
+app.use('/offices', require('./routes/offices'));
+app.use('/cnpjs', require('./routes/cnpjs'));
+app.use('/categories', require('./routes/categories'));
+app.use('/preferences', require('./routes/preferences'));
+app.use('/expenses', require('./routes/expenses'));
+app.use('/reports', require('./routes/reports'));
 
 // 404
 app.use((req, res) => {
