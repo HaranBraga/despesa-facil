@@ -14,7 +14,11 @@ function formatCNPJ(cnpj) {
 // GET /cnpjs — listar CNPJs do usuário
 router.get('/', auth, async (req, res) => {
     try {
-        let base = process.env.DF_BASE_URL || 'https://app.despesafacil.com.br';
+        let base = process.env.DF_BASE_URL || `${req.protocol}://${req.get('host')}`;
+        // Fallback final se o host vier como IP interno ou localhost
+        if (base.includes('sistemas_despesa-facil-ap') || base.includes('localhost')) {
+            base = 'https://despesafacil.azecode.cloud';
+        }
         if (base.endsWith('/')) base = base.slice(0, -1);
         const result = await pool.query(
             'SELECT id, cnpj, razao_social, whatsapp_number, whatsapp_token, is_active, created_at, updated_at FROM cnpjs WHERE user_id = $1 AND is_active = true ORDER BY razao_social',

@@ -121,6 +121,12 @@ router.post('/register', async (req, res) => {
         nextMonth.setDate(nextMonth.getDate() + 1); // começa amanhã
         const nextDue = nextMonth.toISOString().split('T')[0];
 
+        let redirectBase = process.env.DF_BASE_URL || `${req.protocol}://${req.get('host')}`;
+        if (redirectBase.includes('sistemas_despesa-facil-ap') || redirectBase.includes('localhost')) {
+            redirectBase = 'https://despesafacil.azecode.cloud';
+        }
+        if (redirectBase.endsWith('/')) redirectBase = redirectBase.slice(0, -1);
+
         const asaasSubscription = await asaasRequest('POST', '/subscriptions', {
             customer: asaasCustomerId,
             billingType: 'CREDIT_CARD',
@@ -129,7 +135,7 @@ router.post('/register', async (req, res) => {
             cycle: selectedPlan.cycle,
             description: selectedPlan.description,
             externalReference: userId,
-            redirectLink: `${process.env.DF_BASE_URL || 'https://app.despesafacil.com.br'}/login?ativado=true`
+            redirectLink: `${redirectBase}/login?ativado=true`
         });
 
         if (asaasSubscription.status !== 200 && asaasSubscription.status !== 201) {

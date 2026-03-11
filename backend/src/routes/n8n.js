@@ -31,8 +31,15 @@ async function apiKeyAuth(req, res, next) {
 }
 
 // Helper: monta o guest link de um CNPJ
-function buildGuestLink(token) {
-    let base = process.env.DF_BASE_URL || 'https://app.despesafacil.com.br';
+function buildGuestLink(token, req) {
+    // Tenta pegar da variável de ambiente, ou do HOST da requisição atual como fallback
+    let base = process.env.DF_BASE_URL || (req ? `${req.protocol}://${req.get('host')}` : '');
+    
+    if (!base) {
+        console.warn('AVISO: DF_BASE_URL não configurada e sem contexto de requisição.');
+        base = 'https://despesafacil.azecode.cloud'; // Fallback final para o seu domínio atual
+    }
+
     if (base.endsWith('/')) base = base.slice(0, -1);
     return `${base}/lancamento?token=${token}`;
 }
@@ -92,7 +99,7 @@ router.get('/missing-today', apiKeyAuth, async (req, res) => {
             user_id: r.user_id,
             user_name: r.user_name,
             whatsapp: resolveWhatsapp(r.cnpj_whatsapp, r.user_whatsapp),
-            guest_link: buildGuestLink(r.whatsapp_token)
+            guest_link: buildGuestLink(r.whatsapp_token, req)
         }));
 
         res.json({ date: today, total: rows.length, cnpjs: rows });
@@ -157,7 +164,7 @@ router.get('/missing-monthly', apiKeyAuth, async (req, res) => {
             user_id: r.user_id,
             user_name: r.user_name,
             whatsapp: resolveWhatsapp(r.cnpj_whatsapp, r.user_whatsapp),
-            guest_link: buildGuestLink(r.whatsapp_token)
+            guest_link: buildGuestLink(r.whatsapp_token, req)
         }));
 
         res.json({ month: m, year: y, total: rows.length, cnpjs: rows });

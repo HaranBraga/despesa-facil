@@ -100,8 +100,11 @@ router.put('/cnpjs/:id/whatsapp', auth, async (req, res) => {
  */
 router.get('/cnpjs', auth, async (req, res) => {
     try {
-        let base = process.env.DF_BASE_URL || 'https://app.despesafacil.com.br';
-        if (base.endsWith('/')) base = base.slice(0, -1);
+        let base = process.env.DF_BASE_URL || `${req.protocol}://${req.get('host')}`;
+        // Fallback final se o host vier como IP interno ou localhost
+        if (base.includes('sistemas_despesa-facil-ap') || base.includes('localhost')) {
+            base = 'https://despesafacil.azecode.cloud';
+        }
         const result = await pool.query(
             `SELECT id, cnpj, razao_social, whatsapp_number, whatsapp_token, is_active, created_at
              FROM cnpjs
