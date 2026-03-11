@@ -32,7 +32,7 @@ async function apiKeyAuth(req, res, next) {
 
 // Helper: monta o guest link de um CNPJ
 function buildGuestLink(token) {
-    const base = process.env.APP_URL || process.env.FRONTEND_URL || 'https://app.despesafacil.com.br';
+    const base = process.env.APP_URL || 'https://app.despesafacil.com.br';
     return `${base}/lancamento?token=${token}`;
 }
 
