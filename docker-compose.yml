@@ -12,7 +12,7 @@ services:
       PORT: 3000
       NODE_ENV: production
       FRONTEND_URL: ${FRONTEND_URL:-https://seu-dominio.com}
-      APP_URL: ${APP_URL:-https://app.despesafacil.com.br}
+      DF_BASE_URL: ${DF_BASE_URL:-https://app.despesafacil.com.br}
 
   frontend:
     build:

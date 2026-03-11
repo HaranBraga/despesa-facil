@@ -129,7 +129,7 @@ router.post('/register', async (req, res) => {
             cycle: selectedPlan.cycle,
             description: selectedPlan.description,
             externalReference: userId,
-            redirectLink: `${process.env.APP_URL || 'https://app.despesafacil.com.br'}/login?ativado=true`
+            redirectLink: `${process.env.DF_BASE_URL || 'https://app.despesafacil.com.br'}/login?ativado=true`
         });
 
         if (asaasSubscription.status !== 200 && asaasSubscription.status !== 201) {
