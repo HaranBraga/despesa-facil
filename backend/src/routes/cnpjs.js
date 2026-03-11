@@ -14,15 +14,21 @@ function formatCNPJ(cnpj) {
 // GET /cnpjs — listar CNPJs do usuário
 router.get('/', auth, async (req, res) => {
     try {
+        const base = process.env.APP_URL || 'https://app.despesafacil.com.br';
         const result = await pool.query(
-            'SELECT * FROM cnpjs WHERE user_id = $1 AND is_active = true ORDER BY razao_social',
+            'SELECT id, cnpj, razao_social, whatsapp_number, whatsapp_token, is_active, created_at, updated_at FROM cnpjs WHERE user_id = $1 AND is_active = true ORDER BY razao_social',
             [req.user.id]
         );
-        res.json(result.rows);
+        const rows = result.rows.map(r => ({
+            ...r,
+            guest_link: `${base}/lancamento?token=${r.whatsapp_token}`
+        }));
+        res.json(rows);
     } catch (err) {
         res.status(500).json({ error: 'Erro ao buscar CNPJs' });
     }
 });
+
 
 // POST /cnpjs — cadastrar novo CNPJ
 router.post('/', auth, async (req, res) => {

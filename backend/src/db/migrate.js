@@ -74,7 +74,21 @@ const alterStatements = [
   `ALTER TABLE expense_categories ADD COLUMN IF NOT EXISTS tipo VARCHAR(10) NOT NULL DEFAULT 'ambos' CHECK (tipo IN ('diario', 'mensal', 'ambos'))`,
   `ALTER TABLE user_category_preferences ADD COLUMN IF NOT EXISTS tipo VARCHAR(10) CHECK (tipo IN ('diario', 'mensal', 'ambos'))`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS office_id UUID REFERENCES accounting_offices(id) ON DELETE SET NULL`,
-  `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false`
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false`,
+  // Novas colunas para WhatsApp e token de acesso guest
+  `ALTER TABLE cnpjs ADD COLUMN IF NOT EXISTS whatsapp_token UUID DEFAULT uuid_generate_v4()`,
+  `ALTER TABLE cnpjs ADD COLUMN IF NOT EXISTS whatsapp_number VARCHAR(20)`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_number VARCHAR(20)`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true`,
+  // Tabela de API Keys para integração N8N
+  `CREATE TABLE IF NOT EXISTS api_keys (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    key_hash VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    office_id UUID REFERENCES accounting_offices(id) ON DELETE CASCADE,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW()
+  )`
 ];
 
 async function migrate() {

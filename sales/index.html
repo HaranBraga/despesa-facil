@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Despesa Fácil — Controle de Despesas para Empresas</title>
+  <meta name="description" content="Simplifique o lançamento de despesas por CNPJ. Integre com WhatsApp e mantenha seu escritório contábil sempre atualizado." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo">
+        <svg width="28" height="28" fill="none" stroke="url(#lg)" stroke-width="2.5" viewBox="0 0 24 24">
+          <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4f9cf9"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>
+          <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
+        </svg>
+        <span class="logo-text">Despesa Fácil</span>
+      </div>
+      <a href="#cadastro" class="btn-header">Começar agora →</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="badge">✨ Simples, rápido e digital</div>
+      <h1 class="hero-title">
+        Controle de despesas<br/>
+        <span class="gradient-text">sem complicação</span>
+      </h1>
+      <p class="hero-sub">
+        Seus clientes lançam despesas pelo WhatsApp, sem login.<br/>
+        Você acompanha tudo em tempo real por CNPJ.
+      </p>
+      <a href="#cadastro" class="btn-hero">Criar minha conta grátis</a>
+
+      <div class="hero-features">
+        <div class="hf-item"><span class="hf-icon">📱</span> Link direto no WhatsApp</div>
+        <div class="hf-item"><span class="hf-icon">🏢</span> Multi-CNPJ</div>
+        <div class="hf-item"><span class="hf-icon">📊</span> Relatórios automáticos</div>
+        <div class="hf-item"><span class="hf-icon">🔔</span> Lembretes automáticos</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="how-section">
+    <div class="container">
+      <h2 class="section-title-center">Como funciona?</h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-icon">📋</div>
+          <h3>Cadastre seus clientes</h3>
+          <p>Adicione os CNPJs e configure as categorias de despesa para cada empresa.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-icon">📲</div>
+          <h3>Envie o link pelo WhatsApp</h3>
+          <p>Cada CNPJ tem um link único. O cliente acessa e lança as despesas sem precisar de login.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-icon">🔔</div>
+          <h3>Lembretes automáticos</h3>
+          <p>Se o cliente não lançar no dia, você recebe alerta para enviar o lembrete via WhatsApp.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-icon">📊</div>
+          <h3>Relatórios prontos</h3>
+          <p>Visualize totais mensais por categoria, exporte e use direto na contabilidade.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANOS -->
+  <section class="plans-section" id="planos">
+    <div class="container">
+      <h2 class="section-title-center">Planos e preços</h2>
+      <p class="section-sub-center">Sem contrato. Cancele quando quiser.</p>
+      <div class="plans-grid">
+        <div class="plan-card" id="plan-mensal" data-plan="mensal">
+          <div class="plan-badge">Mais popular</div>
+          <h3 class="plan-name">Mensal</h3>
+          <div class="plan-price">
+            <span class="plan-currency">R$</span>
+            <span class="plan-value">97</span>
+            <span class="plan-period">/mês</span>
+          </div>
+          <ul class="plan-features">
+            <li>✅ CNPJs ilimitados</li>
+            <li>✅ Link guest por CNPJ</li>
+            <li>✅ API para N8N/automações</li>
+            <li>✅ Relatórios mensais</li>
+            <li>✅ Suporte via WhatsApp</li>
+          </ul>
+          <button class="btn-plan active" onclick="selectPlan('mensal')">Escolher Mensal</button>
+        </div>
+        <div class="plan-card" id="plan-anual" data-plan="anual">
+          <h3 class="plan-name">Anual</h3>
+          <div class="plan-price">
+            <span class="plan-currency">R$</span>
+            <span class="plan-value">970</span>
+            <span class="plan-period">/ano</span>
+          </div>
+          <div class="plan-savings">🎉 2 meses grátis</div>
+          <ul class="plan-features">
+            <li>✅ Tudo do Mensal</li>
+            <li>✅ Prioridade no suporte</li>
+            <li>✅ Acesso antecipado a novos recursos</li>
+            <li>✅ Equivale a R$ 80,83/mês</li>
+          </ul>
+          <button class="btn-plan" onclick="selectPlan('anual')">Escolher Anual</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CADASTRO -->
+  <section class="signup-section" id="cadastro">
+    <div class="container">
+      <div class="signup-card">
+        <h2 class="signup-title">Criar sua conta</h2>
+        <p class="signup-sub">Preencha os dados abaixo. Você será redirecionado para o pagamento seguro.</p>
+
+        <div id="alert-msg" class="alert-msg" style="display:none"></div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nome completo *</label>
+            <input id="s-name" type="text" placeholder="João Silva" />
+          </div>
+          <div class="form-group">
+            <label>E-mail *</label>
+            <input id="s-email" type="email" placeholder="joao@empresa.com" />
+          </div>
+          <div class="form-group">
+            <label>Telefone / WhatsApp *</label>
+            <input id="s-phone" type="tel" placeholder="(11) 99999-9999" inputmode="numeric" />
+          </div>
+          <div class="form-group">
+            <label>CPF ou CNPJ do responsável *</label>
+            <input id="s-cpfcnpj" type="text" placeholder="000.000.000-00" inputmode="numeric" />
+          </div>
+          <div class="form-group">
+            <label>Senha *</label>
+            <input id="s-pass" type="password" placeholder="Mínimo 6 caracteres" />
+          </div>
+          <div class="form-group">
+            <label>Escritório contábil (opcional)</label>
+            <select id="s-office">
+              <option value="">Selecione (se aplicável)...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="plan-selected-info" id="plan-info">
+          Plano selecionado: <strong id="plan-info-text">Mensal — R$ 97/mês</strong>
+          <a href="#planos" style="margin-left:8px;color:var(--accent);font-size:0.85rem;">trocar</a>
+        </div>
+
+        <button id="btn-register" class="btn-signup">
+          <span id="btn-text">Continuar para pagamento →</span>
+        </button>
+
+        <p class="signup-terms">
+          Ao continuar você concorda com nossos <a href="#">Termos de Uso</a> e <a href="#">Política de Privacidade</a>.<br/>
+          Pagamento processado com segurança pelo <strong>Asaas</strong>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="logo" style="justify-content:center;margin-bottom:8px;">
+        <svg width="22" height="22" fill="none" stroke="url(#lf)" stroke-width="2.5" viewBox="0 0 24 24">
+          <defs><linearGradient id="lf" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4f9cf9"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>
+          <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle>
+        </svg>
+        <span class="logo-text">Despesa Fácil</span>
+      </div>
+      <p style="color:#64748b;font-size:0.85rem;text-align:center">© 2026 Despesa Fácil. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

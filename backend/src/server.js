@@ -23,6 +23,10 @@ app.use('/api/categories', require('./routes/categories'));
 app.use('/api/preferences', require('./routes/preferences'));
 app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/reports', require('./routes/reports'));
+app.use('/api/account', require('./routes/account'));
+app.use('/api/n8n', require('./routes/n8n'));
+app.use('/api/guest', require('./routes/guest'));
+app.use('/api/subscriptions', require('./routes/subscriptions'));
 
 // 404
 app.use((req, res) => {
