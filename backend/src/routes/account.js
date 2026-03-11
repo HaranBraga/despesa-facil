@@ -100,7 +100,7 @@ router.put('/cnpjs/:id/whatsapp', auth, async (req, res) => {
  */
 router.get('/cnpjs', auth, async (req, res) => {
     try {
-        const base = process.env.APP_URL || 'https://app.despesafacil.com.br';
+        const base = process.env.APP_URL || process.env.FRONTEND_URL || 'https://app.despesafacil.com.br';
         const result = await pool.query(
             `SELECT id, cnpj, razao_social, whatsapp_number, whatsapp_token, is_active, created_at
              FROM cnpjs
