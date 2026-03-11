@@ -14,7 +14,8 @@ function formatCNPJ(cnpj) {
 // GET /cnpjs — listar CNPJs do usuário
 router.get('/', auth, async (req, res) => {
     try {
-        const base = process.env.APP_URL || process.env.FRONTEND_URL || 'https://app.despesafacil.com.br';
+        let base = process.env.APP_URL || 'https://app.despesafacil.com.br';
+        if (base.endsWith('/')) base = base.slice(0, -1);
         const result = await pool.query(
             'SELECT id, cnpj, razao_social, whatsapp_number, whatsapp_token, is_active, created_at, updated_at FROM cnpjs WHERE user_id = $1 AND is_active = true ORDER BY razao_social',
             [req.user.id]
