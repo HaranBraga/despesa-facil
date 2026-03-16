@@ -60,18 +60,28 @@ async function render() {
 }
 
 async function renderDashboard(user) {
+    let selectedCompanyId = null;
+    let isSidebarCollapsed = false;
+
     document.getElementById('app').innerHTML = `
-    <div class="app-shell" style="max-width: 100%; margin: 0; display: grid; grid-template-columns: 280px 1fr; height: 100vh; overflow: hidden; background: #f8fafc;">
+    <div class="app-shell" style="max-width: 100%; margin: 0; display: grid; height: 100vh; overflow: hidden; background: #f8fafc;">
         <!-- Sidebar Premium -->
         <aside style="background: #0f172a; color: white; padding: 32px 24px; display: flex; flex-direction: column; gap: 32px;">
-            <div class="logo" style="display:flex; align-items:center; gap:12px;">
-                <div style="width:40px; height:40px; background:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px var(--accent-glow);">
-                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            <div class="logo-container" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                <div class="logo" style="display:flex; align-items:center; gap:12px; overflow:hidden;">
+                    <div style="width:40px; height:40px; background:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px var(--accent-glow); flex-shrink:0;">
+                        <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                            <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <div style="font-weight:800; font-size:1.1rem; line-height:1; white-space:nowrap;">Despesa Fácil</div>
+                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:4px;">Contador</div>
+                    </div>
                 </div>
-                <div>
-                    <div style="font-weight:800; font-size:1.1rem; line-height:1;">Despesa Fácil</div>
-                    <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:4px;">Contador</div>
-                </div>
+                <button id="btn-toggle-sidebar" style="background:none; border:none; color:white; cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center; transition:var(--transition);">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
             </div>
 
             <nav style="display:flex; flex-direction:column; gap:8px; flex:1;">
@@ -115,7 +125,7 @@ async function renderDashboard(user) {
             </header>
 
             <!-- Summary Cards Premium -->
-            <div class="grid-3" id="summary-container">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;" id="summary-container">
                 <div class="summary-card-v2 animate-up glass" style="--delay:0ms;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--accent-soft); color:var(--accent);">
@@ -428,6 +438,32 @@ async function renderDashboard(user) {
 
     loadSummary();
     loadCompanies();
+
+    // Sidebar Toggle Logic
+    const btnToggle = document.getElementById('btn-toggle-sidebar');
+    const shell = document.querySelector('.app-shell');
+    const logoText = document.querySelector('.logo-text');
+    const navLabels = document.querySelectorAll('.nav-item span:not(.nav-icon)'); // If they had labels separately, but they are text nodes here
+    
+    btnToggle.addEventListener('click', () => {
+        isSidebarCollapsed = !isSidebarCollapsed;
+        shell.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
+        btnToggle.style.transform = isSidebarCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+        
+        // Hide/Show elements for clean collapse
+        const sideElements = document.querySelectorAll('.logo-text, aside nav button span:last-child, aside div div:last-child');
+        sideElements.forEach(el => {
+            el.style.display = isSidebarCollapsed ? 'none' : 'block';
+        });
+        
+        // Adjust padding of items
+        document.querySelectorAll('aside nav button, #btn-settings, #btn-logout').forEach(btn => {
+            btn.style.justifyContent = isSidebarCollapsed ? 'center' : 'flex-start';
+            if (btn.querySelector('div:last-child')) {
+                 btn.querySelector('div:last-child').style.display = isSidebarCollapsed ? 'none' : 'block';
+            }
+        });
+    });
 }
 
 render();
