@@ -57,6 +57,8 @@ async function render() {
         if (e.message) showToast(e.message, 'error');
         window.location.href = '/admin.html';
     }
+}
+
 async function renderDashboard(user) {
     document.getElementById('app').innerHTML = `
     <div class="app-shell" style="max-width: 1200px; margin: 0 auto; display: block; height: auto; min-height: 100vh;">
