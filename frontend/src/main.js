@@ -473,7 +473,7 @@ function setupLancamentoEvents(cnpjs, categories, now) {
       expense_date,
       period_month: dateObj.getUTCMonth() + 1,
       period_year: dateObj.getUTCFullYear(),
-      tipo: 'lancamento'
+      tipo: 'diario'
     };
 
     try {
@@ -1010,12 +1010,6 @@ async function renderGuest({ token } = {}) {
     const { cnpj_id, cnpj, razao_social, categories } = data;
 
     const today = new Date().toLocaleDateString('sv');
-    const diaryCats = categories.filter(c => c.tipo === 'diario' || c.tipo === 'ambos');
-    const mensalCats = categories.filter(c => c.tipo === 'mensal' || c.tipo === 'ambos');
-    let guestTab = 'diario';
-    const now = new Date();
-    let guestMonth = now.getMonth() + 1;
-    let guestYear = now.getFullYear();
 
     const renderRow = (cat) => `
       <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;">
@@ -1032,8 +1026,6 @@ async function renderGuest({ token } = {}) {
       : 'flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem;';
 
     function renderGuestHtml() {
-      const isDiario = guestTab === 'diario';
-      const cats = isDiario ? diaryCats : mensalCats;
       return `
         <div style="max-width:480px;margin:0 auto;padding:24px 16px 80px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
@@ -1045,33 +1037,20 @@ async function renderGuest({ token } = {}) {
           </div>
           <p style="color:var(--text-secondary);font-size:0.85rem;margin:0 0 20px">${razao_social} &mdash; <span style="font-family:monospace">${cnpj}</span></p>
 
-          <div style="display:flex;gap:8px;margin-bottom:16px">
-            <button id="g-tab-diario" style="${tabStyle(isDiario)};display:flex;align-items:center;justify-content:center;gap:6px;">📅 Diária</button>
-            <button id="g-tab-mensal" style="${tabStyle(!isDiario)};display:flex;align-items:center;justify-content:center;gap:6px;">📆 Mensal</button>
+          <div class="form-group" style="margin-bottom:16px">
+            <label class="form-label">Data do Lançamento</label>
+            <input id="g-date" type="date" class="form-input" value="${today}" />
           </div>
 
-          ${isDiario ? `
-            <div class="form-group" style="margin-bottom:16px">
-              <label class="form-label">Data do Lançamento</label>
-              <input id="g-date" type="date" class="form-input" value="${today}" />
-            </div>` : `
-            <div class="period-nav" style="margin-bottom:16px">
-              <button class="period-nav-btn" id="g-prev-month">‹</button>
-              <span class="period-label" id="g-period-label">${getMonthName(guestMonth)} / ${guestYear}</span>
-              <button class="period-nav-btn" id="g-next-month">›</button>
-            </div>`}
-
-          <p class="text-sm text-muted" style="text-align:center;margin:0 0 12px">
-            ${isDiario ? 'Preencha os valores das despesas do dia:' : 'Preencha os valores das despesas do mês:'}
-          </p>
+          <p class="text-sm text-muted" style="text-align:center;margin:0 0 12px">Preencha os valores das despesas:</p>
           <div id="g-grid" class="gap-8">
-            ${cats.length === 0 ? '<p class="text-sm text-muted text-center">Nenhuma despesa configurada para esta aba.</p>' : cats.map(renderRow).join('')}
+            ${categories.length === 0 ? '<p class="text-sm text-muted text-center">Nenhuma despesa configurada.</p>' : categories.map(renderRow).join('')}
           </div>
 
           <div class="sticky-save-bar">
             <button id="g-btn-salvar" class="btn btn-primary" style="width:100%;max-width:480px;display:flex;align-items:center;justify-content:center;gap:8px;">
               <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-              Salvar Despesas
+              Lançar Despesa
             </button>
           </div>
         </div>`;
@@ -1080,19 +1059,9 @@ async function renderGuest({ token } = {}) {
     function mountGuest() {
       app.innerHTML = renderGuestHtml();
 
-      document.getElementById('g-tab-diario')?.addEventListener('click', () => { guestTab = 'diario'; mountGuest(); });
-      document.getElementById('g-tab-mensal')?.addEventListener('click', () => { guestTab = 'mensal'; mountGuest(); });
-      document.getElementById('g-prev-month')?.addEventListener('click', () => {
-        guestMonth--; if (guestMonth < 1) { guestMonth = 12; guestYear--; }
-        document.getElementById('g-period-label').textContent = `${getMonthName(guestMonth)} / ${guestYear}`;
-      });
-      document.getElementById('g-next-month')?.addEventListener('click', () => {
-        guestMonth++; if (guestMonth > 12) { guestMonth = 1; guestYear++; }
-        document.getElementById('g-period-label').textContent = `${getMonthName(guestMonth)} / ${guestYear}`;
-      });
-
       document.getElementById('g-btn-salvar').addEventListener('click', async () => {
-        const isDiario = guestTab === 'diario';
+        const d = document.getElementById('g-date')?.value;
+        if (!d) return showToast('Selecione a data', 'error');
         const inputs = document.querySelectorAll('#g-grid input[data-cat-id]');
         const items = Array.from(inputs)
           .filter(i => i.value && parseFloat(i.value) > 0)
@@ -1100,15 +1069,14 @@ async function renderGuest({ token } = {}) {
 
         if (items.length === 0) return showToast('Preencha pelo menos uma despesa', 'error');
 
-        const payload = { items, period_month: guestMonth, period_year: guestYear, tipo: isDiario ? 'diario' : 'mensal' };
-        if (isDiario) {
-          const d = document.getElementById('g-date')?.value;
-          if (!d) return showToast('Selecione a data', 'error');
-          payload.expense_date = d;
-          const dObj = new Date(d);
-          payload.period_month = dObj.getUTCMonth() + 1;
-          payload.period_year = dObj.getUTCFullYear();
-        }
+        const dateObj = new Date(d);
+        const payload = { 
+          items, 
+          expense_date: d,
+          period_month: dateObj.getUTCMonth() + 1, 
+          period_year: dateObj.getUTCFullYear(), 
+          tipo: 'diario' 
+        };
 
         const btn = document.getElementById('g-btn-salvar');
         btn.disabled = true; btn.textContent = 'Salvando...';
