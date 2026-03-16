@@ -80,6 +80,7 @@ const alterStatements = [
   `ALTER TABLE cnpjs ADD COLUMN IF NOT EXISTS whatsapp_number VARCHAR(20)`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_number VARCHAR(20)`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true`,
+  `ALTER TABLE expenses ADD COLUMN IF NOT EXISTS locked BOOLEAN DEFAULT FALSE`,
   // Tabela de API Keys para integração N8N
   `CREATE TABLE IF NOT EXISTS api_keys (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

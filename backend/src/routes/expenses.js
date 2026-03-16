@@ -68,9 +68,9 @@ router.post('/', auth, async (req, res) => {
         const period_year = dateObj.getUTCFullYear();
 
         const result = await pool.query(
-            `INSERT INTO expenses (id, cnpj_id, category_id, amount, expense_date, period_month, period_year, tipo, description)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-            [uuidv4(), cnpj_id, category_id, parseFloat(amount), expense_date, period_month, period_year, tipo, description || null]
+            `INSERT INTO expenses (id, cnpj_id, category_id, amount, expense_date, period_month, period_year, tipo, description, locked)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+            [uuidv4(), cnpj_id, category_id, parseFloat(amount), expense_date, period_month, period_year, tipo, description || null, true]
         );
 
         const expense = result.rows[0];
@@ -107,9 +107,9 @@ router.post('/bulk', auth, async (req, res) => {
             await client.query('BEGIN');
             for (const item of validItems) {
                 const r = await client.query(
-                    `INSERT INTO expenses (id, cnpj_id, category_id, amount, expense_date, period_month, period_year, tipo, description)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-                    [uuidv4(), cnpj_id, item.category_id, parseFloat(item.amount), final_date, parseInt(period_month), parseInt(period_year), tipo, item.description || null]
+                    `INSERT INTO expenses (id, cnpj_id, category_id, amount, expense_date, period_month, period_year, tipo, description, locked)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+                    [uuidv4(), cnpj_id, item.category_id, parseFloat(item.amount), final_date, parseInt(period_month), parseInt(period_year), tipo, item.description || null, true]
                 );
                 inserted.push(r.rows[0]);
             }
@@ -132,10 +132,11 @@ router.put('/:id', auth, async (req, res) => {
     try {
         const { amount, expense_date, description, category_id } = req.body;
         const check = await pool.query(
-            `SELECT e.id FROM expenses e JOIN cnpjs c ON c.id = e.cnpj_id WHERE e.id = $1 AND c.user_id = $2`,
+            `SELECT e.id, e.locked FROM expenses e JOIN cnpjs c ON c.id = e.cnpj_id WHERE e.id = $1 AND c.user_id = $2`,
             [req.params.id, req.user.id]
         );
         if (check.rows.length === 0) return res.status(404).json({ error: 'Despesa não encontrada' });
+        if (check.rows[0].locked) return res.status(403).json({ error: 'Despesa travada não pode ser editada' });
 
         const dateObj = new Date(expense_date);
         const period_month = dateObj.getUTCMonth() + 1;
@@ -155,10 +156,11 @@ router.put('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
     try {
         const check = await pool.query(
-            `SELECT e.id FROM expenses e JOIN cnpjs c ON c.id = e.cnpj_id WHERE e.id = $1 AND c.user_id = $2`,
+            `SELECT e.id, e.locked FROM expenses e JOIN cnpjs c ON c.id = e.cnpj_id WHERE e.id = $1 AND c.user_id = $2`,
             [req.params.id, req.user.id]
         );
         if (check.rows.length === 0) return res.status(404).json({ error: 'Despesa não encontrada' });
+        if (check.rows[0].locked) return res.status(403).json({ error: 'Despesa travada não pode ser removida' });
 
         await pool.query('DELETE FROM expenses WHERE id = $1', [req.params.id]);
         res.json({ message: 'Despesa removida' });

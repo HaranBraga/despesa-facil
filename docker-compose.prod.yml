@@ -10,6 +10,7 @@ services:
       PORT: 3000
       NODE_ENV: production
       FRONTEND_URL: ${FRONTEND_URL:-https://despesafacil.azecode.cloud}
+      DF_BASE_URL: ${DF_BASE_URL:-https://despesafacil.azecode.cloud}
     networks:
       - app-network
     healthcheck:

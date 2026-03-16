@@ -345,7 +345,6 @@ function setupDashboardEvents(cnpjs, report) {
 }
 
 // ================= LANCAMENTO =================
-let lancamentoTab = 'diario';
 
 async function renderLancamento(params = {}) {
   renderShell('<div class="skeleton" style="height:200px"></div>', 'lancamento');
@@ -382,18 +381,6 @@ function getMonthName(m) {
 }
 
 function lancamentoHtml(cnpjs, categories, today, now) {
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
-  const isDiario = lancamentoTab === 'diario';
-
-  const tabStyle = (active) => active
-    ? 'flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.9rem;'
-    : 'flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem;';
-
-  // Filtra as categorias ativas pelo tipo da aba para a renderização inicial
-  const catsDiario = categories.filter(c => c.tipo === 'diario' || c.tipo === 'ambos');
-  const catsMensal = categories.filter(c => c.tipo === 'mensal' || c.tipo === 'ambos');
-
   const renderRow = (cat) => `
     <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;">
       <span style="flex:1;font-size:0.9rem;font-weight:500;color:var(--text-primary)">
@@ -417,44 +404,21 @@ function lancamentoHtml(cnpjs, categories, today, now) {
         </select>
       </div>
 
-      <div style="display:flex;gap:8px;">
-        <button id="tab-diario" style="${tabStyle(isDiario)};display:flex;align-items:center;justify-content:center;gap:6px;">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg> Diária
-        </button>
-        <button id="tab-mensal" style="${tabStyle(!isDiario)};display:flex;align-items:center;justify-content:center;gap:6px;">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Mensal
-        </button>
-      </div>
-
-      <!-- TAB DIÁRIO -->
-      <div id="tab-diario-content" style="display:${isDiario ? 'flex' : 'none'};flex-direction:column;gap:16px">
-        <div class="form-group">
+      <div class="form-group">
           <label class="form-label">Data do Lançamento</label>
           <input id="l-date" type="date" class="form-input" value="${today}" />
-        </div>
-        <p class="text-sm text-muted" style="text-align:center;margin:0">Preencha o valor das despesas do dia:</p>
-        <div id="diario-grid" class="gap-8">
-          ${catsDiario.length === 0 ? '<p class="text-sm text-muted text-center">Nenhuma despesa diária configurada.</p>' : catsDiario.map(renderRow).join('')}
-        </div>
       </div>
 
-      <!-- TAB MENSAL -->
-      <div id="tab-mensal-content" style="display:${!isDiario ? 'flex' : 'none'};flex-direction:column;gap:16px">
-        <div class="period-nav" style="margin-bottom:0">
-          <button class="period-nav-btn" id="prev-month-l">‹</button>
-          <span class="period-label" id="period-label-l">${getMonthName(month)} / ${year}</span>
-          <button class="period-nav-btn" id="next-month-l">›</button>
-        </div>
-        <p class="text-sm text-muted" style="text-align:center;margin:0">Preencha o valor das despesas do mês:</p>
-        <div id="mensal-grid" class="gap-8">
-          ${catsMensal.length === 0 ? '<p class="text-sm text-muted text-center">Nenhuma despesa mensal configurada.</p>' : catsMensal.map(renderRow).join('')}
-        </div>
+      <p class="text-sm text-muted" style="text-align:center;margin:0">Preencha o valor das despesas:</p>
+      
+      <div id="lancamento-grid" class="gap-8">
+          ${categories.length === 0 ? '<p class="text-sm text-muted text-center">Nenhuma despesa configurada.</p>' : categories.map(renderRow).join('')}
       </div>
       
       <!-- Sticky Save Button -->
       <div class="sticky-save-bar">
         <button class="btn btn-primary" id="btn-salvar-lancamento" style="width:100%;max-width:500px;box-shadow:0 4px 12px rgba(16,185,129,0.3);display:flex;align-items:center;justify-content:center;gap:8px;">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Salvar Despesas
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Lançar Despesa
         </button>
       </div>
     </div>
@@ -462,29 +426,11 @@ function lancamentoHtml(cnpjs, categories, today, now) {
 }
 
 function setupLancamentoEvents(cnpjs, categories, now) {
-  let currentMonth = now.getMonth() + 1;
-  let currentYear = now.getFullYear();
-
-  function setTab(tab) {
-    lancamentoTab = tab;
-    const isDiario = tab === 'diario';
-    document.getElementById('tab-diario-content').style.display = isDiario ? 'flex' : 'none';
-    document.getElementById('tab-mensal-content').style.display = !isDiario ? 'flex' : 'none';
-    const activeStyle = 'flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.9rem;';
-    const inactiveStyle = 'flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem;';
-    document.getElementById('tab-diario').style.cssText = isDiario ? activeStyle : inactiveStyle;
-    document.getElementById('tab-mensal').style.cssText = !isDiario ? activeStyle : inactiveStyle;
-  }
-
-  document.getElementById('tab-diario').addEventListener('click', () => setTab('diario'));
-  document.getElementById('tab-mensal').addEventListener('click', () => setTab('mensal'));
-
-  // Define as categorias de cada tela baseado no tipo
   const renderGrid = (containerId, cats) => {
     const grid = document.getElementById(containerId);
     if (!grid) return;
     if (cats.length === 0) {
-      grid.innerHTML = '<p class="text-sm text-muted text-center">Nenhuma despesa configurada para esta aba.</p>';
+      grid.innerHTML = '<p class="text-sm text-muted text-center">Nenhuma despesa configurada.</p>';
       return;
     }
     grid.innerHTML = cats.map(cat => `
@@ -502,27 +448,17 @@ function setupLancamentoEvents(cnpjs, categories, now) {
     selectedCnpjId = e.target.value;
     const prefs = await api.get(`/preferences/${selectedCnpjId}`).catch(() => []);
     const visibleCats = prefs.filter(p => p.is_visible);
-    renderGrid('diario-grid', visibleCats.filter(c => c.tipo === 'diario' || c.tipo === 'ambos'));
-    renderGrid('mensal-grid', visibleCats.filter(c => c.tipo === 'mensal' || c.tipo === 'ambos'));
+    renderGrid('lancamento-grid', visibleCats);
   });
 
-  // Mensal — navegação
-  document.getElementById('prev-month-l').addEventListener('click', () => {
-    currentMonth--; if (currentMonth < 1) { currentMonth = 12; currentYear--; }
-    document.getElementById('period-label-l').textContent = `${getMonthName(currentMonth)} / ${currentYear}`;
-  });
-  document.getElementById('next-month-l').addEventListener('click', () => {
-    currentMonth++; if (currentMonth > 12) { currentMonth = 1; currentYear++; }
-    document.getElementById('period-label-l').textContent = `${getMonthName(currentMonth)} / ${currentYear}`;
-  });
-
-  // Salvar Bulk (Serve para Diário e Mensal)
+  // Salvar Bulk
   document.getElementById('btn-salvar-lancamento').addEventListener('click', async () => {
-    const isDiario = lancamentoTab === 'diario';
     const cnpj_id = document.getElementById('l-cnpj').value;
+    const expense_date = document.getElementById('l-date').value;
+    
+    if (!expense_date) return showToast('Selecione a data', 'error');
 
-    const selector = isDiario ? '#diario-grid input[data-cat-id]' : '#mensal-grid input[data-cat-id]';
-    const inputs = document.querySelectorAll(selector);
+    const inputs = document.querySelectorAll('#lancamento-grid input[data-cat-id]');
 
     const items = Array.from(inputs)
       .filter(inp => inp.value && parseFloat(inp.value) > 0)
@@ -530,37 +466,29 @@ function setupLancamentoEvents(cnpjs, categories, now) {
 
     if (items.length === 0) return showToast('Preencha o valor de pelo menos uma despesa', 'error');
 
+    const dateObj = new Date(expense_date);
     const payload = {
       cnpj_id,
       items,
-      period_month: currentMonth,
-      period_year: currentYear,
-      tipo: isDiario ? 'diario' : 'mensal'
+      expense_date,
+      period_month: dateObj.getUTCMonth() + 1,
+      period_year: dateObj.getUTCFullYear(),
+      tipo: 'lancamento'
     };
-
-    if (isDiario) {
-      const expense_date = document.getElementById('l-date').value;
-      if (!expense_date) return showToast('Selecione a data', 'error');
-      payload.expense_date = expense_date;
-
-      const dateObj = new Date(expense_date);
-      payload.period_month = dateObj.getUTCMonth() + 1;
-      payload.period_year = dateObj.getUTCFullYear();
-    }
 
     try {
       const btn = document.getElementById('btn-salvar-lancamento');
-      btn.disabled = true; btn.textContent = 'Salvando...';
+      btn.disabled = true; btn.textContent = 'Lançando...';
       const result = await api.post('/expenses/bulk', payload);
 
-      showToast(`${result.inserted} despesa(s) salva(s) com sucesso!`, 'success');
+      showToast(`Lançamento concluído! As despesas foram travadas.`, 'success');
       inputs.forEach(inp => inp.value = ''); // Limpa formulário
 
-      btn.disabled = false; btn.innerHTML = '✅ Salvar Despesas';
+      btn.disabled = false; btn.innerHTML = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Lançar Despesa';
     } catch (e) {
       showToast(e.message, 'error');
       const btn = document.getElementById('btn-salvar-lancamento');
-      if (btn) { btn.disabled = false; btn.innerHTML = '✅ Salvar Despesas'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Lançar Despesa'; }
     }
   });
 }
@@ -626,14 +554,16 @@ function renderExpenseList(expenses) {
     <div class="expense-item" data-id="${e.id}">
       <div class="expense-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
       <div class="expense-info">
-        <div class="expense-name">${e.category_name}</div>
+        <div class="expense-name">${e.category_name} ${e.locked ? '<span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal">(Travado)</span>' : ''}</div>
         <div class="expense-date">${e.description || formatDate(e.expense_date)}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
         <span class="expense-amount">${formatCurrency(e.amount)}</span>
-        <button class="btn btn-danger btn-sm" data-del="${e.id}" style="display:flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-        </button>
+        ${!e.locked ? `
+          <button class="btn btn-danger btn-sm" data-del="${e.id}" style="display:flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        ` : `<span style="color:var(--text-muted)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>`}
       </div>
     </div>
   `).join('');
