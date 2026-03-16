@@ -198,16 +198,32 @@ async function renderDashboard(user) {
       }
 
       container.innerHTML = offices.map(o => `
-              <div class="expense-item" style="padding:12px 16px">
-                  <div class="expense-info">
-                      <div class="expense-name" style="font-size:1rem;">${o.name}</div>
-                      <div class="text-sm text-muted" style="margin-top:2px;font-family:monospace">ID: ${o.id.split('-')[0]}...</div>
+              <div class="expense-item" style="flex-direction:column; align-items:stretch; padding:12px 16px; gap:12px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <div class="expense-info">
+                          <div class="expense-name" style="font-size:1rem; font-weight:700;">${o.name}</div>
+                          <div class="text-sm text-muted" style="margin-top:2px;font-family:monospace">ID: ${o.id.split('-')[0]}...</div>
+                      </div>
+                      <div style="display:flex; gap:8px;">
+                          <button class="btn btn-outline btn-sm" data-add-c="${o.id}" style="padding:6px 10px;">+ Contador</button>
+                          <button class="btn btn-danger btn-sm" data-del-o="${o.id}" style="padding:8px; border-radius:8px;">
+                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                          </button>
+                      </div>
                   </div>
-                  <button class="btn btn-danger btn-sm" data-del-o="${o.id}" style="display:flex;align-items:center;justify-content:center;padding:8px;border-radius:8px;">
-                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  </button>
+                  <div id="counters-for-${o.id}" class="gap-4" style="border-top: 1px solid var(--border); padding-top: 8px;">
+                      <div class="text-xs text-muted" style="margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">Contadores vinculados:</div>
+                      <div class="counters-list text-sm">Carregando contadores...</div>
+                  </div>
               </div>
           `).join('');
+
+      // Load counters for each office
+      offices.forEach(o => loadCounters(o.id));
+
+      document.querySelectorAll('[data-add-c]').forEach(btn => {
+        btn.addEventListener('click', () => showAddCounterModal(btn.dataset.addC));
+      });
 
       document.querySelectorAll('[data-del-o]').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -224,6 +240,83 @@ async function renderDashboard(user) {
       showToast('Erro ao carregar escritórios', 'error');
     }
   }
+
+  async function loadCounters(officeId) {
+    const listEl = document.querySelector(`#counters-for-${officeId} .counters-list`);
+    try {
+      const counters = await api.get(`/offices/${officeId}/counters`);
+      if (counters.length === 0) {
+        listEl.innerHTML = '<div class="text-xs text-muted">Nenhum contador cadastrado.</div>';
+        return;
+      }
+      listEl.innerHTML = counters.map(c => `
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(0,0,0,0.05);">
+          <div>
+            <div style="font-weight:500;">${c.name}</div>
+            <div class="text-xs text-muted">${c.email}</div>
+          </div>
+          <button class="btn-icon" style="color:var(--danger); padding:4px;" data-del-c="${c.id}" title="Remover acesso">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('[data-del-c]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Remover o acesso deste contador?')) return;
+          try {
+            await api.delete(`/offices/counters/${btn.dataset.delC}`);
+            showToast('Contador removido', 'success');
+            loadCounters(officeId);
+          } catch (e) { showToast(e.message, 'error'); }
+        });
+      });
+    } catch (e) { listEl.innerHTML = '<div class="text-xs text-danger">Erro ao carregar.</div>'; }
+  }
+
+  const showAddCounterModal = (officeId) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal">
+          <div class="modal-handle"></div>
+          <div class="modal-title">Novo Contador</div>
+          <div class="gap-16">
+            <div class="form-group">
+              <label class="form-label">Nome Completo</label>
+              <input id="m-c-name" type="text" class="form-input" placeholder="Ex: João Silva" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">E-mail de Login</label>
+              <input id="m-c-email" type="email" class="form-input" placeholder="joao@escritorio.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Senha Inicial</label>
+              <input id="m-c-pass" type="password" class="form-input" placeholder="Minimo 6 caracteres" />
+            </div>
+            <button class="btn btn-primary" id="btn-save-counter">Criar Acesso</button>
+            <button class="btn btn-outline" id="btn-cancel-counter">Cancelar</button>
+          </div>
+        </div>
+      `;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('show'));
+
+    document.getElementById('btn-save-counter').addEventListener('click', async () => {
+      const name = document.getElementById('m-c-name').value.trim();
+      const email = document.getElementById('m-c-email').value.trim();
+      const password = document.getElementById('m-c-pass').value;
+      
+      if (!name || !email || !password) return showToast('Preencha todos os campos', 'error');
+      try {
+        await api.post(`/offices/${officeId}/counters`, { name, email, password });
+        showToast('Contador criado!', 'success');
+        overlay.remove();
+        loadCounters(officeId);
+      } catch (e) { showToast(e.message, 'error'); }
+    });
+    document.getElementById('btn-cancel-counter').addEventListener('click', () => overlay.remove());
+  };
 
   loadOffices();
 }
