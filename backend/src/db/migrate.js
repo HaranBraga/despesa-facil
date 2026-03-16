@@ -95,8 +95,10 @@ const alterStatements = [
     reminder_whatsapp_hour INTEGER DEFAULT 9,
     reminder_whatsapp_minute INTEGER DEFAULT 0,
     reminder_enabled BOOLEAN DEFAULT true,
+    reminder_max_business_day INTEGER DEFAULT 3,
     updated_at TIMESTAMP DEFAULT NOW()
-  )`
+  )`,
+  `ALTER TABLE accounting_office_settings ADD COLUMN IF NOT EXISTS reminder_max_business_day INTEGER DEFAULT 3`
 ];
 
 async function migrate() {
