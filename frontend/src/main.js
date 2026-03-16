@@ -258,8 +258,16 @@ async function renderDashboard() {
     const now = new Date();
     const month = now.getMonth() + 1;
     const year = now.getFullYear();
-    const report = await api.get(`/reports/monthly?cnpj_id=${selectedCnpjId}&month=${month}&year=${year}`);
-    renderShell(dashboardContent(cnpjs, report, month, year), 'dashboard');
+    const [cnpjs_report, user_info] = await Promise.all([
+      api.get(`/reports/monthly?cnpj_id=${selectedCnpjId}&month=${month}&year=${year}`),
+      api.get('/auth/me')
+    ]);
+    const report = cnpjs_report;
+    let headerHtml = dashboardContent(cnpjs, report, month, year);
+    if (user_info.office_id) {
+       headerHtml = `<div class="card" style="margin-bottom:16px; background:var(--accent-2-subtle); border-color:var(--accent-2);"><p class="text-sm">Você é um contador. <a href="/counter.html" style="font-weight:bold; color:var(--accent-2)">Acesse o Painel do Contador aqui</a> para gerenciar todas as empresas do seu escritório.</p></div>` + headerHtml;
+    }
+    renderShell(headerHtml, 'dashboard');
     setupDashboardEvents(cnpjs, report);
   } catch (e) {
     renderShell(`<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div><p class="empty-title">${e.message}</p></div>`, 'dashboard');
@@ -636,6 +644,12 @@ async function loadRelatorio(cnpjs, month, year) {
         <div class="stat-label">Total do mês</div>
         <div class="stat-value accent">${formatCurrency(report.total_geral)}</div>
       </div>
+      
+      <button class="btn btn-primary" id="btn-send-counter" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;background:var(--success);border-color:var(--success);">
+         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13"></path><path d="M22 2L15 22L11 13L2 9L22 2z"></path></svg>
+         Enviar Relatório para Contador
+      </button>
+
       <div class="card">
         <div class="section-title" style="margin-bottom:12px">Por categoria</div>
         ${report.categories.map(cat => `
@@ -661,6 +675,15 @@ async function loadRelatorio(cnpjs, month, year) {
   document.getElementById('next-month').addEventListener('click', () => {
     month++; if (month > 12) { month = 1; year++; }
     loadRelatorio(cnpjs, month, year);
+  });
+
+  document.getElementById('btn-send-counter')?.addEventListener('click', async () => {
+    if (!confirm('Deseja enviar este relatório para o contador? Isso travará todos os lançamentos deste mês para evitar alterações.')) return;
+    try {
+      await api.post('/reports/send', { cnpj_id: selectedCnpjId, month, year });
+      showToast('Relatório enviado com sucesso!', 'success');
+      loadRelatorio(cnpjs, month, year);
+    } catch (e) { showToast(e.message, 'error'); }
   });
 }
 

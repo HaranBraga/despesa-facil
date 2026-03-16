@@ -89,6 +89,13 @@ const alterStatements = [
     office_id UUID REFERENCES accounting_offices(id) ON DELETE CASCADE,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT NOW()
+  )`,
+  `CREATE TABLE IF NOT EXISTS accounting_office_settings (
+    office_id UUID PRIMARY KEY REFERENCES accounting_offices(id) ON DELETE CASCADE,
+    reminder_whatsapp_hour INTEGER DEFAULT 9,
+    reminder_whatsapp_minute INTEGER DEFAULT 0,
+    reminder_enabled BOOLEAN DEFAULT true,
+    updated_at TIMESTAMP DEFAULT NOW()
   )`
 ];
 

@@ -14,7 +14,7 @@ API_BASE_URL = os.getenv("LM_STUDIO_URL", "http://192.168.100.250:1234/v1")
 # =============================================================================
 # Modelos disponíveis
 # =============================================================================
-MODEL_SMART = "qwen2.5-coder-32b-instruct"       # Mais capaz, modelo principal
+MODEL_SMART = "deepseek-coder-v2-lite-instruct" # Modelo mais rápido e eficiente
 MODEL_EMBED = "text-embedding-nomic-embed-text-v1.5"  # Embeddings
 
 # Modelo padrão (32B)

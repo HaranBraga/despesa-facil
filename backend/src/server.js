@@ -27,6 +27,7 @@ app.use('/api/account', require('./routes/account'));
 app.use('/api/n8n', require('./routes/n8n'));
 app.use('/api/guest', require('./routes/guest'));
 app.use('/api/subscriptions', require('./routes/subscriptions'));
+app.use('/api/counter', require('./routes/counter'));
 
 // 404
 app.use((req, res) => {

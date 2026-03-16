@@ -70,7 +70,7 @@ router.post('/', auth, async (req, res) => {
         const result = await pool.query(
             `INSERT INTO expenses (id, cnpj_id, category_id, amount, expense_date, period_month, period_year, tipo, description, locked)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-            [uuidv4(), cnpj_id, category_id, parseFloat(amount), expense_date, period_month, period_year, tipo, description || null, true]
+            [uuidv4(), cnpj_id, category_id, parseFloat(amount), expense_date, period_month, period_year, tipo, description || null, false]
         );
 
         const expense = result.rows[0];
@@ -109,7 +109,7 @@ router.post('/bulk', auth, async (req, res) => {
                 const r = await client.query(
                     `INSERT INTO expenses (id, cnpj_id, category_id, amount, expense_date, period_month, period_year, tipo, description, locked)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-                    [uuidv4(), cnpj_id, item.category_id, parseFloat(item.amount), final_date, parseInt(period_month), parseInt(period_year), tipo, item.description || null, true]
+                    [uuidv4(), cnpj_id, item.category_id, parseFloat(item.amount), final_date, parseInt(period_month), parseInt(period_year), tipo, item.description || null, false]
                 );
                 inserted.push(r.rows[0]);
             }

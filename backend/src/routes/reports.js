@@ -6,7 +6,13 @@ const router = express.Router();
 
 async function verifyCnpjOwner(cnpjId, userId) {
     const r = await pool.query(
-        'SELECT id FROM cnpjs WHERE id = $1 AND user_id = $2 AND is_active = true',
+        `SELECT c.id 
+         FROM cnpjs c
+         JOIN users u_owner ON u_owner.id = c.user_id
+         JOIN users u_viewer ON u_viewer.id = $2
+         WHERE c.id = $1 
+           AND (c.user_id = $2 OR (u_viewer.office_id = u_owner.office_id AND u_viewer.office_id IS NOT NULL))
+           AND c.is_active = true`,
         [cnpjId, userId]
     );
     return r.rows.length > 0;
@@ -106,6 +112,32 @@ router.get('/summary', auth, async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: 'Erro ao gerar resumo anual' });
+    }
+});
+
+// POST /reports/send — travar despesas do mês (enviar para o contador)
+router.post('/send', auth, async (req, res) => {
+    try {
+        const { cnpj_id, month, year } = req.body;
+        if (!cnpj_id || !month || !year) {
+            return res.status(400).json({ error: 'cnpj_id, month e year são obrigatórios' });
+        }
+        if (!(await verifyCnpjOwner(cnpj_id, req.user.id))) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+
+        const result = await pool.query(
+            `UPDATE expenses 
+             SET locked = true, updated_at = NOW()
+             WHERE cnpj_id = $1 AND period_month = $2 AND period_year = $3
+             RETURNING id`,
+            [cnpj_id, parseInt(month), parseInt(year)]
+        );
+
+        res.json({ message: 'Relatório enviado e despesas bloqueadas', count: result.rows.length });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao enviar relatório' });
     }
 });
 
