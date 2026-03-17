@@ -60,6 +60,7 @@ async function render() {
 }
 
 async function renderDashboard(user) {
+    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     let selectedCompanyId = null;
     let isSidebarCollapsed = false;
     let currentFilter = 'all'; // all, completed, pending

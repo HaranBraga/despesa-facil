@@ -16,8 +16,8 @@ async function verifyIsCounter(req, res, next) {
 router.get('/companies', auth, verifyIsCounter, async (req, res) => {
     try {
         const now = new Date();
-        const month = now.getMonth() + 1;
-        const year = now.getFullYear();
+        const month = req.query.month ? parseInt(req.query.month) : (now.getMonth() + 1);
+        const year = req.query.year ? parseInt(req.query.year) : now.getFullYear();
 
         const result = await pool.query(
             `SELECT 
@@ -56,8 +56,8 @@ router.get('/companies', auth, verifyIsCounter, async (req, res) => {
 router.get('/dashboard-summary', auth, verifyIsCounter, async (req, res) => {
     try {
         const now = new Date();
-        const month = now.getMonth() + 1;
-        const year = now.getFullYear();
+        const month = req.query.month ? parseInt(req.query.month) : (now.getMonth() + 1);
+        const year = req.query.year ? parseInt(req.query.year) : now.getFullYear();
 
         const result = await pool.query(
             `WITH company_stats AS (
