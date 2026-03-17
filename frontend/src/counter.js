@@ -69,7 +69,7 @@ async function renderDashboard(user) {
     document.getElementById('app').innerHTML = `
     <div class="app-shell" style="max-width: 100%; margin: 0; display: grid; height: 100vh; overflow: hidden; background: #f8fafc;">
         <!-- Sidebar Premium -->
-        <aside style="background: #0f172a; color: white; padding: 32px 24px; display: flex; flex-direction: column; gap: 32px;">
+        <aside style="background: #0f172a; color: white; padding: 32px 24px; display: flex; flex-direction: column; gap: 32px; transition: var(--transition); overflow-x: hidden;">
             <div class="logo-container" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
                 <div class="logo" style="display:flex; align-items:center; gap:12px; overflow:hidden;">
                     <div style="width:40px; height:40px; background:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px var(--accent-glow); flex-shrink:0;">
@@ -77,38 +77,38 @@ async function renderDashboard(user) {
                             <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
                         </svg>
                     </div>
-                    <div class="logo-text">
+                    <div class="logo-text collapse-hide">
                         <div style="font-weight:800; font-size:1.1rem; line-height:1; white-space:nowrap;">Despesa Fácil</div>
                         <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:4px;">Contador</div>
                     </div>
                 </div>
-                <button id="btn-toggle-sidebar" style="background:none; border:none; color:white; cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center; transition:var(--transition);">
+                <button id="btn-toggle-sidebar" style="background:none; border:none; color:white; cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center; transition:var(--transition); flex-shrink:0;">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
             </div>
 
             <nav style="display:flex; flex-direction:column; gap:8px; flex:1;">
                 <button class="nav-item active" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:12px 16px; border-radius:12px; display:flex; align-items:center; gap:12px; width:100%; cursor:pointer;">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-                    Dashboard
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                    <span class="collapse-hide" style="white-space:nowrap;">Dashboard</span>
                 </button>
             </nav>
 
-            <div style="margin-top:auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-                    <div style="width:36px; height:36px; background:var(--accent-2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700;">${user.name.charAt(0)}</div>
-                    <div style="min-width:0;">
+            <div style="margin-top:auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                    <div style="width:36px; height:36px; background:var(--accent-2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">${user.name.charAt(0)}</div>
+                    <div class="collapse-hide" style="min-width:0;">
                         <div style="font-weight:600; font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${user.name}</div>
-                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.5);">Escritório Ativo</div>
+                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); white-space:nowrap;">Escritório Ativo</div>
                     </div>
                 </div>
-                <button class="btn btn-outline btn-sm" id="btn-settings" style="width:100%; justify-content:flex-start; border-color:rgba(255,255,255,0.2); color:white;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-                    Ajustes de Lembrete
+                <button class="btn btn-outline btn-sm btn-sidebar-action" id="btn-settings" style="width:100%; justify-content:flex-start; border-color:rgba(255,255,255,0.2); color:white; gap:12px;">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                    <span class="collapse-hide" style="white-space:nowrap;">Limites & Lembretes</span>
                 </button>
-                <button class="btn btn-sm" id="btn-logout" style="width:100%; margin-top:8px; background:rgba(239,68,68,0.1); color:#f87171; border:none; justify-content:flex-start;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    Sair do Painel
+                <button class="btn btn-sm btn-sidebar-action" id="btn-logout" style="width:100%; background:rgba(239,68,68,0.1); color:#f87171; border:none; justify-content:flex-start; gap:12px;">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    <span class="collapse-hide" style="white-space:nowrap;">Sair do Painel</span>
                 </button>
             </div>
         </aside>
@@ -129,7 +129,20 @@ async function renderDashboard(user) {
 
             <!-- Summary Cards Premium -->
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;" id="summary-container">
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="all" style="--delay:0ms; cursor:pointer; border: 2px solid var(--accent);">
+                <style>
+                    .clickable-card {
+                        border: 2px solid transparent;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+                    .clickable-card:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+                    }
+                    .clickable-card.active-card {
+                        transform: translateY(-2px);
+                    }
+                </style>
+                <div class="summary-card-v2 animate-up glass clickable-card active-card" data-filter="all" data-color="var(--accent)" style="--delay:0ms; cursor:pointer; border-color: var(--accent);">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--accent-soft); color:var(--accent);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M3 7v14M21 7v14M12 3L2 7h20L12 3z"/></svg>
@@ -141,7 +154,7 @@ async function renderDashboard(user) {
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="delivered" style="--delay:100ms; cursor:pointer;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="delivered" data-color="var(--success)" style="--delay:100ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--success-soft); color:var(--success);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -154,7 +167,7 @@ async function renderDashboard(user) {
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="in_progress" style="--delay:200ms; cursor:pointer;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="in_progress" data-color="var(--accent-2)" style="--delay:200ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--accent-2-soft); color:var(--accent-2);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -167,7 +180,7 @@ async function renderDashboard(user) {
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="pending" style="--delay:300ms; cursor:pointer;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="pending" data-color="var(--danger)" style="--delay:300ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--danger-soft); color:var(--danger);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4M12 16h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0z"/></svg>
@@ -265,10 +278,25 @@ async function renderDashboard(user) {
 
         document.getElementById('company-count').textContent = `${filtered.length} empresas`;
         
-        if (filtered.length === 0) {
-            container.innerHTML = `<div class="empty-state" style="padding:20px;">Nenhuma empresa encontrada de acordo com os filtros aplicados.</div>`;
-            return;
-        }
+        container.style.transition = 'opacity 0.2s ease';
+        container.style.opacity = '0';
+        
+        setTimeout(() => {
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                <div class="empty-state animate-fade" style="padding:40px 20px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px;">
+                    <div style="width:64px; height:64px; border-radius:50%; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:#94a3b8;">
+                        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-weight:700; color:#1e293b; font-size:1.1rem;">Nenhuma empresa</div>
+                        <div style="font-size:0.85rem; color:#64748b; max-width:250px; margin:0 auto; margin-top:4px;">Não encontramos resultados para os filtros selecionados atuais.</div>
+                    </div>
+                </div>`;
+                container.style.opacity = '1';
+                return;
+            }
+            
         
         container.innerHTML = filtered.map(c => {
             const initials = c.razao_social.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -301,13 +329,16 @@ async function renderDashboard(user) {
         }).join('');
 
         document.querySelectorAll('.clickable-company').forEach(el => {
-            el.addEventListener('click', () => {
-                selectedCompanyId = el.dataset.id;
-                renderCompanies(); // Refresh UI selection
-                document.getElementById('report-period-picker').style.display = 'flex';
-                loadReport();
+                el.addEventListener('click', () => {
+                    selectedCompanyId = el.dataset.id;
+                    renderCompanies(); // Refresh UI selection
+                    document.getElementById('report-period-picker').style.display = 'flex';
+                    loadReport();
+                });
             });
-        });
+            
+            container.style.opacity = '1';
+        }, 200);
     }
 
     async function loadReport() {
@@ -329,45 +360,67 @@ async function renderDashboard(user) {
                 return;
             }
 
+            let topCategory = { name: '-', total: 0 };
+            if (report.categories.length > 0) {
+                const sorted = [...report.categories].sort((a,b) => parseFloat(b.total) - parseFloat(a.total));
+                topCategory = { name: sorted[0].category_name, total: parseFloat(sorted[0].total) };
+            }
+
             container.innerHTML = `
-                <div class="card glass animate-fade" style="padding:24px; border-radius:24px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
-                        <div>
-                            <div style="font-size:0.75rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Fechamento Mensal</div>
-                            <div style="font-size:1.6rem; font-weight:800; color:#1e293b;">R$ ${report.total_geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                <div class="card glass animate-fade" style="padding:0; border-radius:24px; overflow:hidden;">
+                    <!-- Report Header -->
+                    <div style="background:linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); padding:32px 32px 24px; border-bottom:1px solid var(--border);">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <div style="font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                                    <svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 15v4a2 2 0 0 0 2 2h14v-4"/><path d="M3 15h18v-4H3v4z"/></svg>
+                                    Total Despesas (${monthNames[document.getElementById('sel-month').value - 1]})
+                                </div>
+                                <div style="font-size:2rem; font-weight:800; color:#1e293b; letter-spacing:-0.5px;">R$ ${report.total_geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                            </div>
+                            <button class="btn btn-outline" id="btn-download-pdf" style="width:auto; border-radius:12px; padding:10px 16px; font-size:0.85rem; border-color:var(--border); color:var(--text-secondary); background:white;">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Exportar
+                            </button>
                         </div>
-                        <button class="btn btn-primary" id="btn-download-pdf" style="width:auto; border-radius:12px; padding:8px 16px; font-size:0.85rem;">
-                            <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" style="margin-right:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            Planilha Excel/PDF
-                        </button>
+                        
+                        <div style="margin-top:24px; display:flex; gap:16px;">
+                            <div style="background:white; padding:12px 16px; border-radius:12px; border:1px solid var(--border); flex:1;">
+                                <div style="font-size:0.7rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Maior Despesa</div>
+                                <div style="font-size:0.95rem; font-weight:700; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${topCategory.name}">${topCategory.name}</div>
+                                <div style="font-size:0.85rem; color:var(--danger); font-weight:600; margin-top:2px;">R$ ${topCategory.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                            </div>
+                            <div style="background:white; padding:12px 16px; border-radius:12px; border:1px solid var(--border); width:140px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                                <div style="font-size:0.7rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Lançamentos</div>
+                                <div style="font-size:1.4rem; font-weight:800; color:var(--accent);">${report.categories.reduce((acc, c) => acc + parseInt(c.lancamentos), 0)}</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div style="border-radius:12px; border:1px solid #e2e8f0; overflow:hidden;">
-                        <table class="excel-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:60%">Categoria</th>
-                                    <th style="text-align:center; width:15%">Lançamentos</th>
-                                    <th style="text-align:right; width:25%">Total Bruto (R$)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${report.categories.map(c => `
-                                    <tr>
-                                        <td>
-                                            <span class="category">${c.category_name}</span>
-                                            ${c.is_filial ? '<span class="badge-filial">Filial</span>' : ''}
-                                        </td>
-                                        <td style="text-align:center; color:#64748b;">${c.lancamentos}</td>
-                                        <td class="amount">R$ ${parseFloat(c.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                    </tr>
-                                `).join('')}
-                                <tr style="background:#f8fafc; font-weight:800;">
-                                    <td colspan="2" style="text-align:right; border-right:none;">TOTAL CONSOLIDADO:</td>
-                                    <td class="amount" style="color:var(--accent);">R$ ${report.total_geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- Report List -->
+                    <div style="background:white; padding:20px 32px 32px;">
+                        <div style="font-size:0.85rem; font-weight:700; color:#64748b; margin-bottom:16px;">DETALHAMENTO POR CATEGORIA</div>
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            ${report.categories.map(c => `
+                                <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; border-radius:16px; border:1px solid var(--border); transition:var(--transition); background:white;" onmouseover="this.style.borderColor='var(--accent-glow)'" onmouseout="this.style.borderColor='var(--border)'">
+                                    <div style="display:flex; align-items:center; gap:16px;">
+                                        <div style="width:40px; height:40px; border-radius:12px; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:#64748b;">
+                                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                        </div>
+                                        <div>
+                                            <div style="display:flex; align-items:center; gap:8px;">
+                                                <span style="font-weight:700; color:#1e293b; font-size:0.95rem;">${c.category_name}</span>
+                                                ${c.is_filial ? '<span style="font-size:0.65rem; font-weight:700; background:var(--accent-2-soft); color:var(--accent-2); padding:2px 8px; border-radius:100px; text-transform:uppercase;">Filial</span>' : ''}
+                                            </div>
+                                            <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">${c.lancamentos} item(s) registrado(s)</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size:1.05rem; font-weight:800; color:#1e293b;">
+                                        R$ ${parseFloat(c.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
@@ -386,65 +439,94 @@ async function renderDashboard(user) {
             const settings = await api.get('/counter/settings');
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
+            // Custom CSS only for the modal elements
+            const innerStyles = `
+                <style>
+                    .set-toggle { width:48px; height:24px; background:#cbd5e1; border-radius:34px; position:relative; cursor:pointer; transition:0.3s; }
+                    .set-toggle::after { content:''; position:absolute; width:20px; height:20px; border-radius:50%; background:white; top:2px; left:2px; transition:0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+                    .set-toggle.on { background:var(--accent); }
+                    .set-toggle.on::after { transform:translateX(24px); }
+                </style>
+            `;
             overlay.innerHTML = `
-                <div class="modal animate-up" style="max-width:500px; border-radius:28px; padding:32px;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
-                        <h2 style="font-size:1.4rem; font-weight:800; color:#1e293b;">Configurações</h2>
-                        <button id="btn-close-modal" style="background:none; border:none; cursor:pointer; color:#64748b;"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+                ${innerStyles}
+                <div class="modal animate-up" style="max-width:440px; border-radius:24px; padding:0; overflow:hidden; border:1px solid var(--border); box-shadow:var(--shadow-lg);">
+                    
+                    <div style="background:linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); padding:24px 32px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:40px; height:40px; border-radius:12px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center;">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            </div>
+                            <div>
+                                <h2 style="font-size:1.15rem; font-weight:800; color:#1e293b; margin:0;">Regras & Lembretes</h2>
+                                <p style="font-size:0.75rem; color:#64748b; margin:0; margin-top:2px;">Controle das automações de cobrança</p>
+                            </div>
+                        </div>
+                        <button id="btn-close-modal" style="background:var(--bg-secondary); width:32px; height:32px; border-radius:50%; border:1px solid var(--border); cursor:pointer; color:#64748b; display:flex; align-items:center; justify-content:center; transition:var(--transition);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
                     </div>
                     
-                    <div class="gap-24">
-                        <div class="form-group">
-                            <label class="form-label" style="font-size:0.75rem;">Horário do Lembrete Diário</label>
-                            <div style="display:flex; gap:12px; align-items:center;">
-                                <input id="set-hour" type="number" class="form-input" min="0" max="23" value="${settings.reminder_whatsapp_hour}" style="font-weight:700; font-size:1.1rem; text-align:center;">
-                                <span style="font-weight:700; color:var(--text-muted);">:</span>
-                                <input id="set-min" type="number" class="form-input" min="0" max="59" value="${settings.reminder_whatsapp_minute}" style="font-weight:700; font-size:1.1rem; text-align:center;">
+                    <div style="padding:32px;">
+                        <div class="gap-24">
+                            
+                            <!-- Toggle Automação -->
+                            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--bg-secondary); border-radius:16px; border:1px solid var(--border);">
+                                <div>
+                                    <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">Automação de WhatsApp</div>
+                                    <div style="font-size:0.75rem; color:#64748b; max-width:200px; line-height:1.4; margin-top:4px;">Ative para disparar cobranças automaticamente aos clientes pendentes.</div>
+                                </div>
+                                <div id="set-enabled" class="set-toggle ${settings.reminder_enabled ? 'on' : ''}" data-checked="${settings.reminder_enabled}"></div>
                             </div>
-                        </div>
 
-                        <div class="form-group" style="background:#f1f5f9; padding:20px; border-radius:20px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                <label class="form-label" style="margin:0; font-size:0.75rem;">Limite de Envio (Dia Útil)</label>
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <input id="set-day-limit" type="number" class="form-input" min="1" max="10" value="${settings.reminder_max_business_day || 3}" style="width:70px; text-align:center; font-weight:800; border-color:var(--accent);">
-                                    <span style="font-weight:700; color:var(--accent);">º Dia</span>
+                            <!-- Grupo Horário -->
+                            <div class="form-group" style="margin-top:24px;">
+                                <label class="form-label" style="font-size:0.75rem; display:flex; align-items:center; gap:6px;">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    Horário de Disparo
+                                </label>
+                                <div style="display:flex; gap:12px; align-items:center;">
+                                    <input id="set-hour" type="number" class="form-input" min="0" max="23" value="${settings.reminder_whatsapp_hour}" style="font-weight:700; font-size:1.1rem; text-align:center; padding:12px; border-radius:12px;">
+                                    <span style="font-weight:800; color:var(--text-muted); font-size:1.2rem;">:</span>
+                                    <input id="set-min" type="number" class="form-input" min="0" max="59" value="${settings.reminder_whatsapp_minute}" style="font-weight:700; font-size:1.1rem; text-align:center; padding:12px; border-radius:12px;">
                                 </div>
                             </div>
-                            <p style="font-size:0.75rem; color:#64748b; line-height:1.4;">Os lembretes via WhatsApp para seus clientes serão disparados somente até este dia útil de cada mês.</p>
-                        </div>
 
-                        <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
-                            <div>
-                                <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">Automação Ativa</div>
-                                <div style="font-size:0.75rem; color:#64748b;">Disparar lembretes automaticamente</div>
+                            <!-- Limite de Dia Útil -->
+                            <div class="form-group" style="margin-top:24px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <label class="form-label" style="margin:0; font-size:0.75rem; display:flex; align-items:center; gap:6px;">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        Limite do Mês (Dias Úteis)
+                                    </label>
+                                </div>
+                                <div style="display:flex; align-items:center; position:relative;">
+                                    <input id="set-day-limit" type="number" class="form-input" min="1" max="10" value="${settings.reminder_max_business_day || 3}" style="padding-right:60px; font-weight:800; font-size:1.05rem; border-radius:12px;">
+                                    <div style="position:absolute; right:16px; font-size:0.75rem; font-weight:700; color:var(--accent); background:var(--accent-soft); padding:4px 8px; border-radius:6px; pointer-events:none;">º Dia</div>
+                                </div>
+                                <p style="font-size:0.75rem; color:#64748b; line-height:1.4; margin-top:8px;">Após este dia limite, o sistema para de enviar avisos neste mês.</p>
                             </div>
-                            <label class="switch" style="position:relative; display:inline-block; width:48px; height:24px;">
-                                <input id="set-enabled" type="checkbox" ${settings.reminder_enabled ? 'checked' : ''} style="opacity:0; width:0; height:0;">
-                                <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#e2e8f0; transition:.4s; border-radius:34px;"></span>
-                            </label>
-                        </div>
 
-                        <button class="btn btn-primary" id="btn-save-settings" style="margin-top:12px; border-radius:16px; padding:16px;">Aplicar Alterações</button>
+                            <button class="btn btn-primary" id="btn-save-settings" style="margin-top:32px; border-radius:14px; padding:14px; width:100%; font-size:1rem; box-shadow:0 8px 16px var(--accent-glow);">
+                                Salvar Preferências
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
             document.body.appendChild(overlay);
-            requestAnimationFrame(() => {
-                overlay.classList.add('show');
-                const sw = overlay.querySelector('input#set-enabled + span');
-                if (settings.reminder_enabled) sw.style.backgroundColor = 'var(--accent)';
-            });
+            requestAnimationFrame(() => overlay.classList.add('show'));
 
-            document.getElementById('set-enabled').addEventListener('change', (e) => {
-                overlay.querySelector('input#set-enabled + span').style.backgroundColor = e.target.checked ? 'var(--accent)' : '#e2e8f0';
+            const toggleEl = document.getElementById('set-enabled');
+            toggleEl.addEventListener('click', () => {
+                const isChecked = toggleEl.dataset.checked === 'true';
+                toggleEl.dataset.checked = !isChecked;
+                toggleEl.classList.toggle('on', !isChecked);
             });
 
             document.getElementById('btn-save-settings').addEventListener('click', async () => {
                 const hour = parseInt(document.getElementById('set-hour').value);
                 const min = parseInt(document.getElementById('set-min').value);
                 const dayLimit = parseInt(document.getElementById('set-day-limit').value);
-                const enabled = document.getElementById('set-enabled').checked;
+                const enabled = document.getElementById('set-enabled').dataset.checked === 'true';
 
                 try {
                     await api.put('/counter/settings', {
@@ -503,10 +585,22 @@ async function renderDashboard(user) {
     // Interaction Handlers
     document.querySelectorAll('.clickable-card').forEach(card => {
         card.addEventListener('click', () => {
+            if (currentFilter === card.dataset.filter) return; // ignore double click
+            
             currentFilter = card.dataset.filter;
-            // Highlight selected card
-            document.querySelectorAll('.clickable-card').forEach(c => c.style.border = '1px solid var(--glass-border)');
-            card.style.border = '2px solid var(--accent)';
+            
+            // Highlight selected card and clear others
+            document.querySelectorAll('.clickable-card').forEach(c => {
+                c.classList.remove('active-card');
+                c.style.borderColor = 'transparent';
+                c.style.boxShadow = 'none';
+            });
+            
+            card.classList.add('active-card');
+            const themeColor = card.dataset.color || 'var(--accent)';
+            card.style.borderColor = themeColor;
+            card.style.boxShadow = `0 8px 25px -5px ${themeColor}20, 0 8px 10px -6px ${themeColor}10`;
+            
             renderCompanies();
         });
     });
@@ -514,26 +608,21 @@ async function renderDashboard(user) {
     // Sidebar Toggle Logic
     const btnToggle = document.getElementById('btn-toggle-sidebar');
     const shell = document.querySelector('.app-shell');
-    const logoText = document.querySelector('.logo-text');
-    const navLabels = document.querySelectorAll('.nav-item span:not(.nav-icon)'); // If they had labels separately, but they are text nodes here
     
     btnToggle.addEventListener('click', () => {
         isSidebarCollapsed = !isSidebarCollapsed;
         shell.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
         btnToggle.style.transform = isSidebarCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
         
-        // Hide/Show elements for clean collapse
-        const sideElements = document.querySelectorAll('.logo-text, aside nav button span:last-child, aside div div:last-child');
-        sideElements.forEach(el => {
+        // Use the collapse-hide class and button styles instead of inline display manipulation
+        document.querySelectorAll('.collapse-hide').forEach(el => {
+            el.style.opacity = isSidebarCollapsed ? '0' : '1';
             el.style.display = isSidebarCollapsed ? 'none' : 'block';
         });
-        
-        // Adjust padding of items
-        document.querySelectorAll('aside nav button, #btn-settings, #btn-logout').forEach(btn => {
+
+        document.querySelectorAll('.btn-sidebar-action').forEach(btn => {
             btn.style.justifyContent = isSidebarCollapsed ? 'center' : 'flex-start';
-            if (btn.querySelector('div:last-child')) {
-                 btn.querySelector('div:last-child').style.display = isSidebarCollapsed ? 'none' : 'block';
-            }
+            btn.style.padding = isSidebarCollapsed ? '8px' : '13px 26px';
         });
     });
 }
