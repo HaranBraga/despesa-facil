@@ -144,4 +144,41 @@ router.put('/settings', auth, verifyIsCounter, async (req, res) => {
     }
 });
 
+// GET /api/counter/expenses — List individual expenses for a company
+router.get('/expenses', auth, verifyIsCounter, async (req, res) => {
+    try {
+        const { cnpj_id, month, year } = req.query;
+        if (!cnpj_id || !month || !year) {
+            return res.status(400).json({ error: 'cnpj_id, month e year são obrigatórios' });
+        }
+
+        // Verify if the requested cnpj belongs to a client of this counter's office
+        const verify = await pool.query(
+            `SELECT c.id 
+             FROM cnpjs c
+             JOIN users u ON u.id = c.user_id
+             WHERE c.id = $1 AND u.office_id = $2 AND c.is_active = true`,
+            [cnpj_id, req.user.office_id]
+        );
+
+        if (verify.rows.length === 0) {
+            return res.status(403).json({ error: 'Acesso negado à empresa' });
+        }
+
+        const result = await pool.query(
+            `SELECT e.id, e.amount, e.expense_date, e.description, ec.name AS category_name, ec.is_filial
+             FROM expenses e
+             JOIN expense_categories ec ON ec.id = e.category_id
+             WHERE e.cnpj_id = $1 AND e.period_month = $2 AND e.period_year = $3
+             ORDER BY e.expense_date DESC, e.created_at DESC`,
+            [cnpj_id, parseInt(month), parseInt(year)]
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao buscar lista de despesas' });
+    }
+});
+
 module.exports = router;

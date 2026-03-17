@@ -114,20 +114,18 @@ async function renderDashboard(user) {
         </aside>
 
         <!-- Main Content -->
-        <main style="overflow-y:auto; padding:40px; display:flex; flex-direction:column; gap:32px;">
-            <header style="display:flex; justify-content:space-between; align-items:flex-end;">
-                <div>
-                    <h1 style="font-size:1.8rem; font-weight:800; color:#1e293b; margin-bottom:4px;">Olá, ${user.name.split(' ')[0]} 👋</h1>
-                    <p style="color:#64748b;">Aqui está o resumo contábil do seu escritório hoje.</p>
-                </div>
-                <div id="report-period-picker" style="display:none; gap:12px; background:white; padding:8px 16px; border-radius:100px; box-shadow:var(--shadow-sm); border:1px solid var(--border);">
-                    <select id="sel-month" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600;"></select>
-                    <div style="width:1px; height:20px; background:var(--border);"></div>
-                    <select id="sel-year" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600;"></select>
-                </div>
-            </header>
+        <main style="overflow-y:auto; padding:40px; display:flex; flex-direction:column; gap:32px; position:relative; overflow-x:hidden;">
+            
+            <!-- VIEW: DASHBOARD MESTRE -->
+            <div id="dashboard-view" style="display:flex; flex-direction:column; gap:32px; transition:var(--transition);">
+                <header style="display:flex; justify-content:space-between; align-items:flex-end;">
+                    <div>
+                        <h1 style="font-size:1.8rem; font-weight:800; color:#1e293b; margin-bottom:4px;">Olá, ${user.name.split(' ')[0]} 👋</h1>
+                        <p style="color:#64748b;">Aqui está o resumo contábil do seu escritório hoje.</p>
+                    </div>
+                </header>
 
-            <!-- Summary Cards Premium -->
+                <!-- Summary Cards Premium -->
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;" id="summary-container">
                 <style>
                     .clickable-card {
@@ -215,15 +213,64 @@ async function renderDashboard(user) {
                     </div>
                 </div>
 
-                <!-- Report Detail Area -->
-                <div id="report-container" class="animate-up" style="--delay:400ms;">
-                    <div class="card glass" style="padding:48px; display:flex; flex-direction:column; align-items:center; gap:20px; border:2px dashed var(--border);">
-                        <div style="width:80px; height:80px; background:var(--bg-secondary); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
-                            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 17h6M9 13h6M9 9h6M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
+            </div>
+            
+            <!-- VIEW: DETALHE COMPANHIA -->
+            <div id="company-detail-view" style="display:none; flex-direction:column; gap:32px; transition:var(--transition); position:absolute; top:40px; left:40px; right:40px; transform:translateX(100px); opacity:0;">
+                <header style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--border); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--transition);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='white'">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                        </button>
+                        <div>
+                            <h1 id="detail-company-name" style="font-size:1.6rem; font-weight:800; color:#1e293b; margin-bottom:0;">Carregando...</h1>
+                            <p id="detail-company-cnpj" style="color:#64748b; font-size:0.85rem; margin:0;">--</p>
                         </div>
-                        <div style="text-align:center;">
-                            <h3 style="font-weight:700; color:#1e293b; margin-bottom:4px;">Relatório Consolidado</h3>
-                            <p style="color:#64748b; font-size:0.9rem;">Selecione um cliente ao lado para visualizar os detalhes financeiros.</p>
+                    </div>
+                    
+                    <div id="report-period-picker" style="display:flex; gap:12px; background:white; padding:8px 16px; border-radius:100px; box-shadow:var(--shadow-sm); border:1px solid var(--border);">
+                        <select id="sel-month" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600;"></select>
+                        <div style="width:1px; height:20px; background:var(--border);"></div>
+                        <select id="sel-year" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600;"></select>
+                    </div>
+                </header>
+
+                <!-- Tabs Navigation -->
+                <div style="display:flex; gap:8px; border-bottom:1px solid var(--border); padding-bottom:16px;">
+                    <button class="detail-tab active" data-tab="summary" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:var(--accent-soft); color:var(--accent); border:none; cursor:pointer;">Resumo Financeiro</button>
+                    <button class="detail-tab" data-tab="list" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:transparent; color:#64748b; border:none; cursor:pointer; transition:var(--transition);">Transações Detalhadas</button>
+                </div>
+
+                <!-- Tab Content: Summary -->
+                <div id="tab-summary-content">
+                    <div id="report-container" class="animate-up">
+                        <div class="card glass" style="padding:48px; display:flex; flex-direction:column; align-items:center; gap:20px; border:2px dashed var(--border);">
+                            <div class="skeleton" style="width:100%; height:400px; border-radius:24px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: List (Individual Expenses) -->
+                <div id="tab-list-content" style="display:none;">
+                    <div class="card glass" style="padding:0; overflow:hidden; border-radius:20px;">
+                        <div style="padding:20px 24px; border-bottom:1px solid var(--border); background:var(--bg-secondary); display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="font-size:0.95rem; font-weight:700; color:#1e293b; margin:0;">Extrato de Lançamentos</h3>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
+                                <thead>
+                                    <tr style="border-bottom:1px solid var(--border); background:rgba(241, 245, 249, 0.5);">
+                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Data</th>
+                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Descrição</th>
+                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
+                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor (R$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenses-list-tbody">
+                                    <!-- Rendered dynamically -->
+                                    <tr><td colspan="4" style="padding:40px; text-align:center;"><div class="skeleton" style="height:200px; border-radius:12px;"></div></td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -330,15 +377,62 @@ async function renderDashboard(user) {
 
         document.querySelectorAll('.clickable-company').forEach(el => {
                 el.addEventListener('click', () => {
-                    selectedCompanyId = el.dataset.id;
-                    renderCompanies(); // Refresh UI selection
-                    document.getElementById('report-period-picker').style.display = 'flex';
-                    loadReport();
+                    const companyData = companiesList.find(c => c.id === el.dataset.id);
+                    openCompanyDetail(companyData);
                 });
             });
             
             container.style.opacity = '1';
         }, 200);
+    }
+    
+    // --- Navigation Master/Detail ---
+    function openCompanyDetail(company) {
+        selectedCompanyId = company.id;
+        
+        // Update Headers
+        document.getElementById('detail-company-name').textContent = company.razao_social;
+        document.getElementById('detail-company-cnpj').textContent = company.cnpj;
+        
+        // Hide dashboard, Show detail view
+        const dashboard = document.getElementById('dashboard-view');
+        const detailView = document.getElementById('company-detail-view');
+        
+        dashboard.style.opacity = '0';
+        dashboard.style.transform = 'translateX(-50px)';
+        dashboard.style.pointerEvents = 'none';
+        
+        setTimeout(() => {
+            dashboard.style.display = 'none';
+            detailView.style.display = 'flex';
+            // Trigger reflow
+            void detailView.offsetWidth;
+            detailView.style.opacity = '1';
+            detailView.style.transform = 'translateX(0)';
+            
+            loadReport();
+            loadIndividualExpenses();
+        }, 300);
+    }
+    
+    function closeCompanyDetail() {
+        selectedCompanyId = null;
+        
+        const dashboard = document.getElementById('dashboard-view');
+        const detailView = document.getElementById('company-detail-view');
+        
+        detailView.style.opacity = '0';
+        detailView.style.transform = 'translateX(50px)';
+        
+        setTimeout(() => {
+            detailView.style.display = 'none';
+            dashboard.style.display = 'flex';
+            // Trigger reflow
+            void dashboard.offsetWidth;
+            dashboard.style.pointerEvents = 'auto';
+            dashboard.style.opacity = '1';
+            dashboard.style.transform = 'translateX(0)';
+        }, 300);
     }
 
     async function loadReport() {
@@ -431,6 +525,53 @@ async function renderDashboard(user) {
 
         } catch (e) { 
             container.innerHTML = `<div class="card glass" style="padding:32px; color:var(--danger);">${e.message}</div>`;
+        }
+    }
+
+    async function loadIndividualExpenses() {
+        if (!selectedCompanyId) return;
+        const month = document.getElementById('sel-month').value;
+        const year = document.getElementById('sel-year').value;
+        const tbody = document.getElementById('expenses-list-tbody');
+        tbody.innerHTML = '<tr><td colspan="4" style="padding:40px; text-align:center;"><div class="skeleton" style="height:200px; border-radius:12px;"></div></td></tr>';
+
+        try {
+            const expenses = await api.get(`/counter/expenses?cnpj_id=${selectedCompanyId}&month=${month}&year=${year}`);
+            
+            if (expenses.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="padding:48px 24px; text-align:center; color:#64748b;">
+                            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:12px; opacity:0.5;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <p style="margin:0;">Nenhum lançamento registrado neste mês.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = expenses.map(e => `
+                <tr style="border-bottom:1px solid var(--border); transition:var(--transition);" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding:16px 24px; font-size:0.85rem; color:#64748b; white-space:nowrap;">
+                        ${new Date(e.expense_date + 'T12:00:00Z').toLocaleDateString('pt-BR')}
+                    </td>
+                    <td style="padding:16px 24px;">
+                        <div style="font-weight:600; color:#1e293b; font-size:0.9rem;">${e.description || '-'}</div>
+                    </td>
+                    <td style="padding:16px 24px;">
+                        <div style="display:inline-flex; align-items:center; gap:6px; background:var(--bg-secondary); padding:4px 10px; border-radius:100px; font-size:0.75rem; font-weight:600; color:#475569;">
+                            ${e.category_name}
+                            ${e.is_filial ? '<span style="color:var(--accent-2); font-weight:800;">• Filial</span>' : ''}
+                        </div>
+                    </td>
+                    <td style="padding:16px 24px; text-align:right; font-weight:700; color:#1e293b; font-size:0.95rem;">
+                        R$ ${parseFloat(e.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </td>
+                </tr>
+            `).join('');
+
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="4" style="padding:24px; color:var(--danger); text-align:center;">${e.message}</td></tr>`;
         }
     }
 
@@ -551,8 +692,34 @@ async function renderDashboard(user) {
 
     document.getElementById('btn-settings').addEventListener('click', showSettingsModal);
     
-    document.getElementById('sel-month').addEventListener('change', loadReport);
-    document.getElementById('sel-year').addEventListener('change', loadReport);
+    document.getElementById('sel-month').addEventListener('change', () => { loadReport(); loadIndividualExpenses(); });
+    document.getElementById('sel-year').addEventListener('change', () => { loadReport(); loadIndividualExpenses(); });
+    
+    document.getElementById('btn-back-dashboard').addEventListener('click', closeCompanyDetail);
+
+    // Tab Logic
+    document.querySelectorAll('.detail-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.detail-tab').forEach(t => {
+                t.classList.remove('active');
+                t.style.background = 'transparent';
+                t.style.color = '#64748b';
+            });
+            const target = e.target;
+            target.classList.add('active');
+            target.style.background = 'var(--accent-soft)';
+            target.style.color = 'var(--accent)';
+            
+            const tabId = target.dataset.tab;
+            if (tabId === 'summary') {
+                document.getElementById('tab-summary-content').style.display = 'block';
+                document.getElementById('tab-list-content').style.display = 'none';
+            } else {
+                document.getElementById('tab-summary-content').style.display = 'none';
+                document.getElementById('tab-list-content').style.display = 'block';
+            }
+        });
+    });
 
     document.getElementById('company-search').addEventListener('input', () => {
         renderCompanies();
