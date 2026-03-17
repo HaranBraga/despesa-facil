@@ -2,8 +2,7 @@
 
 Agente AI especializado em **criar sistemas full-stack** e **fazer deploy no EasyPanel**.
 
-Combina expertise de Frontend, Backend, Banco de Dados e DevOps em um único agente,
-com conhecimento real extraído de projetos em produção no EasyPanel.
+Conhecimento real extraído de projetos em produção no EasyPanel.
 
 ---
 
@@ -30,54 +29,20 @@ com conhecimento real extraído de projetos em produção no EasyPanel.
 
 ---
 
-## 🧠 O que o Agente Sabe Fazer
-
-- ✅ Criar sistemas CRUD completos (gestão, e-commerce, dashboards)
-- ✅ Frontend responsivo com design premium
-- ✅ API REST com autenticação JWT
-- ✅ Schema PostgreSQL com migrations e seeds
-- ✅ Docker multi-stage build otimizado
-- ✅ Nginx como proxy reverso (`/api/` → backend)
-- ✅ Docker Compose pronto para EasyPanel
-- ✅ Troubleshooting de proxy, CORS, 404
-
----
-
 ## 📁 Estrutura
 
 ```
 .agent/
 ├── agents/easypanel-fullstack.md   ← Agente principal
 ├── skills/
-│   ├── easypanel-deploy/           ← ★ Deploy EasyPanel (com templates)
-│   ├── api-patterns/               ← REST patterns
-│   ├── app-builder/                ← Scaffolding de apps
-│   ├── architecture/               ← Design de sistemas
-│   ├── clean-code/                 ← Código limpo
-│   ├── database-design/            ← PostgreSQL
-│   ├── deployment-procedures/      ← Deploy seguro
-│   ├── frontend-design/            ← UI/UX
-│   ├── nodejs-best-practices/      ← Node.js
-│   ├── systematic-debugging/       ← Debugging
-│   ├── web-design-guidelines/      ← Design web
-│   └── powershell-windows/         ← Windows
+│   ├── easypanel-deploy/           ← Deploy EasyPanel (templates Docker/Nginx)
+│   └── frontend-design/           ← UI/UX, psicologia, cores, tipografia
 ├── workflows/
 │   ├── create-app.md               ← /create-app
 │   ├── deploy-easypanel.md         ← /deploy-easypanel
 │   └── debug.md                    ← /debug
 └── rules/GEMINI.md                 ← Regras globais
 ```
-
----
-
-## 🎯 Projetos de Referência
-
-Este agente foi treinado com base em projetos reais:
-
-- **Despesa Fácil** — Gestão de despesas (Vite + Express + PostgreSQL)
-- **ClassPro** — Classificação NCM (HTML/CSS/JS + Express + PostgreSQL)
-
-Ambos rodam em produção no EasyPanel via Docker Compose.
 
 ---
 

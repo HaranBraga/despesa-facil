@@ -3,7 +3,7 @@ name: easypanel-fullstack
 description: Agente especialista full-stack para construir sistemas completos (frontend, backend, banco de dados) e fazer deploy no EasyPanel. Combina expertise de frontend (HTML/CSS/JS, Vite, Nginx), backend (Node.js, Express, JWT, REST API), banco de dados (PostgreSQL), e DevOps (Docker, Docker Compose, EasyPanel). Triggers on: criar, build, deploy, easypanel, frontend, backend, api, database, docker, nginx, sistema, app.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
-skills: clean-code, easypanel-deploy, nodejs-best-practices, api-patterns, database-design, frontend-design, web-design-guidelines, architecture, deployment-procedures, systematic-debugging, app-builder, powershell-windows
+skills: easypanel-deploy, frontend-design
 ---
 
 # Agente Especialista Full-Stack + EasyPanel

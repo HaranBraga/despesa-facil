@@ -67,18 +67,18 @@ async function renderDashboard(user) {
 
 
     document.getElementById('app').innerHTML = `
-    <div class="app-shell" style="max-width: 100%; margin: 0; display: grid; height: 100vh; overflow: hidden; background: #f8fafc;">
+    <div class="app-shell">
         <!-- Sidebar Premium -->
-        <aside style="background: #0f172a; color: white; padding: 32px 24px; display: flex; flex-direction: column; gap: 32px; transition: var(--transition); overflow-x: hidden;">
-            <div class="logo-container" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+        <aside id="sidebar-main" class="bottom-nav">
+             <div class="logo-container" style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom: 24px;">
                 <div class="logo" style="display:flex; align-items:center; gap:12px; overflow:hidden;">
                     <div style="width:40px; height:40px; background:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px var(--accent-glow); flex-shrink:0;">
-                        <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                         <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
                             <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
                         </svg>
                     </div>
                     <div class="logo-text collapse-hide">
-                        <div style="font-weight:800; font-size:1.1rem; line-height:1; white-space:nowrap;">Despesa Fácil</div>
+                        <div style="font-weight:800; font-size:1.1rem; line-height:1; white-space:nowrap; color: white;">Despesa Fácil</div>
                         <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:4px;">Contador</div>
                     </div>
                 </div>
@@ -88,33 +88,33 @@ async function renderDashboard(user) {
             </div>
 
             <nav style="display:flex; flex-direction:column; gap:8px; flex:1;">
-                <button class="nav-item active" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:12px 16px; border-radius:12px; display:flex; align-items:center; gap:12px; width:100%; cursor:pointer;">
+                <button class="nav-item active">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-                    <span class="collapse-hide" style="white-space:nowrap;">Dashboard</span>
+                    <span class="collapse-hide nav-label">Dashboard</span>
                 </button>
             </nav>
 
             <div style="margin-top:auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:8px;">
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-                    <div style="width:36px; height:36px; background:var(--accent-2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">${user.name.charAt(0)}</div>
+                    <div style="width:36px; height:36px; background:var(--accent-2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; color: white;">${user.name.charAt(0)}</div>
                     <div class="collapse-hide" style="min-width:0;">
-                        <div style="font-weight:600; font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${user.name}</div>
+                        <div style="font-weight:600; font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: white;">${user.name}</div>
                         <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); white-space:nowrap;">Escritório Ativo</div>
                     </div>
                 </div>
                 <button class="btn btn-outline btn-sm btn-sidebar-action" id="btn-settings" style="width:100%; justify-content:flex-start; border-color:rgba(255,255,255,0.2); color:white; gap:12px;">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-                    <span class="collapse-hide" style="white-space:nowrap;">Limites & Lembretes</span>
+                    <span class="collapse-hide nav-label" style="white-space:nowrap;">Limites</span>
                 </button>
                 <button class="btn btn-sm btn-sidebar-action" id="btn-logout" style="width:100%; background:rgba(239,68,68,0.1); color:#f87171; border:none; justify-content:flex-start; gap:12px;">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span class="collapse-hide" style="white-space:nowrap;">Sair do Painel</span>
+                    <span class="collapse-hide nav-label" style="white-space:nowrap;">Sair</span>
                 </button>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main style="overflow-y:auto; padding:40px; display:flex; flex-direction:column; gap:32px; position:relative; overflow-x:hidden;">
+        <main class="page-content" id="main-content">
             
             <!-- VIEW: DASHBOARD MESTRE -->
             <div id="dashboard-view" style="display:flex; flex-direction:column; gap:32px; transition:var(--transition);">
@@ -414,6 +414,10 @@ async function renderDashboard(user) {
         
         detailView.style.display = 'none';
         dashboard.style.display = 'flex';
+        
+        // Ensure main content is scrollable
+        const main = document.getElementById('main-content');
+        main.scrollTop = 0;
     }
 
     async function loadReport() {
@@ -764,16 +768,10 @@ async function renderDashboard(user) {
         shell.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
         btnToggle.style.transform = isSidebarCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
         
-        // Use the collapse-hide class and button styles instead of inline display manipulation
-        document.querySelectorAll('.collapse-hide').forEach(el => {
-            el.style.opacity = isSidebarCollapsed ? '0' : '1';
-            el.style.display = isSidebarCollapsed ? 'none' : 'block';
-        });
-
-        document.querySelectorAll('.btn-sidebar-action').forEach(btn => {
-            btn.style.justifyContent = isSidebarCollapsed ? 'center' : 'flex-start';
-            btn.style.padding = isSidebarCollapsed ? '8px' : '13px 26px';
-        });
+        // Sidebar alignment fixes for collapsed state
+        const sidebar = document.getElementById('sidebar-main');
+        sidebar.style.width = isSidebarCollapsed ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
+        sidebar.style.padding = isSidebarCollapsed ? '32px 10px' : '32px 24px';
     });
 }
 
