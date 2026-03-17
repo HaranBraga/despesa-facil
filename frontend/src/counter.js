@@ -216,7 +216,7 @@ async function renderDashboard(user) {
             </div>
             
             <!-- VIEW: DETALHE COMPANHIA -->
-            <div id="company-detail-view" style="display:none; flex-direction:column; gap:32px; transition:var(--transition); transform:translateX(100px); opacity:0;">
+            <div id="company-detail-view" style="display:none; flex-direction:column; gap:32px; transition:var(--transition);">
                 <header style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="display:flex; align-items:center; gap:16px;">
                         <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--border); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--transition);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='white'">
@@ -398,21 +398,11 @@ async function renderDashboard(user) {
         const dashboard = document.getElementById('dashboard-view');
         const detailView = document.getElementById('company-detail-view');
         
-        dashboard.style.opacity = '0';
-        dashboard.style.transform = 'translateX(-50px)';
-        dashboard.style.pointerEvents = 'none';
+        dashboard.style.display = 'none';
+        detailView.style.display = 'flex';
         
-        setTimeout(() => {
-            dashboard.style.display = 'none';
-            detailView.style.display = 'flex';
-            // Trigger reflow
-            void detailView.offsetWidth;
-            detailView.style.opacity = '1';
-            detailView.style.transform = 'translateX(0)';
-            
-            loadReport();
-            loadIndividualExpenses();
-        }, 300);
+        loadReport();
+        loadIndividualExpenses();
     }
     
     function closeCompanyDetail() {
@@ -421,18 +411,8 @@ async function renderDashboard(user) {
         const dashboard = document.getElementById('dashboard-view');
         const detailView = document.getElementById('company-detail-view');
         
-        detailView.style.opacity = '0';
-        detailView.style.transform = 'translateX(50px)';
-        
-        setTimeout(() => {
-            detailView.style.display = 'none';
-            dashboard.style.display = 'flex';
-            // Trigger reflow
-            void dashboard.offsetWidth;
-            dashboard.style.pointerEvents = 'auto';
-            dashboard.style.opacity = '1';
-            dashboard.style.transform = 'translateX(0)';
-        }, 300);
+        detailView.style.display = 'none';
+        dashboard.style.display = 'flex';
     }
 
     async function loadReport() {
