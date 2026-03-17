@@ -214,6 +214,7 @@ async function renderDashboard(user) {
                 </div>
 
             </div>
+            </div> <!-- Close dashboard-view -->
             
             <!-- VIEW: DETALHE COMPANHIA -->
             <div id="company-detail-view" style="display:none; flex-direction:column; gap:32px; transition:var(--transition);">
