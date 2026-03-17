@@ -216,7 +216,7 @@ async function renderDashboard(user) {
             </div>
             
             <!-- VIEW: DETALHE COMPANHIA -->
-            <div id="company-detail-view" style="display:none; flex-direction:column; gap:32px; transition:var(--transition); position:absolute; top:40px; left:40px; right:40px; transform:translateX(100px); opacity:0;">
+            <div id="company-detail-view" style="display:none; flex-direction:column; gap:32px; transition:var(--transition); transform:translateX(100px); opacity:0;">
                 <header style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="display:flex; align-items:center; gap:16px;">
                         <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--border); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--transition);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='white'">
@@ -242,8 +242,8 @@ async function renderDashboard(user) {
                 </div>
 
                 <!-- Tab Content: Summary -->
-                <div id="tab-summary-content">
-                    <div id="report-container" class="animate-up">
+                <div id="tab-summary-content" style="flex:1; display:flex; flex-direction:column;">
+                    <div id="report-content-body" class="animate-up" style="flex:1;">
                         <div class="card glass" style="padding:48px; display:flex; flex-direction:column; align-items:center; gap:20px; border:2px dashed var(--border);">
                             <div class="skeleton" style="width:100%; height:400px; border-radius:24px;"></div>
                         </div>
@@ -439,8 +439,10 @@ async function renderDashboard(user) {
         if (!selectedCompanyId) return;
         const month = document.getElementById('sel-month').value;
         const year = document.getElementById('sel-year').value;
-        const container = document.getElementById('report-container');
-        container.innerHTML = '<div class="skeleton" style="height:400px; border-radius:24px;"></div>';
+        const container = document.getElementById('report-content-body');
+        if(!container) return; // Prevent errors if DOM not ready
+        
+        container.innerHTML = '<div class="card glass animate-fade" style="padding:48px;"><div class="skeleton" style="height:400px; border-radius:24px;"></div></div>';
 
         try {
             const report = await api.get(`/reports/monthly?cnpj_id=${selectedCompanyId}&month=${month}&year=${year}`);
