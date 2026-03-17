@@ -1,5 +1,8 @@
 FROM node:20-alpine AS builder
 
+# Cache buster to force Easypanel to rebuild: 1
+ARG CACHEBUST=1
+
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
