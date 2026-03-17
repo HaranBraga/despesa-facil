@@ -59,6 +59,7 @@ async function render() {
     }
 }
 
+async function renderDashboard(user) {
     let selectedCompanyId = null;
     let isSidebarCollapsed = false;
     let currentFilter = 'all'; // all, completed, pending
