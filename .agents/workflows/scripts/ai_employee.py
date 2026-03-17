@@ -6,7 +6,7 @@ def ask_local_ai(prompt, system_prompt="Você é um assistente técnico prestati
     url = "http://192.168.100.250:1234/api/v1/chat"
     headers = {"Content-Type": "application/json"}
     data = {
-        "model": "deepseek-coder-v2-lite-instruct",
+        "model": "qwen2.5-coder-7b-instruct",
         "system_prompt": system_prompt,
         "input": prompt
     }
