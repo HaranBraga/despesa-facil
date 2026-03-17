@@ -59,9 +59,11 @@ async function render() {
     }
 }
 
-async function renderDashboard(user) {
     let selectedCompanyId = null;
     let isSidebarCollapsed = false;
+    let currentFilter = 'all'; // all, completed, pending
+    let companiesList = [];
+
 
     document.getElementById('app').innerHTML = `
     <div class="app-shell" style="max-width: 100%; margin: 0; display: grid; height: 100vh; overflow: hidden; background: #f8fafc;">
@@ -126,7 +128,7 @@ async function renderDashboard(user) {
 
             <!-- Summary Cards Premium -->
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;" id="summary-container">
-                <div class="summary-card-v2 animate-up glass" style="--delay:0ms;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="all" style="--delay:0ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--accent-soft); color:var(--accent);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M3 7v14M21 7v14M12 3L2 7h20L12 3z"/></svg>
@@ -138,7 +140,7 @@ async function renderDashboard(user) {
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass" style="--delay:100ms;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="completed" style="--delay:100ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--success-soft); color:var(--success);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -151,7 +153,7 @@ async function renderDashboard(user) {
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass" style="--delay:200ms;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="pending" style="--delay:200ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--danger-soft); color:var(--danger);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4M12 16h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0z"/></svg>
@@ -214,45 +216,48 @@ async function renderDashboard(user) {
 
     async function loadCompanies() {
         try {
-            const companies = await api.get('/counter/companies');
-            const container = document.getElementById('companies-container');
-            document.getElementById('company-count').textContent = `${companies.length} empresas`;
-            
-            if (companies.length === 0) {
-                container.innerHTML = '<div class="empty-state">Sua carteira está vazia.</div>';
-                return;
-            }
-            
-            container.innerHTML = companies.map(c => {
-                const initials = c.razao_social.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-                return `
-                <div class="expense-item clickable-company" data-id="${c.id}" style="display:flex; align-items:center; gap:16px; padding:16px; border-radius:16px; border:1px solid var(--border); background:white; cursor:pointer; transition:var(--transition);">
-                    <div style="width:44px; height:44px; background:#f1f5f9; color:#475569; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;">${initials}</div>
-                    <div style="flex:1; min-width:0;">
-                        <div style="font-weight:700; color:#1e293b; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.razao_social}</div>
-                        <div style="font-size:0.75rem; color:#64748b;">${c.cnpj}</div>
-                    </div>
-                    <div style="width:8px; height:8px; border-radius:50%; background:#e2e8f0;" class="status-indicator"></div>
-                </div>
-                `;
-            }).join('');
-
-            document.querySelectorAll('.clickable-company').forEach(el => {
-                el.addEventListener('click', () => {
-                    document.querySelectorAll('.clickable-company').forEach(i => {
-                        i.style.borderColor = 'var(--border)';
-                        i.style.background = 'white';
-                        i.querySelector('.status-indicator').style.background = '#e2e8f0';
-                    });
-                    el.style.borderColor = 'var(--accent)';
-                    el.style.background = 'rgba(79, 156, 249, 0.05)';
-                    el.querySelector('.status-indicator').style.background = 'var(--accent)';
-                    selectedCompanyId = el.dataset.id;
-                    document.getElementById('report-period-picker').style.display = 'flex';
-                    loadReport();
-                });
-            });
+            companiesList = await api.get('/counter/companies');
+            renderCompanies();
         } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    function renderCompanies() {
+        const container = document.getElementById('companies-container');
+        
+        let filtered = companiesList;
+        if (currentFilter === 'completed') filtered = companiesList.filter(c => c.has_expenses);
+        if (currentFilter === 'pending') filtered = companiesList.filter(c => !c.has_expenses);
+
+        document.getElementById('company-count').textContent = `${filtered.length} empresas`;
+        
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="empty-state" style="padding:20px;">Nenhuma empresa encontrada${currentFilter !== 'all' ? ' para este filtro' : ''}.</div>`;
+            return;
+        }
+        
+        container.innerHTML = filtered.map(c => {
+            const initials = c.razao_social.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+            const isActive = selectedCompanyId == c.id;
+            return `
+            <div class="expense-item clickable-company" data-id="${c.id}" style="display:flex; align-items:center; gap:16px; padding:16px; border-radius:16px; border:1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}; background:${isActive ? 'rgba(79, 156, 249, 0.05)' : 'white'}; cursor:pointer; transition:var(--transition);">
+                <div style="width:44px; height:44px; background:#f1f5f9; color:#475569; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;">${initials}</div>
+                <div style="flex:1; min-width:0;">
+                    <div style="font-weight:700; color:#1e293b; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.razao_social}</div>
+                    <div style="font-size:0.75rem; color:#64748b;">${c.cnpj}</div>
+                </div>
+                <div style="width:8px; height:8px; border-radius:50%; background:${c.has_expenses ? 'var(--success)' : '#e2e8f0'};" class="status-indicator"></div>
+            </div>
+            `;
+        }).join('');
+
+        document.querySelectorAll('.clickable-company').forEach(el => {
+            el.addEventListener('click', () => {
+                selectedCompanyId = el.dataset.id;
+                renderCompanies(); // Refresh UI selection
+                document.getElementById('report-period-picker').style.display = 'flex';
+                loadReport();
+            });
+        });
     }
 
     async function loadReport() {
@@ -275,40 +280,42 @@ async function renderDashboard(user) {
             }
 
             container.innerHTML = `
-                <div class="card glass animate-fade" style="padding:32px; border-radius:24px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px;">
+                <div class="card glass animate-fade" style="padding:24px; border-radius:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
                         <div>
-                            <div style="font-size:0.85rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Fechamento Mensal</div>
-                            <div style="font-size:1.8rem; font-weight:800; color:#1e293b;">R$ ${report.total_geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                            <div style="font-size:0.75rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Fechamento Mensal</div>
+                            <div style="font-size:1.6rem; font-weight:800; color:#1e293b;">R$ ${report.total_geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                         </div>
-                        <button class="btn btn-primary" id="btn-download-pdf" style="width:auto; border-radius:12px; padding:10px 20px;">
-                            <svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            Exportar PDF
+                        <button class="btn btn-primary" id="btn-download-pdf" style="width:auto; border-radius:12px; padding:8px 16px; font-size:0.85rem;">
+                            <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" style="margin-right:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Planilha Excel/PDF
                         </button>
                     </div>
 
-                    <div style="background:#f8fafc; border-radius:20px; border:1px solid var(--border); overflow:hidden;">
-                        <table style="width:100%; border-collapse:collapse;">
+                    <div style="border-radius:12px; border:1px solid #e2e8f0; overflow:hidden;">
+                        <table class="excel-table">
                             <thead>
-                                <tr style="background:rgba(0,0,0,0.02);">
-                                    <th style="padding:16px 24px; text-align:left; font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase;">Categoria</th>
-                                    <th style="padding:16px 24px; text-align:center; font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase;">Qtd</th>
-                                    <th style="padding:16px 24px; text-align:right; font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase;">Valor Total</th>
+                                <tr>
+                                    <th style="width:60%">Categoria</th>
+                                    <th style="text-align:center; width:15%">Lançamentos</th>
+                                    <th style="text-align:right; width:25%">Total Bruto (R$)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${report.categories.map(c => `
-                                    <tr style="border-bottom:1px solid rgba(0,0,0,0.04);">
-                                        <td style="padding:16px 24px; font-weight:600; color:#334155;">
-                                            <div style="display:flex; align-items:center; gap:8px;">
-                                                <div style="width:8px; height:8px; border-radius:50%; background:var(--accent);"></div>
-                                                ${c.category_name}
-                                            </div>
+                                    <tr>
+                                        <td>
+                                            <span class="category">${c.category_name}</span>
+                                            ${c.is_filial ? '<span class="badge-filial">Filial</span>' : ''}
                                         </td>
-                                        <td style="padding:16px 24px; text-align:center; color:#64748b; font-weight:500;">${c.lancamentos}</td>
-                                        <td style="padding:16px 24px; text-align:right; font-weight:700; color:#1e293b;">R$ ${parseFloat(c.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                                        <td style="text-align:center; color:#64748b;">${c.lancamentos}</td>
+                                        <td class="amount">R$ ${parseFloat(c.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                     </tr>
                                 `).join('')}
+                                <tr style="background:#f8fafc; font-weight:800;">
+                                    <td colspan="2" style="text-align:right; border-right:none;">TOTAL CONSOLIDADO:</td>
+                                    <td class="amount" style="color:var(--accent);">R$ ${report.total_geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -438,6 +445,17 @@ async function renderDashboard(user) {
 
     loadSummary();
     loadCompanies();
+
+    // Interaction Handlers
+    document.querySelectorAll('.clickable-card').forEach(card => {
+        card.addEventListener('click', () => {
+            currentFilter = card.dataset.filter;
+            // Highlight selected card
+            document.querySelectorAll('.clickable-card').forEach(c => c.style.border = '1px solid var(--glass-border)');
+            card.style.border = '2px solid var(--accent)';
+            renderCompanies();
+        });
+    });
 
     // Sidebar Toggle Logic
     const btnToggle = document.getElementById('btn-toggle-sidebar');
