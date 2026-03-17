@@ -755,6 +755,21 @@ body {
     grid-template-columns: var(--sidebar-collapsed-w) 1fr;
   }
 
+  .app-shell.sidebar-collapsed .collapse-hide {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: absolute;
+  }
+
+  .collapse-hide {
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
   /* ---- Desktop Header ---- */
   .app-header {
     grid-area: header;

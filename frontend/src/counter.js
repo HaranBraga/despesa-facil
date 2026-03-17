@@ -65,6 +65,10 @@ async function renderDashboard(user) {
     let currentFilter = 'all'; // all, completed, pending
     let companiesList = [];
 
+    const now = new Date();
+    let dashboardMonth = now.getMonth() + 1;
+    let dashboardYear = now.getFullYear();
+
 
     document.getElementById('app').innerHTML = `
     <div class="app-shell">
@@ -118,10 +122,17 @@ async function renderDashboard(user) {
             
             <!-- VIEW: DASHBOARD MESTRE -->
             <div id="dashboard-view" style="display:flex; flex-direction:column; gap:32px; transition:var(--transition);">
-                <header style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <header style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <h1 style="font-size:1.8rem; font-weight:800; color:#1e293b; margin-bottom:4px;">Olá, ${user.name.split(' ')[0]} 👋</h1>
-                        <p style="color:#64748b;">Aqui está o resumo contábil do seu escritório hoje.</p>
+                        <p style="color:#64748b;">Aqui está o resumo contábil do seu escritório.</p>
+                    </div>
+                    
+                    <div id="dashboard-period-picker" style="display:flex; gap:12px; background:white; padding:12px 20px; border-radius:16px; box-shadow:var(--shadow-sm); border:1px solid var(--border); align-items:center;">
+                        <span style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Período:</span>
+                        <select id="dash-sel-month" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600; cursor:pointer;"></select>
+                        <div style="width:1px; height:20px; background:var(--border);"></div>
+                        <select id="dash-sel-year" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600; cursor:pointer;"></select>
                     </div>
                 </header>
 
@@ -282,7 +293,7 @@ async function renderDashboard(user) {
 
     async function loadSummary() {
         try {
-            const summ = await api.get('/counter/dashboard-summary');
+            const summ = await api.get(`/counter/dashboard-summary?month=${dashboardMonth}&year=${dashboardYear}`);
             document.getElementById('summ-total').textContent = summ.total;
             document.getElementById('summ-delivered').textContent = summ.delivered;
             document.getElementById('summ-in-progress').textContent = summ.in_progress;
@@ -300,7 +311,7 @@ async function renderDashboard(user) {
 
     async function loadCompanies() {
         try {
-            companiesList = await api.get('/counter/companies');
+            companiesList = await api.get(`/counter/companies?month=${dashboardMonth}&year=${dashboardYear}`);
             renderCompanies();
         } catch (e) { showToast(e.message, 'error'); }
     }
@@ -479,28 +490,45 @@ async function renderDashboard(user) {
                     </div>
 
                     <!-- Report List -->
-                    <div style="background:white; padding:20px 32px 32px;">
-                        <div style="font-size:0.85rem; font-weight:700; color:#64748b; margin-bottom:16px;">DETALHAMENTO POR CATEGORIA</div>
-                        <div style="display:flex; flex-direction:column; gap:12px;">
-                            ${report.categories.map(c => `
-                                <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; border-radius:16px; border:1px solid var(--border); transition:var(--transition); background:white;" onmouseover="this.style.borderColor='var(--accent-glow)'" onmouseout="this.style.borderColor='var(--border)'">
-                                    <div style="display:flex; align-items:center; gap:16px;">
-                                        <div style="width:40px; height:40px; border-radius:12px; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:#64748b;">
-                                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                                        </div>
-                                        <div>
-                                            <div style="display:flex; align-items:center; gap:8px;">
-                                                <span style="font-weight:700; color:#1e293b; font-size:0.95rem;">${c.category_name}</span>
-                                                ${c.is_filial ? '<span style="font-size:0.65rem; font-weight:700; background:var(--accent-2-soft); color:var(--accent-2); padding:2px 8px; border-radius:100px; text-transform:uppercase;">Filial</span>' : ''}
-                                            </div>
-                                            <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">${c.lancamentos} item(s) registrado(s)</div>
-                                        </div>
-                                    </div>
-                                    <div style="font-size:1.05rem; font-weight:800; color:#1e293b;">
-                                        R$ ${parseFloat(c.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                    </div>
-                                </div>
-                            `).join('')}
+                    <div style="background:white; padding:0;">
+                         <div style="padding:24px 32px 16px; border-bottom:1px solid var(--border);">
+                            <h3 style="font-size:0.85rem; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">Detalhamento por Categoria</h3>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
+                                <thead>
+                                    <tr style="border-bottom:1px solid var(--border); background:rgba(241, 245, 249, 0.5);">
+                                        <th style="padding:16px 32px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
+                                        <th style="padding:16px 32px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:center;">Lançamentos</th>
+                                        <th style="padding:16px 32px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor (R$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${report.categories.map(c => `
+                                        <tr style="border-bottom:1px solid var(--border); transition:var(--transition);" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding:20px 32px;">
+                                                <div style="display:flex; align-items:center; gap:12px;">
+                                                    <div style="width:36px; height:36px; border-radius:10px; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:#64748b;">
+                                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                                    </div>
+                                                    <div>
+                                                        <div style="display:flex; align-items:center; gap:8px;">
+                                                            <span style="font-weight:700; color:#1e293b; font-size:0.9rem;">${c.category_name}</span>
+                                                            ${c.is_filial ? '<span style="font-size:0.6rem; font-weight:700; background:var(--accent-2-soft); color:var(--accent-2); padding:2px 8px; border-radius:100px; text-transform:uppercase;">Filial</span>' : ''}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="padding:20px 32px; text-align:center;">
+                                                <div style="font-size:0.9rem; font-weight:600; color:#475569;">${c.lancamentos} item(s)</div>
+                                            </td>
+                                            <td style="padding:20px 32px; text-align:right;">
+                                                <div style="font-size:1rem; font-weight:800; color:#1e293b;">R$ ${parseFloat(c.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -540,7 +568,7 @@ async function renderDashboard(user) {
             tbody.innerHTML = expenses.map(e => `
                 <tr style="border-bottom:1px solid var(--border); transition:var(--transition);" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='transparent'">
                     <td style="padding:16px 24px; font-size:0.85rem; color:#64748b; white-space:nowrap;">
-                        ${new Date(e.expense_date + 'T12:00:00Z').toLocaleDateString('pt-BR')}
+                        ${e.expense_date ? new Date(e.expense_date).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-'}
                     </td>
                     <td style="padding:16px 24px;">
                         <div style="font-weight:600; color:#1e293b; font-size:0.9rem;">${e.description || '-'}</div>
@@ -712,8 +740,6 @@ async function renderDashboard(user) {
         renderCompanies();
     });
 
-    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const now = new Date();
     const selMonth = document.getElementById('sel-month');
     const selYear = document.getElementById('sel-year');
 
@@ -732,6 +758,37 @@ async function renderDashboard(user) {
         opt.selected = (y === now.getFullYear());
         selYear.appendChild(opt);
     }
+
+    // Dashboard Period Selectors
+    const dashSelMonth = document.getElementById('dash-sel-month');
+    const dashSelYear = document.getElementById('dash-sel-year');
+
+    monthNames.forEach((m, i) => {
+        const opt = document.createElement('option');
+        opt.value = i + 1;
+        opt.textContent = m;
+        opt.selected = (i + 1 === dashboardMonth);
+        dashSelMonth.appendChild(opt);
+    });
+
+    for (let y = now.getFullYear(); y >= 2024; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        opt.selected = (y === dashboardYear);
+        dashSelYear.appendChild(opt);
+    }
+
+    dashSelMonth.addEventListener('change', () => { 
+        dashboardMonth = dashSelMonth.value;
+        loadSummary();
+        loadCompanies();
+    });
+    dashSelYear.addEventListener('change', () => { 
+        dashboardYear = dashSelYear.value;
+        loadSummary();
+        loadCompanies();
+    });
 
     loadSummary();
     loadCompanies();
