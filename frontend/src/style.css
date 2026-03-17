@@ -462,7 +462,7 @@ body {
 .expense-amount { font-size: 0.95rem; font-weight: 800; color: var(--success); flex-shrink: 0; }
 
 /* =============================================
-   REPORT ROWS
+   REPORT ROWS & DATA TABLE
    ============================================= */
 .report-row {
   display: flex; justify-content: space-between; align-items: center;
@@ -473,6 +473,28 @@ body {
 .report-cat-name { font-size: 0.88rem; color: var(--text-secondary); flex: 1; }
 .report-amount { font-size: 0.92rem; font-weight: 700; color: var(--text-primary); }
 .report-amount.zero { color: var(--text-muted); font-weight: 400; }
+
+.data-table th { font-family: inherit; }
+.data-table td { font-family: inherit; }
+.data-table tbody tr:last-child { border-bottom: none !important; }
+
+/* Skeleton Loaders */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.skeleton {
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 1.5s infinite;
+}
 
 /* =============================================
    AUTH PAGES
