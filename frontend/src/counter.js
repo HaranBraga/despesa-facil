@@ -128,33 +128,46 @@ async function renderDashboard(user) {
             </header>
 
             <!-- Summary Cards Premium -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;" id="summary-container">
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="all" style="--delay:0ms; cursor:pointer;">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;" id="summary-container">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="all" style="--delay:0ms; cursor:pointer; border: 2px solid var(--accent);">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--accent-soft); color:var(--accent);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M3 7v14M21 7v14M12 3L2 7h20L12 3z"/></svg>
                         </div>
                     </div>
                     <div>
-                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Empresas sob Gestão</div>
+                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Total de Empresas</div>
                         <div style="font-size:1.8rem; font-weight:800; color:#1e293b;" id="summ-total">-</div>
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="completed" style="--delay:100ms; cursor:pointer;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="delivered" style="--delay:100ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--success-soft); color:var(--success);">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <div id="prog-completed" style="font-size:0.75rem; font-weight:700; color:var(--success); background:var(--success-soft); padding:4px 10px; border-radius:100px;">0%</div>
+                        <div id="prog-delivered" style="font-size:0.75rem; font-weight:700; color:var(--success); background:var(--success-soft); padding:4px 10px; border-radius:100px;">0%</div>
                     </div>
                     <div>
-                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Contabilidade Concluída</div>
-                        <div style="font-size:1.8rem; font-weight:800; color:#1e293b;" id="summ-completed">-</div>
+                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Entregues</div>
+                        <div style="font-size:1.8rem; font-weight:800; color:#1e293b;" id="summ-delivered">-</div>
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="pending" style="--delay:200ms; cursor:pointer;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="in_progress" style="--delay:200ms; cursor:pointer;">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <div class="summary-icon-box" style="background:var(--accent-2-soft); color:var(--accent-2);">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <div id="prog-in-progress" style="font-size:0.75rem; font-weight:700; color:var(--accent-2); background:var(--accent-2-soft); padding:4px 10px; border-radius:100px;">0%</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Em Digitação</div>
+                        <div style="font-size:1.8rem; font-weight:800; color:#1e293b;" id="summ-in-progress">-</div>
+                    </div>
+                </div>
+
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="pending" style="--delay:300ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--danger-soft); color:var(--danger);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4M12 16h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0z"/></svg>
@@ -162,7 +175,7 @@ async function renderDashboard(user) {
                         <div id="prog-pending" style="font-size:0.75rem; font-weight:700; color:var(--danger); background:var(--danger-soft); padding:4px 10px; border-radius:100px;">0%</div>
                     </div>
                     <div>
-                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Pendências de Envio</div>
+                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Pendente</div>
                         <div style="font-size:1.8rem; font-weight:800; color:#1e293b;" id="summ-pending">-</div>
                     </div>
                 </div>
@@ -171,12 +184,18 @@ async function renderDashboard(user) {
             <!-- Content Grid Area -->
             <div class="grid-2" style="grid-template-columns: 380px 1fr; align-items: flex-start; gap:32px;">
                 <!-- Company List Area -->
-                <div class="card glass animate-up" style="--delay:300ms; padding:24px;">
-                    <div class="section-header" style="margin-bottom:24px;">
-                        <div class="section-title">Lista de Clientes</div>
-                        <div class="text-xs text-muted" id="company-count">0 empresas</div>
+                <div class="card glass animate-up" style="--delay:300ms; padding:24px; display:flex; flex-direction:column; gap:20px;">
+                    <div class="section-header" style="margin-bottom:0;">
+                        <div>
+                            <div class="section-title">Lista de Clientes</div>
+                            <div class="text-xs text-muted" id="company-count">0 empresas</div>
+                        </div>
                     </div>
-                    <div id="companies-container" class="gap-12" style="max-height:500px; overflow-y:auto; padding-right:8px;">
+                    <div class="search-box" style="position:relative;">
+                        <input type="text" id="company-search" class="form-input" placeholder="Buscar empresa..." style="padding-left:40px; border-radius:12px; font-size:0.85rem;">
+                        <svg width="18" height="18" fill="none" stroke="#64748b" stroke-width="2" viewBox="0 0 24 24" style="position:absolute; left:14px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    </div>
+                    <div id="companies-container" class="gap-12" style="max-height:500px; overflow-y:auto; padding-right:8px; flex:1;">
                         <!-- Skeleton loader logic -->
                         <div class="skeleton" style="height:72px; border-radius:16px;"></div>
                         <div class="skeleton" style="height:72px; border-radius:16px;"></div>
@@ -204,13 +223,16 @@ async function renderDashboard(user) {
         try {
             const summ = await api.get('/counter/dashboard-summary');
             document.getElementById('summ-total').textContent = summ.total;
-            document.getElementById('summ-completed').textContent = summ.completed;
+            document.getElementById('summ-delivered').textContent = summ.delivered;
+            document.getElementById('summ-in-progress').textContent = summ.in_progress;
             document.getElementById('summ-pending').textContent = summ.pending;
             
-            const pctComp = Math.round((summ.completed / summ.total) * 100) || 0;
+            const pctDeliv = Math.round((summ.delivered / summ.total) * 100) || 0;
+            const pctProg = Math.round((summ.in_progress / summ.total) * 100) || 0;
             const pctPend = Math.round((summ.pending / summ.total) * 100) || 0;
             
-            document.getElementById('prog-completed').textContent = `${pctComp}%`;
+            document.getElementById('prog-delivered').textContent = `${pctDeliv}%`;
+            document.getElementById('prog-in-progress').textContent = `${pctProg}%`;
             document.getElementById('prog-pending').textContent = `${pctPend}%`;
         } catch (e) { console.error('Erro ao carregar resumo:', e); }
     }
@@ -224,29 +246,56 @@ async function renderDashboard(user) {
 
     function renderCompanies() {
         const container = document.getElementById('companies-container');
+        const searchTerm = document.getElementById('company-search')?.value.toLowerCase() || '';
         
         let filtered = companiesList;
-        if (currentFilter === 'completed') filtered = companiesList.filter(c => c.has_expenses);
+        
+        // Filter by summary card selection
+        if (currentFilter === 'delivered') filtered = companiesList.filter(c => c.is_locked);
+        if (currentFilter === 'in_progress') filtered = companiesList.filter(c => c.has_expenses && !c.is_locked);
         if (currentFilter === 'pending') filtered = companiesList.filter(c => !c.has_expenses);
+
+        // Search filter
+        if (searchTerm) {
+            filtered = filtered.filter(c => 
+                c.razao_social.toLowerCase().includes(searchTerm) || 
+                c.cnpj.includes(searchTerm)
+            );
+        }
 
         document.getElementById('company-count').textContent = `${filtered.length} empresas`;
         
         if (filtered.length === 0) {
-            container.innerHTML = `<div class="empty-state" style="padding:20px;">Nenhuma empresa encontrada${currentFilter !== 'all' ? ' para este filtro' : ''}.</div>`;
+            container.innerHTML = `<div class="empty-state" style="padding:20px;">Nenhuma empresa encontrada de acordo com os filtros aplicados.</div>`;
             return;
         }
         
         container.innerHTML = filtered.map(c => {
             const initials = c.razao_social.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
             const isActive = selectedCompanyId == c.id;
+            
+            let statusColor = '#e2e8f0';
+            let statusLabel = 'Não Iniciado';
+            if (c.is_locked) {
+                statusColor = 'var(--success)';
+                statusLabel = 'Entregue';
+            } else if (c.has_expenses) {
+                statusColor = 'var(--accent-2)';
+                statusLabel = 'Em Digitação';
+            }
+
             return `
-            <div class="expense-item clickable-company" data-id="${c.id}" style="display:flex; align-items:center; gap:16px; padding:16px; border-radius:16px; border:1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}; background:${isActive ? 'rgba(79, 156, 249, 0.05)' : 'white'}; cursor:pointer; transition:var(--transition);">
+            <div class="expense-item clickable-company" data-id="${c.id}" style="display:flex; align-items:center; gap:16px; padding:16px; border-radius:16px; border:1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}; background:${isActive ? 'rgba(79, 156, 249, 0.05)' : 'white'}; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden;">
+                ${isActive ? '<div style="position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent);"></div>' : ''}
                 <div style="width:44px; height:44px; background:#f1f5f9; color:#475569; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;">${initials}</div>
                 <div style="flex:1; min-width:0;">
                     <div style="font-weight:700; color:#1e293b; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.razao_social}</div>
                     <div style="font-size:0.75rem; color:#64748b;">${c.cnpj}</div>
                 </div>
-                <div style="width:8px; height:8px; border-radius:50%; background:${c.has_expenses ? 'var(--success)' : '#e2e8f0'};" class="status-indicator"></div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                    <div style="width:8px; height:8px; border-radius:50%; background:${statusColor};" class="status-indicator"></div>
+                    <span style="font-size:0.6rem; font-weight:700; color:${statusColor}; text-transform:uppercase;">${statusLabel}</span>
+                </div>
             </div>
             `;
         }).join('');
@@ -422,6 +471,10 @@ async function renderDashboard(user) {
     
     document.getElementById('sel-month').addEventListener('change', loadReport);
     document.getElementById('sel-year').addEventListener('change', loadReport);
+
+    document.getElementById('company-search').addEventListener('input', () => {
+        renderCompanies();
+    });
 
     const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     const now = new Date();

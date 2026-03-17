@@ -12,16 +12,38 @@ async function verifyIsCounter(req, res, next) {
     next();
 }
 
-// GET /api/counter/companies — List companies associated with the office
+// GET /api/counter/companies — List companies associated with the office with current month status
 router.get('/companies', auth, verifyIsCounter, async (req, res) => {
     try {
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+
         const result = await pool.query(
-            `SELECT c.id, c.cnpj, c.razao_social, u.name as owner_name, u.email as owner_email
+            `SELECT 
+                c.id, 
+                c.cnpj, 
+                c.razao_social, 
+                u.name as owner_name, 
+                u.email as owner_email,
+                EXISTS (
+                    SELECT 1 FROM expenses e 
+                    WHERE e.cnpj_id = c.id 
+                    AND e.period_month = $2 
+                    AND e.period_year = $3
+                ) as has_expenses,
+                EXISTS (
+                    SELECT 1 FROM expenses e 
+                    WHERE e.cnpj_id = c.id 
+                    AND e.period_month = $2 
+                    AND e.period_year = $3
+                    AND e.locked = true
+                ) as is_locked
              FROM cnpjs c
              JOIN users u ON u.id = c.user_id
              WHERE u.office_id = $1 AND c.is_active = true
              ORDER BY c.razao_social`,
-            [req.user.office_id]
+            [req.user.office_id, month, year]
         );
         res.json(result.rows);
     } catch (err) {
@@ -46,14 +68,22 @@ router.get('/dashboard-summary', auth, verifyIsCounter, async (req, res) => {
                         WHERE e.cnpj_id = c.id 
                         AND e.period_month = $2 
                         AND e.period_year = $3
-                    ) as has_expenses
+                    ) as has_expenses,
+                    EXISTS (
+                        SELECT 1 FROM expenses e 
+                        WHERE e.cnpj_id = c.id 
+                        AND e.period_month = $2 
+                        AND e.period_year = $3
+                        AND e.locked = true
+                    ) as is_locked
                 FROM cnpjs c
                 JOIN users u ON u.id = c.user_id
                 WHERE u.office_id = $1 AND c.is_active = true
             )
             SELECT 
                 COUNT(*) as total,
-                COUNT(*) FILTER (WHERE has_expenses) as completed,
+                COUNT(*) FILTER (WHERE is_locked) as delivered,
+                COUNT(*) FILTER (WHERE has_expenses AND NOT is_locked) as in_progress,
                 COUNT(*) FILTER (WHERE NOT has_expenses) as pending
             FROM company_stats`,
             [req.user.office_id, month, year]
