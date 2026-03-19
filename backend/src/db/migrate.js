@@ -98,7 +98,16 @@ const alterStatements = [
     reminder_max_business_day INTEGER DEFAULT 3,
     updated_at TIMESTAMP DEFAULT NOW()
   )`,
-  `ALTER TABLE accounting_office_settings ADD COLUMN IF NOT EXISTS reminder_max_business_day INTEGER DEFAULT 3`
+  `ALTER TABLE accounting_office_settings ADD COLUMN IF NOT EXISTS reminder_max_business_day INTEGER DEFAULT 3`,
+  `ALTER TABLE accounting_office_settings ADD COLUMN IF NOT EXISTS webhook_url TEXT`,
+  `CREATE TABLE IF NOT EXISTS report_submissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    cnpj_id UUID NOT NULL REFERENCES cnpjs(id) ON DELETE CASCADE,
+    period_month INTEGER NOT NULL,
+    period_year INTEGER NOT NULL,
+    sent_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(cnpj_id, period_month, period_year)
+  )`
 ];
 
 async function migrate() {

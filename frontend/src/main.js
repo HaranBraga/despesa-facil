@@ -104,7 +104,7 @@ function renderShell(content, activeNav) {
 // ---- Render ----
 async function render(params = {}) {
   const token = localStorage.getItem('token');
-  const publicPages = ['login', 'register', 'guest'];
+  const publicPages = ['login', 'register'];
 
   if (!token && !publicPages.includes(currentPage)) {
     currentPage = 'login';
@@ -113,7 +113,6 @@ async function render(params = {}) {
   switch (currentPage) {
     case 'login': return renderLogin();
     case 'register': return renderRegister();
-    case 'guest': return renderGuest(params);
     case 'dashboard': return renderDashboard();
     case 'lancamento': return renderLancamento(params);
     case 'historico': return renderHistorico();
@@ -622,7 +621,28 @@ async function renderRelatorio() {
 
 async function loadRelatorio(cnpjs, month, year) {
   const MONTHS = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const MONTHS_FULL = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   const report = await api.get(`/reports/monthly?cnpj_id=${selectedCnpjId}&month=${month}&year=${year}`);
+
+  const sentBadge = report.report_sent_at
+    ? `<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--success-soft);border:1px solid var(--success);border-radius:var(--radius-md);margin-bottom:8px;">
+         <svg width="20" height="20" fill="none" stroke="var(--success)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+         <div>
+           <div style="font-weight:700;font-size:0.85rem;color:var(--success)">Relatório Enviado ✓</div>
+           <div style="font-size:0.75rem;color:var(--text-muted)">Enviado em ${new Date(report.report_sent_at).toLocaleDateString('pt-BR')} às ${new Date(report.report_sent_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>
+         </div>
+       </div>`
+    : '';
+
+  const sendBtnHtml = report.report_sent_at
+    ? `<button class="btn" id="btn-send-counter" disabled style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-muted);cursor:default;">
+         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+         Já Enviado
+       </button>`
+    : `<button class="btn btn-primary" id="btn-send-counter" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;background:var(--success);border-color:var(--success);">
+         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13"></path><path d="M22 2L15 22L11 13L2 9L22 2z"></path></svg>
+         Enviar Relatório para Contador
+       </button>`;
 
   const contentHtml = `
     <div class="gap-16">
@@ -635,20 +655,34 @@ async function loadRelatorio(cnpjs, month, year) {
           ${cnpjs.map(c => `<option value="${c.id}" ${c.id === selectedCnpjId ? 'selected' : ''}>${c.razao_social}</option>`).join('')}
         </select>
       </div>
-      <div class="period-nav">
-        <button class="period-nav-btn" id="prev-month">‹</button>
-        <span class="period-label">${MONTHS[month]} / ${year}</span>
-        <button class="period-nav-btn" id="next-month">›</button>
+
+      <!-- Month/Year Picker -->
+      <div class="period-nav" id="period-picker-toggle" style="cursor:pointer;position:relative;">
+        <svg width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="period-label">${MONTHS_FULL[month]} / ${year}</span>
+        <svg width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
       </div>
+      <div id="month-picker-grid" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-md);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <button class="period-nav-btn" id="picker-prev-year">‹</button>
+          <span style="font-weight:700;font-size:1rem;" id="picker-year-label">${year}</span>
+          <button class="period-nav-btn" id="picker-next-year">›</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="months-grid">
+          ${MONTHS.slice(1).map((m, i) => `
+            <button class="month-pill ${i + 1 === month ? 'active' : ''}" data-m="${i + 1}" style="padding:10px 4px;border-radius:var(--radius-sm);border:1.5px solid ${i + 1 === month ? 'var(--accent)' : 'var(--border)'};background:${i + 1 === month ? 'var(--accent-soft)' : 'var(--bg-secondary)'};color:${i + 1 === month ? 'var(--accent)' : 'var(--text-secondary)'};font-weight:600;font-size:0.82rem;cursor:pointer;font-family:inherit;transition:var(--transition);">${m}</button>
+          `).join('')}
+        </div>
+      </div>
+
+      ${sentBadge}
+
       <div class="stat-card">
         <div class="stat-label">Total do mês</div>
         <div class="stat-value accent">${formatCurrency(report.total_geral)}</div>
       </div>
       
-      <button class="btn btn-primary" id="btn-send-counter" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;background:var(--success);border-color:var(--success);">
-         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13"></path><path d="M22 2L15 22L11 13L2 9L22 2z"></path></svg>
-         Enviar Relatório para Contador
-      </button>
+      ${sendBtnHtml}
 
       <div class="card">
         <div class="section-title" style="margin-bottom:12px">Por categoria</div>
@@ -664,20 +698,39 @@ async function loadRelatorio(cnpjs, month, year) {
 
   renderShell(contentHtml, 'relatorio');
 
+  // Month picker toggle
+  let pickerYear = year;
+  document.getElementById('period-picker-toggle').addEventListener('click', () => {
+    const grid = document.getElementById('month-picker-grid');
+    grid.style.display = grid.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.getElementById('picker-prev-year')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    pickerYear--;
+    document.getElementById('picker-year-label').textContent = pickerYear;
+  });
+  document.getElementById('picker-next-year')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    pickerYear++;
+    document.getElementById('picker-year-label').textContent = pickerYear;
+  });
+
+  document.querySelectorAll('.month-pill').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const newMonth = parseInt(btn.dataset.m);
+      loadRelatorio(cnpjs, newMonth, pickerYear);
+    });
+  });
+
   document.getElementById('r-cnpj').addEventListener('change', (e) => {
     selectedCnpjId = e.target.value;
     loadRelatorio(cnpjs, month, year);
   });
-  document.getElementById('prev-month').addEventListener('click', () => {
-    month--; if (month < 1) { month = 12; year--; }
-    loadRelatorio(cnpjs, month, year);
-  });
-  document.getElementById('next-month').addEventListener('click', () => {
-    month++; if (month > 12) { month = 1; year++; }
-    loadRelatorio(cnpjs, month, year);
-  });
 
   document.getElementById('btn-send-counter')?.addEventListener('click', async () => {
+    if (report.report_sent_at) return;
     if (!confirm('Deseja enviar este relatório para o contador? Isso travará todos os lançamentos deste mês para evitar alterações.')) return;
     try {
       await api.post('/reports/send', { cnpj_id: selectedCnpjId, month, year });
@@ -762,19 +815,12 @@ function configHtml(cnpjs, categories, prefs) {
           </div>
           <div id="categorias-list" class="gap-8" style="margin-bottom:16px;">
             ${prefs.map((p, i) => `
-              <div class="pref-item" data-id="${p.category_id}" style="display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--bg-app);border:1px solid var(--border);border-radius:12px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                  <span style="font-weight:600;font-size:0.95rem">${p.name}</span>
-                  <button class="drag-toggle ${p.is_visible ? 'on' : ''}" data-visible="${p.is_visible ? '1' : '0'}" title="Visível no App"></button>
-                </div>
-                <div style="display:flex;gap:12px;margin-top:4px" class="type-checks">
-                  <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text-secondary);cursor:pointer;">
-                     <input type="checkbox" class="check-diario" ${p.tipo === 'diario' || p.tipo === 'ambos' ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--primary)"> Diária
-                  </label>
-                  <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text-secondary);cursor:pointer;">
-                     <input type="checkbox" class="check-mensal" ${p.tipo === 'mensal' || p.tipo === 'ambos' ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--primary)"> Mensal
-                  </label>
-                </div>
+              <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-app);border:1px solid var(--border);border-radius:12px;">
+                <span style="flex:1;font-weight:600;font-size:0.95rem">${p.name}</span>
+                <button class="btn btn-danger btn-sm btn-del-pref" data-cat-id="${p.category_id}" style="padding:6px;border-radius:8px;" title="Apagar despesa">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+                <button class="drag-toggle ${p.is_visible ? 'on' : ''}" data-visible="${p.is_visible ? '1' : '0'}" title="Visível no App"></button>
               </div>
             `).join('')}
           </div>
@@ -788,17 +834,6 @@ function configHtml(cnpjs, categories, prefs) {
         </div>
         <div class="gap-12">
           <input id="new-cat-name" type="text" class="form-input" placeholder="Nome da nova despesa..." />
-          <div style="display:flex;gap:12px;align-items:center">
-             <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:500">
-               <input type="radio" name="new-cat-tipo" value="diario" checked style="accent-color:var(--primary)"> Diária
-             </label>
-             <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:500">
-               <input type="radio" name="new-cat-tipo" value="mensal" style="accent-color:var(--primary)"> Mensal
-             </label>
-             <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:500">
-               <input type="radio" name="new-cat-tipo" value="ambos" style="accent-color:var(--primary)"> Ambas
-             </label>
-          </div>
           <button class="btn btn-outline" id="btn-add-cat">Criar e Adicionar à Lista</button>
         </div>
       </div>
@@ -845,18 +880,10 @@ async function setupConfigEvents(cnpjs, categories, prefs) {
     const items = document.querySelectorAll('.pref-item');
     const preferences = Array.from(items).map((item, i) => {
       const isVisible = item.querySelector('.drag-toggle').dataset.visible === '1';
-      const isDiario = item.querySelector('.check-diario').checked;
-      const isMensal = item.querySelector('.check-mensal').checked;
-      let tipo = 'ambos';
-      if (isDiario && !isMensal) tipo = 'diario';
-      if (!isDiario && isMensal) tipo = 'mensal';
-      if (!isDiario && !isMensal) tipo = 'ambos'; // Fallback se desmarcar os dois
-
       return {
         category_id: item.dataset.id,
-        sort_order: i, // mantemos a ordem atual
-        is_visible: isVisible,
-        tipo
+        sort_order: i,
+        is_visible: isVisible
       };
     });
 
@@ -872,56 +899,42 @@ async function setupConfigEvents(cnpjs, categories, prefs) {
     const newPrefs = await api.get(`/preferences/${selectedCnpjId}`).catch(() => []);
     const catList = document.getElementById('categorias-list');
     catList.innerHTML = newPrefs.map((p, i) => `
-      <div class="pref-item" data-id="${p.category_id}" style="display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--bg-app);border:1px solid var(--border);border-radius:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-weight:600;font-size:0.95rem">${p.name}</span>
-          <button class="drag-toggle ${p.is_visible ? 'on' : ''}" data-visible="${p.is_visible ? '1' : '0'}" title="Visível no App"></button>
-        </div>
-        <div style="display:flex;gap:12px;margin-top:4px" class="type-checks">
-          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text-secondary);cursor:pointer;">
-             <input type="checkbox" class="check-diario" ${p.tipo === 'diario' || p.tipo === 'ambos' ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--primary)"> Diária
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text-secondary);cursor:pointer;">
-             <input type="checkbox" class="check-mensal" ${p.tipo === 'mensal' || p.tipo === 'ambos' ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--primary)"> Mensal
-          </label>
-        </div>
+      <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-app);border:1px solid var(--border);border-radius:12px;">
+        <span style="flex:1;font-weight:600;font-size:0.95rem">${p.name}</span>
+        <button class="btn btn-danger btn-sm btn-del-pref" data-cat-id="${p.category_id}" style="padding:6px;border-radius:8px;" title="Apagar despesa">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+        <button class="drag-toggle ${p.is_visible ? 'on' : ''}" data-visible="${p.is_visible ? '1' : '0'}" title="Visível no App"></button>
       </div>
     `).join('');
     setupToggles();
+    setupDelPref();
   });
 
   // Add category
   document.getElementById('btn-add-cat')?.addEventListener('click', async () => {
     const name = document.getElementById('new-cat-name').value.trim();
-    const tipo = document.querySelector('input[name="new-cat-tipo"]:checked').value;
     if (!name) return showToast('Digite o nome da categoria', 'error');
 
     try {
       const btn = document.getElementById('btn-add-cat');
       btn.disabled = true; btn.textContent = 'Adicionando...';
 
-      const newCat = await api.post('/categories', { name, tipo });
+      const newCat = await api.post('/categories', { name });
 
       const allItems = document.querySelectorAll('.pref-item');
       let maxOrder = 0;
       allItems.forEach(i => { if (parseInt(i.dataset.order || 0) > maxOrder) maxOrder = parseInt(i.dataset.order || 0); });
 
       const prefs = Array.from(allItems).map((item, i) => {
-        const isDiario = item.querySelector('.check-diario').checked;
-        const isMensal = item.querySelector('.check-mensal').checked;
-        let t = 'ambos';
-        if (isDiario && !isMensal) t = 'diario';
-        if (!isDiario && isMensal) t = 'mensal';
-        if (!isDiario && !isMensal) t = 'ambos';
         return {
           category_id: item.dataset.id,
           sort_order: i,
-          is_visible: item.querySelector('.drag-toggle').dataset.visible === '1',
-          tipo: t
+          is_visible: item.querySelector('.drag-toggle').dataset.visible === '1'
         };
       });
 
-      prefs.push({ category_id: newCat.id, sort_order: maxOrder + 1, is_visible: true, tipo: newCat.tipo || tipo });
+      prefs.push({ category_id: newCat.id, sort_order: maxOrder + 1, is_visible: true });
 
       await api.put(`/preferences/${selectedCnpjId}`, { preferences: prefs });
 
@@ -935,6 +948,21 @@ async function setupConfigEvents(cnpjs, categories, prefs) {
       }
     }
   });
+
+  // Delete preference
+  const setupDelPref = () => {
+    document.querySelectorAll('.btn-del-pref').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Apagar esta despesa da lista?')) return;
+        try {
+          await api.delete(`/categories/${btn.dataset.catId}`);
+          showToast('Despesa removida', 'success');
+          renderConfig();
+        } catch (e) { showToast(e.message, 'error'); }
+      });
+    });
+  };
+  setupDelPref();
 }
 
 function showAddCnpjModal() {
@@ -1000,15 +1028,7 @@ function formatDate(dateStr) {
 }
 
 // ---- Init ----
-// Detecta link guest: /lancamento?token=xxx
-(function checkGuestToken() {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('token');
-  if (token && window.location.pathname.includes('lancamento')) {
-    currentPage = 'guest';
-    render({ token });
-    return;
-  }
+(function init() {
   render();
 })();
 

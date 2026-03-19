@@ -1067,3 +1067,115 @@ body {
   .card { padding: 40px; }
   .stat-card { padding: 28px 40px; }
 }
+
+/* =============================================
+   BOTTOM NAV (Mobile) — compact and always visible
+   ============================================= */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--border);
+  padding: 4px 0 calc(4px + var(--safe-bottom));
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  position: relative;
+}
+
+.nav-item.active {
+  color: var(--accent);
+}
+
+.nav-item .nav-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Primary Launcamento button - always visible FAB */
+.nav-item.nav-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  margin-top: -20px;
+  box-shadow: var(--shadow-glow);
+  justify-content: center;
+  padding: 0;
+}
+
+.nav-item.nav-primary .nav-label {
+  display: none;
+}
+
+.nav-item.nav-primary .nav-icon svg {
+  width: 26px;
+  height: 26px;
+  stroke: white;
+  stroke-width: 3;
+}
+
+/* Ensure page content doesn't go under bottom nav */
+.page-content {
+  padding-bottom: calc(80px + var(--safe-bottom)) !important;
+}
+
+/* =============================================
+   REPORT-SENT BADGE & MONTH PICKER
+   ============================================= */
+.month-pill:hover {
+  border-color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+  transform: scale(1.05);
+}
+
+/* =============================================
+   COUNTER PAGE — responsive grid fix
+   ============================================= */
+@media (max-width: 900px) {
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* =============================================
+   DESKTOP — hide bottom nav, show sidebar
+   ============================================= */
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none;
+  }
+  .page-content {
+    padding-bottom: 40px !important;
+  }
+}
+

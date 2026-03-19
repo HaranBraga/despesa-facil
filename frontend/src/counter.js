@@ -25,7 +25,8 @@ const api = {
     },
     get: (path) => api.request('GET', path),
     post: (path, body) => api.request('POST', path, body),
-    put: (path, body) => api.request('PUT', path, body)
+    put: (path, body) => api.request('PUT', path, body),
+    delete: (path) => api.request('DELETE', path)
 };
 
 // ---- Toast ----
@@ -250,7 +251,7 @@ async function renderDashboard(user) {
 
                 <!-- Tabs Navigation -->
                 <div style="display:flex; gap:8px; border-bottom:1px solid var(--border); padding-bottom:16px;">
-                    <button class="detail-tab active" data-tab="summary" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:var(--accent-soft); color:var(--accent); border:none; cursor:pointer;">Resumo Financeiro</button>
+                    <button class="detail-tab active" data-tab="summary" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:var(--accent-soft); color:var(--accent); border:none; cursor:pointer;">Análise Comparativa</button>
                     <button class="detail-tab" data-tab="list" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:transparent; color:#64748b; border:none; cursor:pointer; transition:var(--transition);">Transações Detalhadas</button>
                 </div>
 
@@ -273,15 +274,16 @@ async function renderDashboard(user) {
                             <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
                                 <thead>
                                     <tr style="border-bottom:1px solid var(--border); background:rgba(241, 245, 249, 0.5);">
-                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Data</th>
+                                         <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Data</th>
                                         <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Descrição</th>
                                         <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
                                         <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor (R$)</th>
+                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:center;">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="expenses-list-tbody">
                                     <!-- Rendered dynamically -->
-                                    <tr><td colspan="4" style="padding:40px; text-align:center;"><div class="skeleton" style="height:200px; border-radius:12px;"></div></td></tr>
+                                    <tr><td colspan="5" style="padding:40px; text-align:center;"><div class="skeleton" style="height:200px; border-radius:12px;"></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -372,6 +374,13 @@ async function renderDashboard(user) {
                 statusLabel = 'Em Digitação';
             }
 
+            const lateCount = parseInt(c.late_expenses_count) || 0;
+            const lateBadge = lateCount > 0 ? `
+                <div style="display:flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(245,158,11,0.12);border-radius:100px;margin-top:4px;">
+                    <svg width="12" height="12" fill="none" stroke="var(--warning)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span style="font-size:0.6rem;font-weight:700;color:var(--warning);">${lateCount} após envio</span>
+                </div>` : '';
+
             return `
             <div class="expense-item clickable-company" data-id="${c.id}" style="display:flex; align-items:center; gap:16px; padding:16px; border-radius:16px; border:1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}; background:${isActive ? 'rgba(79, 156, 249, 0.05)' : 'white'}; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden;">
                 ${isActive ? '<div style="position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent);"></div>' : ''}
@@ -379,6 +388,7 @@ async function renderDashboard(user) {
                 <div style="flex:1; min-width:0;">
                     <div style="font-weight:700; color:#1e293b; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.razao_social}</div>
                     <div style="font-size:0.75rem; color:#64748b;">${c.cnpj}</div>
+                    ${lateBadge}
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
                     <div style="width:8px; height:8px; border-radius:50%; background:${statusColor};" class="status-indicator"></div>
@@ -549,7 +559,7 @@ async function renderDashboard(user) {
         const month = document.getElementById('sel-month').value;
         const year = document.getElementById('sel-year').value;
         const tbody = document.getElementById('expenses-list-tbody');
-        tbody.innerHTML = '<tr><td colspan="4" style="padding:40px; text-align:center;"><div class="skeleton" style="height:200px; border-radius:12px;"></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="padding:40px; text-align:center;"><div class="skeleton" style="height:200px; border-radius:12px;"></div></td></tr>';
 
         try {
             const expenses = await api.get(`/counter/expenses?cnpj_id=${selectedCompanyId}&month=${month}&year=${year}`);
@@ -557,7 +567,7 @@ async function renderDashboard(user) {
             if (expenses.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" style="padding:48px 24px; text-align:center; color:#64748b;">
+                        <td colspan="5" style="padding:48px 24px; text-align:center; color:#64748b;">
                             <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:12px; opacity:0.5;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             <p style="margin:0;">Nenhum lançamento registrado neste mês.</p>
                         </td>
@@ -566,10 +576,12 @@ async function renderDashboard(user) {
                 return;
             }
 
-            tbody.innerHTML = expenses.map(e => `
-                <tr style="border-bottom:1px solid var(--border); transition:var(--transition);" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='transparent'">
+            tbody.innerHTML = expenses.map(e => {
+                const lateBadge = e.is_late ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warning);margin-left:6px;" title="Adicionada após envio do relatório"></span>' : '';
+                return `
+                <tr style="border-bottom:1px solid var(--border); transition:var(--transition);${e.is_late ? 'background:rgba(245,158,11,0.04);' : ''}" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='${e.is_late ? 'rgba(245,158,11,0.04)' : 'transparent'}'}">
                     <td style="padding:16px 24px; font-size:0.85rem; color:#64748b; white-space:nowrap;">
-                        ${e.expense_date ? new Date(e.expense_date).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-'}
+                        ${e.expense_date ? new Date(e.expense_date).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-'}${lateBadge}
                     </td>
                     <td style="padding:16px 24px;">
                         <div style="font-weight:600; color:#1e293b; font-size:0.9rem;">${e.description || '-'}</div>
@@ -577,17 +589,77 @@ async function renderDashboard(user) {
                     <td style="padding:16px 24px;">
                         <div style="display:inline-flex; align-items:center; gap:6px; background:var(--bg-secondary); padding:4px 10px; border-radius:100px; font-size:0.75rem; font-weight:600; color:#475569;">
                             ${e.category_name}
-                            ${e.is_filial ? '<span style="color:var(--accent-2); font-weight:800;">• Filial</span>' : ''}
+                            ${e.is_filial ? '<span style="color:var(--accent-2); font-weight:800;">\u2022 Filial</span>' : ''}
                         </div>
                     </td>
                     <td style="padding:16px 24px; text-align:right; font-weight:700; color:#1e293b; font-size:0.95rem;">
                         R$ ${parseFloat(e.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
+                    <td style="padding:16px 24px; text-align:center;">
+                        <div style="display:flex;gap:6px;justify-content:center;">
+                            <button class="btn-icon btn-edit-exp" data-id="${e.id}" data-amount="${e.amount}" data-desc="${e.description || ''}" data-date="${e.expense_date}" title="Editar" style="padding:6px;border-radius:8px;border:1px solid var(--border);background:white;color:var(--accent);cursor:pointer;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                            <button class="btn-icon btn-del-exp" data-id="${e.id}" title="Excluir" style="padding:6px;border-radius:8px;border:1px solid var(--border);background:white;color:var(--danger);cursor:pointer;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
-            `).join('');
+            `}).join('');
+
+            // Edit expense handler
+            document.querySelectorAll('.btn-edit-exp').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'modal-overlay';
+                    overlay.innerHTML = `
+                        <div class="modal" style="max-width:400px;">
+                            <div class="modal-handle"></div>
+                            <div class="modal-title">Editar Despesa</div>
+                            <div class="gap-16">
+                                <div class="form-group"><label class="form-label">Valor</label><input id="edit-amount" type="number" step="0.01" class="form-input" value="${btn.dataset.amount}"/></div>
+                                <div class="form-group"><label class="form-label">Descri\u00e7\u00e3o</label><input id="edit-desc" type="text" class="form-input" value="${btn.dataset.desc}"/></div>
+                                <div class="form-group"><label class="form-label">Data</label><input id="edit-date" type="date" class="form-input" value="${btn.dataset.date}"/></div>
+                                <button class="btn btn-primary" id="btn-save-edit">Salvar Altera\u00e7\u00f5es</button>
+                                <button class="btn btn-outline" id="btn-cancel-edit">Cancelar</button>
+                            </div>
+                        </div>`;
+                    document.body.appendChild(overlay);
+                    requestAnimationFrame(() => overlay.classList.add('show'));
+                    document.getElementById('btn-save-edit').addEventListener('click', async () => {
+                        try {
+                            await api.put(`/counter/expenses/${btn.dataset.id}`, {
+                                amount: document.getElementById('edit-amount').value,
+                                description: document.getElementById('edit-desc').value,
+                                expense_date: document.getElementById('edit-date').value
+                            });
+                            showToast('Despesa atualizada!', 'success');
+                            overlay.remove();
+                            loadIndividualExpenses();
+                            loadReport();
+                        } catch (e) { showToast(e.message, 'error'); }
+                    });
+                    document.getElementById('btn-cancel-edit').addEventListener('click', () => overlay.remove());
+                    overlay.addEventListener('click', (ev) => { if (ev.target === overlay) overlay.remove(); });
+                });
+            });
+
+            // Delete expense handler
+            document.querySelectorAll('.btn-del-exp').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (!confirm('Tem certeza que deseja excluir esta despesa? A altera\u00e7\u00e3o ser\u00e1 refletida no app do usu\u00e1rio.')) return;
+                    try {
+                        await api.delete(`/counter/expenses/${btn.dataset.id}`);
+                        showToast('Despesa removida!', 'success');
+                        loadIndividualExpenses();
+                        loadReport();
+                    } catch (e) { showToast(e.message, 'error'); }
+                });
+            });
 
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="4" style="padding:24px; color:var(--danger); text-align:center;">${e.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="padding:24px; color:var(--danger); text-align:center;">${e.message}</td></tr>`;
         }
     }
 

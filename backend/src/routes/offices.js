@@ -5,7 +5,7 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET /offices — listar todos os escritórios disponíveis (aberto para o formulário de registro, ou protegido mas retornamos apenas ID e Nome)
+// GET /offices — listar todos os escritórios disponíveis
 router.get('/', async (req, res) => {
     try {
         const result = await pool.query(
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST /offices — Criar um novo escritório (Protegido, idealmente apenas Admins)
+// POST /offices — Criar um novo escritório (Apenas Admins)
 router.post('/', auth, async (req, res) => {
     try {
         if (!req.user.is_admin) {
@@ -52,6 +52,73 @@ router.delete('/:id', auth, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro ao excluir escritório' });
+    }
+});
+
+// --- USER MANAGEMENT (Admin) ---
+
+// GET /offices/users/all — List ALL client users across all offices
+router.get('/users/all', auth, async (req, res) => {
+    try {
+        if (!req.user.is_admin) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        const result = await pool.query(
+            `SELECT u.id, u.name, u.email, u.is_active, u.is_admin, u.office_id, u.created_at,
+                    ao.name AS office_name,
+                    (SELECT COUNT(*) FROM cnpjs c WHERE c.user_id = u.id AND c.is_active = true) AS cnpj_count
+             FROM users u
+             LEFT JOIN accounting_offices ao ON ao.id = u.office_id
+             WHERE u.is_admin = false
+             ORDER BY u.name ASC`
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao buscar usuários' });
+    }
+});
+
+// PUT /offices/users/:id/toggle — Enable/Disable a user account
+router.put('/users/:id/toggle', auth, async (req, res) => {
+    try {
+        if (!req.user.is_admin) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        const { id } = req.params;
+        const check = await pool.query('SELECT is_active, is_admin FROM users WHERE id = $1', [id]);
+        if (check.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+        if (check.rows[0].is_admin) return res.status(403).json({ error: 'Não é possível desativar um admin' });
+
+        const newStatus = !check.rows[0].is_active;
+        await pool.query('UPDATE users SET is_active = $1, updated_at = NOW() WHERE id = $2', [newStatus, id]);
+        res.json({ message: newStatus ? 'Usuário ativado' : 'Usuário desativado', is_active: newStatus });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao alterar status' });
+    }
+});
+
+// GET /offices/admin/stats — Dashboard stats for admin panel
+router.get('/admin/stats', auth, async (req, res) => {
+    try {
+        if (!req.user.is_admin) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        const offices = await pool.query('SELECT COUNT(*) as count FROM accounting_offices');
+        const users = await pool.query('SELECT COUNT(*) as count FROM users WHERE is_admin = false');
+        const cnpjs = await pool.query('SELECT COUNT(*) as count FROM cnpjs WHERE is_active = true');
+        const counters = await pool.query('SELECT COUNT(*) as count FROM users WHERE office_id IS NOT NULL AND is_admin = false');
+
+        res.json({
+            total_offices: parseInt(offices.rows[0].count),
+            total_users: parseInt(users.rows[0].count),
+            total_cnpjs: parseInt(cnpjs.rows[0].count),
+            total_counters: parseInt(counters.rows[0].count)
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao buscar estatísticas' });
     }
 });
 
@@ -114,7 +181,6 @@ router.delete('/counters/:id', auth, async (req, res) => {
             return res.status(403).json({ error: 'Acesso negado' });
         }
         const { id } = req.params;
-        // Impedindo deletar a si mesmo ou outro admin por esta rota
         const check = await pool.query('SELECT is_admin FROM users WHERE id = $1', [id]);
         if (check.rows.length > 0 && check.rows[0].is_admin) {
             return res.status(403).json({ error: 'Não é possível deletar um administrador por esta rota' });
@@ -125,6 +191,62 @@ router.delete('/counters/:id', auth, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro ao excluir contador' });
+    }
+});
+
+// GET /offices/:id/settings — Get office settings including webhook (Admin)
+router.get('/:id/settings', auth, async (req, res) => {
+    try {
+        if (!req.user.is_admin) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        const result = await pool.query(
+            'SELECT * FROM accounting_office_settings WHERE office_id = $1',
+            [req.params.id]
+        );
+        if (result.rows.length === 0) {
+            return res.json({
+                office_id: req.params.id,
+                reminder_whatsapp_hour: 9,
+                reminder_whatsapp_minute: 0,
+                reminder_enabled: true,
+                reminder_max_business_day: 3,
+                webhook_url: null
+            });
+        }
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao buscar configurações' });
+    }
+});
+
+// PUT /offices/:id/settings — Update office settings (Admin)
+router.put('/:id/settings', auth, async (req, res) => {
+    try {
+        if (!req.user.is_admin) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        const { webhook_url, reminder_whatsapp_hour, reminder_whatsapp_minute, reminder_enabled, reminder_max_business_day } = req.body;
+
+        const result = await pool.query(
+            `INSERT INTO accounting_office_settings (office_id, reminder_whatsapp_hour, reminder_whatsapp_minute, reminder_enabled, reminder_max_business_day, webhook_url, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, NOW())
+             ON CONFLICT (office_id) DO UPDATE SET
+                reminder_whatsapp_hour = COALESCE(EXCLUDED.reminder_whatsapp_hour, accounting_office_settings.reminder_whatsapp_hour),
+                reminder_whatsapp_minute = COALESCE(EXCLUDED.reminder_whatsapp_minute, accounting_office_settings.reminder_whatsapp_minute),
+                reminder_enabled = COALESCE(EXCLUDED.reminder_enabled, accounting_office_settings.reminder_enabled),
+                reminder_max_business_day = COALESCE(EXCLUDED.reminder_max_business_day, accounting_office_settings.reminder_max_business_day),
+                webhook_url = EXCLUDED.webhook_url,
+                updated_at = NOW()
+             RETURNING *`,
+            [req.params.id, reminder_whatsapp_hour || 9, reminder_whatsapp_minute || 0, reminder_enabled !== false, reminder_max_business_day || 3, webhook_url || null]
+        );
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao atualizar configurações' });
     }
 });
 

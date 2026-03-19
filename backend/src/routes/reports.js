@@ -53,11 +53,31 @@ router.get('/monthly', auth, async (req, res) => {
 
         const total_geral = result.rows.reduce((sum, r) => sum + parseFloat(r.total), 0);
 
+        // Check if report was already sent for this month
+        const submission = await pool.query(
+            'SELECT sent_at FROM report_submissions WHERE cnpj_id = $1 AND period_month = $2 AND period_year = $3',
+            [cnpj_id, parseInt(month), parseInt(year)]
+        );
+
+        // Count late expenses (added after report was sent)
+        let late_expenses_count = 0;
+        if (submission.rows.length > 0) {
+            const lateResult = await pool.query(
+                `SELECT COUNT(*) as count FROM expenses 
+                 WHERE cnpj_id = $1 AND period_month = $2 AND period_year = $3 
+                 AND created_at > $4`,
+                [cnpj_id, parseInt(month), parseInt(year), submission.rows[0].sent_at]
+            );
+            late_expenses_count = parseInt(lateResult.rows[0].count);
+        }
+
         res.json({
             month: parseInt(month),
             year: parseInt(year),
             categories: result.rows,
-            total_geral
+            total_geral,
+            report_sent_at: submission.rows.length > 0 ? submission.rows[0].sent_at : null,
+            late_expenses_count
         });
     } catch (err) {
         console.error(err);
@@ -131,6 +151,15 @@ router.post('/send', auth, async (req, res) => {
              SET locked = true, updated_at = NOW()
              WHERE cnpj_id = $1 AND period_month = $2 AND period_year = $3
              RETURNING id`,
+            [cnpj_id, parseInt(month), parseInt(year)]
+        );
+
+        // Record the submission timestamp
+        await pool.query(
+            `INSERT INTO report_submissions (cnpj_id, period_month, period_year, sent_at)
+             VALUES ($1, $2, $3, NOW())
+             ON CONFLICT (cnpj_id, period_month, period_year) 
+             DO UPDATE SET sent_at = NOW()`,
             [cnpj_id, parseInt(month), parseInt(year)]
         );
 
