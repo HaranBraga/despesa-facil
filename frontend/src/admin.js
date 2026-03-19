@@ -125,15 +125,15 @@ async function renderDashboard(user) {
         <nav style="display:flex;flex-direction:column;gap:8px;flex:1;">
           <button class="nav-item-side active" data-tab="dashboard">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-            <span class="collapse-hide">Dashboard</span>
+            <span class="collapse-hide nav-label">Dashboard</span>
           </button>
           <button class="nav-item-side" data-tab="offices">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <span class="collapse-hide">Escritórios</span>
+            <span class="collapse-hide nav-label">Escritórios</span>
           </button>
           <button class="nav-item-side" data-tab="users">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            <span class="collapse-hide">Usuários</span>
+            <span class="collapse-hide nav-label">Usuários</span>
           </button>
         </nav>
 
