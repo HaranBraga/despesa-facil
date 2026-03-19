@@ -75,7 +75,7 @@ async function renderDashboard(user) {
     document.getElementById('app').innerHTML = `
     <div class="app-shell">
         <!-- Sidebar Premium -->
-        <aside id="sidebar-main" class="bottom-nav">
+        <aside id="sidebar-main" class="sidebar-main">
              <div class="logo-container" style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom: 24px;">
                 <div class="logo" style="display:flex; align-items:center; gap:12px; overflow:hidden;">
                     <div style="width:40px; height:40px; background:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px var(--accent-glow); flex-shrink:0;">
@@ -94,17 +94,16 @@ async function renderDashboard(user) {
             </div>
 
             <nav style="display:flex; flex-direction:column; gap:8px; flex:1;">
-                <button class="nav-item active">
+                <button class="nav-item-side active">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-                    <span class="collapse-hide nav-label">Dashboard</span>
+                    <span class="collapse-hide">Dashboard</span>
+                </button>
+                <button class="nav-item-side" id="btn-settings-sidebar">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                    <span class="collapse-hide">Regras & Avisos</span>
                 </button>
             </nav>
 
-            <div style="margin-top:auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:8px;">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-                    <div style="width:36px; height:36px; background:var(--accent-2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; color: white;">${user.name.charAt(0)}</div>
-                    <div class="collapse-hide" style="min-width:0;">
-                        <div style="font-weight:600; font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: white;">${user.name}</div>
                         <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); white-space:nowrap;">Escritório Ativo</div>
                     </div>
                 </div>
