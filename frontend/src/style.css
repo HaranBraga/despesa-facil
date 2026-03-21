@@ -31,20 +31,21 @@
   --text-inverse:   #f1f5f9;
 
   /* Border */
-  --border:        rgba(15,23,42,0.08);
-  --border-active: rgba(79,156,249,0.45);
+  --border:        rgba(15,23,42,0.1);
+  --border-active: rgba(79,156,249,0.5);
 
   /* Shadows */
-  --shadow-sm:   0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.05);
-  --shadow-md:   0 4px 16px rgba(15,23,42,0.08), 0 2px 6px rgba(15,23,42,0.05);
-  --shadow-lg:   0 12px 40px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.06);
-  --shadow-glow: 0 4px 20px var(--accent-glow);
+  --shadow-sm:   0 1px 2px rgba(15,23,42,0.04), 0 1px 1px rgba(15,23,42,0.02);
+  --shadow-md:   0 4px 12px rgba(15,23,42,0.05), 0 2px 4px rgba(15,23,42,0.03);
+  --shadow-lg:   0 12px 32px rgba(15,23,42,0.08), 0 4px 12px rgba(15,23,42,0.04);
+  --shadow-xl:   0 24px 64px rgba(15,23,42,0.1), 0 8px 24px rgba(15,23,42,0.05);
+  --shadow-glow: 0 4px 16px var(--accent-glow);
 
   /* Shape */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
 
   /* Motion */
   --transition: all 0.2s ease;
@@ -157,7 +158,8 @@ body {
     top: 0;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-xl);
+    box-shadow: var(--shadow-2xl);
+    width: 280px !important;
   }
   .sidebar-main.show {
     transform: translateX(0);
@@ -165,9 +167,9 @@ body {
   .sidebar-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     z-index: 150;
     opacity: 0;
     pointer-events: none;
@@ -182,6 +184,9 @@ body {
 @media (min-width: 768px) {
   .app-header {
     display: none !important;
+  }
+  .page-content {
+    padding: 32px 40px !important;
   }
 }
 
@@ -242,15 +247,12 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border);
-  padding: calc(var(--safe-top) + 14px) 20px 14px;
+  padding: calc(var(--safe-top) + 12px) 16px 12px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: var(--shadow-sm);
 }
 
 .app-header .logo {
@@ -374,8 +376,13 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 24px;
   box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .card-glass {
@@ -449,20 +456,19 @@ body {
 /* =============================================
    FORMS
    ============================================= */
-.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 
 .form-label {
-  font-size: 0.78rem; font-weight: 700;
+  font-size: 0.8rem; font-weight: 600;
   color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
 }
 
 .form-input, .form-select, .form-textarea {
-  width: 100%; padding: 13px 16px;
-  background: var(--bg-secondary);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
+  width: 100%; padding: 12px 14px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 0.95rem; font-family: 'Inter', sans-serif;
   transition: var(--transition);
@@ -471,8 +477,7 @@ body {
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-  background: var(--bg-card);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .form-input::placeholder { color: #8da4be; }
 .form-textarea { resize: none; min-height: 80px; }
@@ -627,6 +632,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 24px;
+  background: var(--bg-secondary);
 }
 
 .auth-logo {
@@ -1095,11 +1101,11 @@ body {
 
   /* Auth page */
   .auth-page {
-    background: linear-gradient(160deg, #e8f4ff 0%, #f4f6fb 40%, #f5f0ff 100%);
+    background: var(--bg-secondary);
     padding: 40px;
   }
   .auth-card {
-    padding: 48px;
+    padding: 40px;
   }
 
   /* Modal — centered on desktop */
