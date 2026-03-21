@@ -119,9 +119,19 @@ async function renderDashboard(user) {
                 </button>
             </div>
         </aside>
+        
+        <!-- Sidebar overlay for mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
         <!-- Main Content -->
         <main class="page-content" id="main-content">
+            
+            <!-- Mobile Header for Hamburger Toggle -->
+            <header class="app-header" style="padding:16px; margin-bottom:16px; border-radius:16px; background:var(--bg-card); display:flex; align-items:center;">
+                <button class="btn-icon" id="btn-toggle-mobile-menu" style="border:none;background:transparent;">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+            </header>
             
             <!-- VIEW: DASHBOARD MESTRE -->
             <div id="dashboard-view" style="display:flex; flex-direction:column; gap:32px; transition:var(--transition);">
@@ -894,16 +904,34 @@ async function renderDashboard(user) {
     const btnToggle = document.getElementById('btn-toggle-sidebar');
     const shell = document.querySelector('.app-shell');
     
-    btnToggle.addEventListener('click', () => {
-        isSidebarCollapsed = !isSidebarCollapsed;
-        shell.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
-        btnToggle.style.transform = isSidebarCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
-        
-        // Sidebar alignment fixes for collapsed state
-        const sidebar = document.getElementById('sidebar-main');
-        sidebar.style.width = isSidebarCollapsed ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
-        sidebar.style.padding = isSidebarCollapsed ? '32px 10px' : '32px 24px';
-    });
+    if(btnToggle) {
+        btnToggle.addEventListener('click', () => {
+            isSidebarCollapsed = !isSidebarCollapsed;
+            shell.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
+            btnToggle.style.transform = isSidebarCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+            
+            // Sidebar alignment fixes for collapsed state
+            const sidebar = document.getElementById('sidebar-main');
+            sidebar.style.width = isSidebarCollapsed ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
+            sidebar.style.padding = isSidebarCollapsed ? '32px 10px' : '32px 24px';
+        });
+    }
+
+    const btnMobileMenu = document.getElementById('btn-toggle-mobile-menu');
+    if(btnMobileMenu) {
+        btnMobileMenu.addEventListener('click', () => {
+            document.getElementById('sidebar-main').classList.add('show');
+            document.getElementById('sidebar-overlay').classList.add('show');
+        });
+    }
+
+    const overlay = document.getElementById('sidebar-overlay');
+    if(overlay) {
+        overlay.addEventListener('click', () => {
+            document.getElementById('sidebar-main').classList.remove('show');
+            overlay.classList.remove('show');
+        });
+    }
 }
 
 render();

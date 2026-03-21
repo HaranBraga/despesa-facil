@@ -145,14 +145,24 @@ async function renderDashboard(user) {
         </div>
       </aside>
 
+      <!-- Sidebar overlay for mobile -->
+      <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
       <!-- Main Content -->
-      <main id="admin-main" class="page-content" style="padding:32px 40px;">
+      <div style="display:flex; flex-direction:column; flex:1; min-width:0;">
+        <header class="app-header" style="padding:16px; margin-bottom:16px; border-radius:16px; background:var(--bg-card); display:flex; align-items:center;">
+            <button class="btn-icon" id="btn-toggle-mobile-menu" style="border:none;background:transparent;">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </header>
+        <main id="admin-main" class="page-content" style="padding:16px 40px;">
         <div class="card" style="background:linear-gradient(135deg, rgba(79,156,249,0.1), rgba(124,58,237,0.1)); border-color:rgba(124,58,237,0.2); margin-bottom:24px;">
           <p style="margin:0;font-weight:600;color:var(--text-primary)">Olá, ${user.name}</p>
           <p class="text-sm text-muted" style="margin-top:4px;">Gerencie escritórios, contadores e usuários da plataforma.</p>
         </div>
         <div id="tab-content"></div>
       </main>
+      </div>
     </div>
   `;
 
@@ -180,6 +190,22 @@ async function renderDashboard(user) {
     sidebar.style.width = isSidebarCollapsed ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
     sidebar.style.padding = isSidebarCollapsed ? '32px 10px' : '32px 24px';
   });
+
+  const btnMobileMenu = document.getElementById('btn-toggle-mobile-menu');
+  if(btnMobileMenu) {
+      btnMobileMenu.addEventListener('click', () => {
+          document.getElementById('sidebar-main').classList.add('show');
+          document.getElementById('sidebar-overlay').classList.add('show');
+      });
+  }
+
+  const overlay = document.getElementById('sidebar-overlay');
+  if(overlay) {
+      overlay.addEventListener('click', () => {
+          document.getElementById('sidebar-main').classList.remove('show');
+          overlay.classList.remove('show');
+      });
+  }
 
   async function loadTab(tab) {
     const container = document.getElementById('tab-content');
