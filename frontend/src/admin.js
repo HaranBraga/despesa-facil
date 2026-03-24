@@ -62,7 +62,7 @@ function renderLogin() {
   document.getElementById('app').innerHTML = `
     <div class="auth-page">
       <div class="auth-logo" style="display:flex;align-items:center;justify-content:center;gap:12px;">
-        <svg width="32" height="32" fill="none" stroke="var(--accent)" stroke-width="2.5" viewBox="0 0 24 24">
+        <svg width="32" height="32" fill="none" stroke="var(--brand)" stroke-width="2.5" viewBox="0 0 24 24">
           <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
         </svg>
         <span class="text-gradient">Admin HQ</span>
@@ -157,7 +157,7 @@ async function renderDashboard(user) {
         </header>
         <main id="admin-main" class="page-content">
           <div class="card" style="background:linear-gradient(135deg, rgba(79,156,249,0.08), rgba(124,58,237,0.08)); border-color:rgba(124,58,237,0.15); margin-bottom:24px;">
-            <p style="margin:0;font-weight:600;color:var(--text-primary)">Olá, ${user.name}</p>
+            <p style="margin:0;font-weight:600;color:var(--ink)">Olá, ${user.name}</p>
             <p class="text-sm text-muted mt-4">Gerencie escritórios, contadores e usuários da plataforma.</p>
           </div>
           <div id="tab-content"></div>
@@ -228,26 +228,26 @@ async function renderDashboard(user) {
           Visão Geral
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
-          <div class="stat-card" style="border-left:4px solid var(--accent);">
+          <div class="stat-card" style="border-left:4px solid var(--brand);">
             <div class="stat-label">Escritórios</div>
             <div class="stat-value accent">${stats.total_offices}</div>
           </div>
-          <div class="stat-card" style="border-left:4px solid var(--accent-2);">
+          <div class="stat-card" style="border-left:4px solid #8b5cf6;">
             <div class="stat-label">Contadores</div>
-            <div class="stat-value" style="color:var(--accent-2)">${stats.total_counters}</div>
+            <div class="stat-value" style="color:#8b5cf6">${stats.total_counters}</div>
           </div>
-          <div class="stat-card" style="border-left:4px solid var(--success);">
+          <div class="stat-card" style="border-left:4px solid var(--green);">
             <div class="stat-label">Usuários</div>
-            <div class="stat-value" style="color:var(--success)">${stats.total_users}</div>
+            <div class="stat-value" style="color:var(--green)">${stats.total_users}</div>
           </div>
-          <div class="stat-card" style="border-left:4px solid var(--warning);">
+          <div class="stat-card" style="border-left:4px solid var(--amber);">
             <div class="stat-label">CNPJs Ativos</div>
-            <div class="stat-value" style="color:var(--warning)">${stats.total_cnpjs}</div>
+            <div class="stat-value" style="color:var(--amber)">${stats.total_cnpjs}</div>
           </div>
         </div>
       `;
     } catch (e) {
-      container.innerHTML = `<div class="card" style="color:var(--danger)">${e.message}</div>`;
+      container.innerHTML = `<div class="card" style="color:var(--red)">${e.message}</div>`;
     }
   }
 
@@ -295,7 +295,7 @@ async function renderDashboard(user) {
               </button>
             </div>
           </div>
-          <div id="counters-for-${o.id}" class="gap-4" style="border-top:1px solid var(--border);padding-top:8px;">
+          <div id="counters-for-${o.id}" class="gap-4" style="border-top:1px solid var(--line);padding-top:8px;">
             <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Contadores vinculados:</div>
             <div class="counters-list text-sm">Carregando...</div>
           </div>
@@ -335,7 +335,7 @@ async function renderDashboard(user) {
       listEl.innerHTML = counters.map(c => `
         <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.05);">
           <div><div style="font-weight:500;">${c.name}</div><div class="text-xs text-muted">${c.email}</div></div>
-          <button class="btn-icon" style="color:var(--danger);padding:4px;" data-del-c="${c.id}" title="Remover"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+          <button class="btn-icon" style="color:var(--red);padding:4px;" data-del-c="${c.id}" title="Remover"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
         </div>
       `).join('');
       listEl.querySelectorAll('[data-del-c]').forEach(btn => {
@@ -388,7 +388,7 @@ async function renderDashboard(user) {
         <div class="modal" style="max-width:440px;">
           <div class="modal-handle"></div>
           <div class="modal-title" style="display:flex;align-items:center;gap:8px;">
-            <svg width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg width="20" height="20" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             Webhook & Lembretes
           </div>
           <div class="gap-16">
@@ -401,7 +401,7 @@ async function renderDashboard(user) {
               <label class="form-label">Horário de Disparo</label>
               <div style="display:flex;gap:12px;align-items:center;">
                 <input id="wh-hour" type="number" class="form-input" min="0" max="23" value="${settings.reminder_whatsapp_hour}" style="text-align:center;font-weight:700;">
-                <span style="font-weight:800;color:var(--text-muted);font-size:1.2rem;">:</span>
+                <span style="font-weight:800;color:var(--ink-3);font-size:1.2rem;">:</span>
                 <input id="wh-min" type="number" class="form-input" min="0" max="59" value="${settings.reminder_whatsapp_minute}" style="text-align:center;font-weight:700;">
               </div>
             </div>
@@ -469,7 +469,7 @@ async function renderDashboard(user) {
         <div style="overflow-x:auto;">
           <table class="data-table" style="width:100%;border-collapse:collapse;">
             <thead>
-              <tr style="border-bottom:2px solid var(--border);background:var(--bg-secondary);">
+              <tr style="border-bottom:2px solid var(--line);background:var(--bg);">
                 <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:left;">Nome</th>
                 <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:left;">Email</th>
                 <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:left;">Escritório</th>
@@ -479,13 +479,13 @@ async function renderDashboard(user) {
             </thead>
             <tbody>
               ${filtered.map(u => `
-                <tr style="border-bottom:1px solid var(--border);">
+                <tr style="border-bottom:1px solid var(--line);">
                   <td style="padding:12px 16px;font-weight:600;">${u.name}</td>
                   <td style="padding:12px 16px;font-size:0.85rem;color:#64748b;">${u.email}</td>
                   <td style="padding:12px 16px;font-size:0.85rem;">${u.office_name || '<span class="text-muted">-</span>'}</td>
                   <td style="padding:12px 16px;text-align:center;font-weight:700;">${u.cnpj_count}</td>
                   <td style="padding:12px 16px;text-align:center;">
-                    <button class="btn btn-sm btn-toggle-user" data-uid="${u.id}" style="font-size:0.75rem;padding:4px 12px;border-radius:100px;border:1px solid ${u.is_active ? 'var(--success)' : 'var(--danger)'};background:${u.is_active ? 'var(--success-soft)' : 'var(--danger-soft)'};color:${u.is_active ? 'var(--success)' : 'var(--danger)'};font-weight:700;cursor:pointer;">
+                    <button class="btn btn-sm btn-toggle-user" data-uid="${u.id}" style="font-size:0.75rem;padding:4px 12px;border-radius:100px;border:1px solid ${u.is_active ? 'var(--green)' : 'var(--red)'};background:${u.is_active ? 'var(--green-soft)' : 'var(--red-soft)'};color:${u.is_active ? 'var(--green)' : 'var(--red)'};font-weight:700;cursor:pointer;">
                       ${u.is_active ? 'Ativo' : 'Inativo'}
                     </button>
                   </td>

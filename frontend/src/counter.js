@@ -111,7 +111,7 @@ async function renderDashboard(user) {
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
                     <span class="collapse-hide">Limites</span>
                 </button>
-                <button class="nav-item-side" id="btn-logout" style="color:var(--danger);">
+                <button class="nav-item-side" id="btn-logout" style="color:var(--red);">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                     <span class="collapse-hide">Sair</span>
                 </button>
@@ -131,26 +131,26 @@ async function renderDashboard(user) {
             </header>
             
             <!-- VIEW: DASHBOARD MESTRE -->
-            <div id="dashboard-view" style="display:flex; flex-direction:column; gap:32px; transition:var(--transition);">
+            <div id="dashboard-view" style="display:flex; flex-direction:column; gap:32px; transition:var(--ease);">
                 <header style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <h1 style="font-size:1.8rem; font-weight:800; color:#1e293b; margin-bottom:4px;">Olá, ${user.name.split(' ')[0]} 👋</h1>
                         <p style="color:#64748b;">Aqui está o resumo contábil do seu escritório.</p>
                     </div>
                     
-                    <div id="dashboard-period-picker" style="display:flex; gap:12px; background:white; padding:12px 20px; border-radius:16px; box-shadow:var(--shadow-sm); border:1px solid var(--border); align-items:center;">
+                    <div id="dashboard-period-picker" style="display:flex; gap:12px; background:white; padding:12px 20px; border-radius:16px; box-shadow:var(--shadow-1); border:1px solid var(--line); align-items:center;">
                         <span style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Período:</span>
                         <select id="dash-sel-month" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600; cursor:pointer;"></select>
-                        <div style="width:1px; height:20px; background:var(--border);"></div>
+                        <div style="width:1px; height:20px; background:var(--line);"></div>
                         <select id="dash-sel-year" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600; cursor:pointer;"></select>
                     </div>
                 </header>
 
                 <!-- Summary Cards Premium -->
             <div class="grid-stats" id="summary-container">
-                <div class="summary-card-v2 animate-up glass clickable-card active-card" data-filter="all" data-color="var(--accent)" style="--delay:0ms; cursor:pointer; border-color: var(--accent);">
+                <div class="summary-card-v2 animate-up glass clickable-card active-card" data-filter="all" data-color="var(--brand)" style="--delay:0ms; cursor:pointer; border-color: var(--brand);">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
-                        <div class="summary-icon-box" style="background:var(--accent-soft); color:var(--accent);">
+                        <div class="summary-icon-box" style="background:var(--brand-soft); color:var(--brand);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M3 7v14M21 7v14M12 3L2 7h20L12 3z"/></svg>
                         </div>
                     </div>
@@ -160,12 +160,12 @@ async function renderDashboard(user) {
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="delivered" data-color="var(--success)" style="--delay:100ms; cursor:pointer;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="delivered" data-color="var(--green)" style="--delay:100ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
-                        <div class="summary-icon-box" style="background:var(--success-soft); color:var(--success);">
+                        <div class="summary-icon-box" style="background:var(--green-soft); color:var(--green);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <div id="prog-delivered" style="font-size:0.75rem; font-weight:700; color:var(--success); background:var(--success-soft); padding:4px 10px; border-radius:100px;">0%</div>
+                        <div id="prog-delivered" style="font-size:0.75rem; font-weight:700; color:var(--green); background:var(--green-soft); padding:4px 10px; border-radius:100px;">0%</div>
                     </div>
                     <div>
                         <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Entregues</div>
@@ -173,12 +173,12 @@ async function renderDashboard(user) {
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="in_progress" data-color="var(--accent-2)" style="--delay:200ms; cursor:pointer;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="in_progress" data-color="#8b5cf6" style="--delay:200ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
-                        <div class="summary-icon-box" style="background:var(--accent-2-soft); color:var(--accent-2);">
+                        <div class="summary-icon-box" style="background:rgba(139,92,246,0.10); color:#8b5cf6;">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         </div>
-                        <div id="prog-in-progress" style="font-size:0.75rem; font-weight:700; color:var(--accent-2); background:var(--accent-2-soft); padding:4px 10px; border-radius:100px;">0%</div>
+                        <div id="prog-in-progress" style="font-size:0.75rem; font-weight:700; color:#8b5cf6; background:rgba(139,92,246,0.10); padding:4px 10px; border-radius:100px;">0%</div>
                     </div>
                     <div>
                         <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Em Digitação</div>
@@ -186,12 +186,12 @@ async function renderDashboard(user) {
                     </div>
                 </div>
 
-                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="pending" data-color="var(--danger)" style="--delay:300ms; cursor:pointer;">
+                <div class="summary-card-v2 animate-up glass clickable-card" data-filter="pending" data-color="var(--red)" style="--delay:300ms; cursor:pointer;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
-                        <div class="summary-icon-box" style="background:var(--danger-soft); color:var(--danger);">
+                        <div class="summary-icon-box" style="background:var(--red-soft); color:var(--red);">
                             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4M12 16h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0z"/></svg>
                         </div>
-                        <div id="prog-pending" style="font-size:0.75rem; font-weight:700; color:var(--danger); background:var(--danger-soft); padding:4px 10px; border-radius:100px;">0%</div>
+                        <div id="prog-pending" style="font-size:0.75rem; font-weight:700; color:var(--red); background:var(--red-soft); padding:4px 10px; border-radius:100px;">0%</div>
                     </div>
                     <div>
                         <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Pendente</div>
@@ -225,10 +225,10 @@ async function renderDashboard(user) {
             </div> <!-- Close dashboard-view -->
             
             <!-- VIEW: DETALHE COMPANHIA -->
-            <div id="company-detail-view" style="display:none; flex-direction:column; gap:32px; transition:var(--transition);">
+            <div id="company-detail-view" style="display:none; flex-direction:column; gap:32px; transition:var(--ease);">
                 <header style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="display:flex; align-items:center; gap:16px;">
-                        <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--border); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--transition);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='white'">
+                        <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--ease);" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                         </button>
                         <div>
@@ -237,23 +237,23 @@ async function renderDashboard(user) {
                         </div>
                     </div>
                     
-                    <div id="report-period-picker" style="display:flex; gap:12px; background:white; padding:8px 16px; border-radius:100px; box-shadow:var(--shadow-sm); border:1px solid var(--border);">
+                    <div id="report-period-picker" style="display:flex; gap:12px; background:white; padding:8px 16px; border-radius:100px; box-shadow:var(--shadow-1); border:1px solid var(--line);">
                         <select id="sel-month" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600;"></select>
-                        <div style="width:1px; height:20px; background:var(--border);"></div>
+                        <div style="width:1px; height:20px; background:var(--line);"></div>
                         <select id="sel-year" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600;"></select>
                     </div>
                 </header>
 
                 <!-- Tabs Navigation -->
-                <div style="display:flex; gap:8px; border-bottom:1px solid var(--border); padding-bottom:16px;">
-                    <button class="detail-tab active" data-tab="summary" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:var(--accent-soft); color:var(--accent); border:none; cursor:pointer;">Análise Comparativa</button>
-                    <button class="detail-tab" data-tab="list" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:transparent; color:#64748b; border:none; cursor:pointer; transition:var(--transition);">Transações Detalhadas</button>
+                <div style="display:flex; gap:8px; border-bottom:1px solid var(--line); padding-bottom:16px;">
+                    <button class="detail-tab active" data-tab="summary" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:var(--brand-soft); color:var(--brand); border:none; cursor:pointer;">Análise Comparativa</button>
+                    <button class="detail-tab" data-tab="list" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:transparent; color:#64748b; border:none; cursor:pointer; transition:var(--ease);">Transações Detalhadas</button>
                 </div>
 
                 <!-- Tab Content: Summary -->
                 <div id="tab-summary-content" style="flex:1; display:flex; flex-direction:column;">
                     <div id="report-content-body" class="animate-up" style="flex:1;">
-                        <div class="card glass" style="padding:48px; display:flex; flex-direction:column; align-items:center; gap:20px; border:2px dashed var(--border);">
+                        <div class="card glass" style="padding:48px; display:flex; flex-direction:column; align-items:center; gap:20px; border:2px dashed var(--line);">
                             <div class="skeleton" style="width:100%; height:400px; border-radius:24px;"></div>
                         </div>
                     </div>
@@ -262,13 +262,13 @@ async function renderDashboard(user) {
                 <!-- Tab Content: List (Individual Expenses) -->
                 <div id="tab-list-content" style="display:none;">
                     <div class="card glass" style="padding:0; overflow:hidden; border-radius:20px;">
-                        <div style="padding:20px 24px; border-bottom:1px solid var(--border); background:var(--bg-secondary); display:flex; justify-content:space-between; align-items:center;">
+                        <div style="padding:20px 24px; border-bottom:1px solid var(--line); background:var(--bg); display:flex; justify-content:space-between; align-items:center;">
                             <h3 style="font-size:0.95rem; font-weight:700; color:#1e293b; margin:0;">Extrato de Lançamentos</h3>
                         </div>
                         <div style="overflow-x:auto;">
                             <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
                                 <thead>
-                                    <tr style="border-bottom:1px solid var(--border); background:rgba(241, 245, 249, 0.5);">
+                                    <tr style="border-bottom:1px solid var(--line); background:rgba(241, 245, 249, 0.5);">
                                          <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Data</th>
                                         <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Descrição</th>
                                         <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
@@ -342,7 +342,7 @@ async function renderDashboard(user) {
             if (filtered.length === 0) {
                 container.innerHTML = `
                 <div class="empty-state animate-fade" style="padding:40px 20px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px;">
-                    <div style="width:64px; height:64px; border-radius:50%; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:#94a3b8;">
+                    <div style="width:64px; height:64px; border-radius:50%; background:var(--bg); display:flex; align-items:center; justify-content:center; color:#94a3b8;">
                         <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </div>
                     <div>
@@ -362,23 +362,23 @@ async function renderDashboard(user) {
             let statusColor = '#e2e8f0';
             let statusLabel = 'Não Iniciado';
             if (c.is_locked) {
-                statusColor = 'var(--success)';
+                statusColor = 'var(--green)';
                 statusLabel = 'Entregue';
             } else if (c.has_expenses) {
-                statusColor = 'var(--accent-2)';
+                statusColor = '#8b5cf6';
                 statusLabel = 'Em Digitação';
             }
 
             const lateCount = parseInt(c.late_expenses_count) || 0;
             const lateBadge = lateCount > 0 ? `
                 <div style="display:flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(245,158,11,0.12);border-radius:100px;margin-top:4px;">
-                    <svg width="12" height="12" fill="none" stroke="var(--warning)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    <span style="font-size:0.6rem;font-weight:700;color:var(--warning);">${lateCount} após envio</span>
+                    <svg width="12" height="12" fill="none" stroke="var(--amber)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span style="font-size:0.6rem;font-weight:700;color:var(--amber);">${lateCount} após envio</span>
                 </div>` : '';
 
             return `
-            <div class="expense-item clickable-company" data-id="${c.id}" style="display:flex; align-items:center; gap:16px; padding:16px; border-radius:16px; border:1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}; background:${isActive ? 'rgba(79, 156, 249, 0.05)' : 'white'}; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden;">
-                ${isActive ? '<div style="position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent);"></div>' : ''}
+            <div class="expense-item clickable-company" data-id="${c.id}" style="display:flex; align-items:center; gap:16px; padding:16px; border-radius:16px; border:1px solid ${isActive ? 'var(--brand)' : 'var(--line)'}; background:${isActive ? 'rgba(79, 156, 249, 0.05)' : 'white'}; cursor:pointer; transition:var(--ease); position:relative; overflow:hidden;">
+                ${isActive ? '<div style="position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--brand);"></div>' : ''}
                 <div style="width:44px; height:44px; background:#f1f5f9; color:#475569; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;">${initials}</div>
                 <div style="flex:1; min-width:0;">
                     <div style="font-weight:700; color:#1e293b; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.razao_social}</div>
@@ -467,43 +467,43 @@ async function renderDashboard(user) {
             container.innerHTML = `
                 <div class="card glass animate-fade" style="padding:0; border-radius:24px; overflow:hidden;">
                     <!-- Report Header -->
-                    <div style="background:linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); padding:32px 32px 24px; border-bottom:1px solid var(--border);">
+                    <div style="background:linear-gradient(135deg, var(--bg), var(--bg)); padding:32px 32px 24px; border-bottom:1px solid var(--line);">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <div>
                                 <div style="font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-                                    <svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 15v4a2 2 0 0 0 2 2h14v-4"/><path d="M3 15h18v-4H3v4z"/></svg>
+                                    <svg width="14" height="14" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 15v4a2 2 0 0 0 2 2h14v-4"/><path d="M3 15h18v-4H3v4z"/></svg>
                                     Total Despesas (${monthNames[document.getElementById('sel-month').value - 1]})
                                 </div>
                                 <div style="font-size:2rem; font-weight:800; color:#1e293b; letter-spacing:-0.5px;">R$ ${report.total_geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                             </div>
-                            <button class="btn btn-outline" id="btn-download-pdf" style="width:auto; border-radius:12px; padding:10px 16px; font-size:0.85rem; border-color:var(--border); color:var(--text-secondary); background:white;">
+                            <button class="btn btn-outline" id="btn-download-pdf" style="width:auto; border-radius:12px; padding:10px 16px; font-size:0.85rem; border-color:var(--line); color:var(--ink-2); background:white;">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 Exportar
                             </button>
                         </div>
                         
                         <div style="margin-top:24px; display:flex; gap:16px;">
-                            <div style="background:white; padding:12px 16px; border-radius:12px; border:1px solid var(--border); flex:1;">
+                            <div style="background:white; padding:12px 16px; border-radius:12px; border:1px solid var(--line); flex:1;">
                                 <div style="font-size:0.7rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Maior Despesa</div>
                                 <div style="font-size:0.95rem; font-weight:700; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${topCategory.name}">${topCategory.name}</div>
-                                <div style="font-size:0.85rem; color:var(--danger); font-weight:600; margin-top:2px;">R$ ${topCategory.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                                <div style="font-size:0.85rem; color:var(--red); font-weight:600; margin-top:2px;">R$ ${topCategory.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                             </div>
-                            <div style="background:white; padding:12px 16px; border-radius:12px; border:1px solid var(--border); width:140px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                            <div style="background:white; padding:12px 16px; border-radius:12px; border:1px solid var(--line); width:140px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
                                 <div style="font-size:0.7rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Lançamentos</div>
-                                <div style="font-size:1.4rem; font-weight:800; color:var(--accent);">${report.categories.reduce((acc, c) => acc + parseInt(c.lancamentos), 0)}</div>
+                                <div style="font-size:1.4rem; font-weight:800; color:var(--brand);">${report.categories.reduce((acc, c) => acc + parseInt(c.lancamentos), 0)}</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Report List -->
                     <div style="background:white; padding:0;">
-                         <div style="padding:24px 32px 16px; border-bottom:1px solid var(--border);">
+                         <div style="padding:24px 32px 16px; border-bottom:1px solid var(--line);">
                             <h3 style="font-size:0.85rem; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">Detalhamento por Categoria</h3>
                         </div>
                         <div style="overflow-x:auto;">
                             <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
                                 <thead>
-                                    <tr style="border-bottom:1px solid var(--border); background:rgba(241, 245, 249, 0.5);">
+                                    <tr style="border-bottom:1px solid var(--line); background:rgba(241, 245, 249, 0.5);">
                                         <th style="padding:16px 32px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
                                         <th style="padding:16px 32px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:center;">Lançamentos</th>
                                         <th style="padding:16px 32px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor (R$)</th>
@@ -511,16 +511,16 @@ async function renderDashboard(user) {
                                 </thead>
                                 <tbody>
                                     ${report.categories.map(c => `
-                                        <tr style="border-bottom:1px solid var(--border); transition:var(--transition);" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='transparent'">
+                                        <tr style="border-bottom:1px solid var(--line); transition:var(--ease);" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='transparent'">
                                             <td style="padding:20px 32px;">
                                                 <div style="display:flex; align-items:center; gap:12px;">
-                                                    <div style="width:36px; height:36px; border-radius:10px; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:#64748b;">
+                                                    <div style="width:36px; height:36px; border-radius:10px; background:var(--bg); display:flex; align-items:center; justify-content:center; color:#64748b;">
                                                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                                                     </div>
                                                     <div>
                                                         <div style="display:flex; align-items:center; gap:8px;">
                                                             <span style="font-weight:700; color:#1e293b; font-size:0.9rem;">${c.category_name}</span>
-                                                            ${c.is_filial ? '<span style="font-size:0.6rem; font-weight:700; background:var(--accent-2-soft); color:var(--accent-2); padding:2px 8px; border-radius:100px; text-transform:uppercase;">Filial</span>' : ''}
+                                                            ${c.is_filial ? '<span style="font-size:0.6rem; font-weight:700; background:rgba(139,92,246,0.10); color:#8b5cf6; padding:2px 8px; border-radius:100px; text-transform:uppercase;">Filial</span>' : ''}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -545,7 +545,7 @@ async function renderDashboard(user) {
             });
 
         } catch (e) { 
-            container.innerHTML = `<div class="card glass" style="padding:32px; color:var(--danger);">${e.message}</div>`;
+            container.innerHTML = `<div class="card glass" style="padding:32px; color:var(--red);">${e.message}</div>`;
         }
     }
 
@@ -572,9 +572,9 @@ async function renderDashboard(user) {
             }
 
             tbody.innerHTML = expenses.map(e => {
-                const lateBadge = e.is_late ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warning);margin-left:6px;" title="Adicionada após envio do relatório"></span>' : '';
+                const lateBadge = e.is_late ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-left:6px;" title="Adicionada após envio do relatório"></span>' : '';
                 return `
-                <tr style="border-bottom:1px solid var(--border); transition:var(--transition);${e.is_late ? 'background:rgba(245,158,11,0.04);' : ''}" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='${e.is_late ? 'rgba(245,158,11,0.04)' : 'transparent'}'}">
+                <tr style="border-bottom:1px solid var(--line); transition:var(--ease);${e.is_late ? 'background:rgba(245,158,11,0.04);' : ''}" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='${e.is_late ? 'rgba(245,158,11,0.04)' : 'transparent'}'}">
                     <td style="padding:16px 24px; font-size:0.85rem; color:#64748b; white-space:nowrap;">
                         ${e.expense_date ? new Date(e.expense_date).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-'}${lateBadge}
                     </td>
@@ -582,9 +582,9 @@ async function renderDashboard(user) {
                         <div style="font-weight:600; color:#1e293b; font-size:0.9rem;">${e.description || '-'}</div>
                     </td>
                     <td style="padding:16px 24px;">
-                        <div style="display:inline-flex; align-items:center; gap:6px; background:var(--bg-secondary); padding:4px 10px; border-radius:100px; font-size:0.75rem; font-weight:600; color:#475569;">
+                        <div style="display:inline-flex; align-items:center; gap:6px; background:var(--bg); padding:4px 10px; border-radius:100px; font-size:0.75rem; font-weight:600; color:#475569;">
                             ${e.category_name}
-                            ${e.is_filial ? '<span style="color:var(--accent-2); font-weight:800;">\u2022 Filial</span>' : ''}
+                            ${e.is_filial ? '<span style="color:#8b5cf6; font-weight:800;">\u2022 Filial</span>' : ''}
                         </div>
                     </td>
                     <td style="padding:16px 24px; text-align:right; font-weight:700; color:#1e293b; font-size:0.95rem;">
@@ -592,10 +592,10 @@ async function renderDashboard(user) {
                     </td>
                     <td style="padding:16px 24px; text-align:center;">
                         <div style="display:flex;gap:6px;justify-content:center;">
-                            <button class="btn-icon btn-edit-exp" data-id="${e.id}" data-amount="${e.amount}" data-desc="${e.description || ''}" data-date="${e.expense_date}" title="Editar" style="padding:6px;border-radius:8px;border:1px solid var(--border);background:white;color:var(--accent);cursor:pointer;">
+                            <button class="btn-icon btn-edit-exp" data-id="${e.id}" data-amount="${e.amount}" data-desc="${e.description || ''}" data-date="${e.expense_date}" title="Editar" style="padding:6px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--brand);cursor:pointer;">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
-                            <button class="btn-icon btn-del-exp" data-id="${e.id}" title="Excluir" style="padding:6px;border-radius:8px;border:1px solid var(--border);background:white;color:var(--danger);cursor:pointer;">
+                            <button class="btn-icon btn-del-exp" data-id="${e.id}" title="Excluir" style="padding:6px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--red);cursor:pointer;">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                             </button>
                         </div>
@@ -654,7 +654,7 @@ async function renderDashboard(user) {
             });
 
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="5" style="padding:24px; color:var(--danger); text-align:center;">${e.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="padding:24px; color:var(--red); text-align:center;">${e.message}</td></tr>`;
         }
     }
 
@@ -668,17 +668,17 @@ async function renderDashboard(user) {
                 <style>
                     .set-toggle { width:48px; height:24px; background:#cbd5e1; border-radius:34px; position:relative; cursor:pointer; transition:0.3s; }
                     .set-toggle::after { content:''; position:absolute; width:20px; height:20px; border-radius:50%; background:white; top:2px; left:2px; transition:0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
-                    .set-toggle.on { background:var(--accent); }
+                    .set-toggle.on { background:var(--brand); }
                     .set-toggle.on::after { transform:translateX(24px); }
                 </style>
             `;
             overlay.innerHTML = `
                 ${innerStyles}
-                <div class="modal animate-up" style="max-width:440px; border-radius:24px; padding:0; overflow:hidden; border:1px solid var(--border); box-shadow:var(--shadow-lg);">
+                <div class="modal animate-up" style="max-width:440px; border-radius:24px; padding:0; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow-3);">
                     
-                    <div style="background:linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); padding:24px 32px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+                    <div style="background:linear-gradient(135deg, var(--bg), var(--bg)); padding:24px 32px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between;">
                         <div style="display:flex; align-items:center; gap:12px;">
-                            <div style="width:40px; height:40px; border-radius:12px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center;">
+                            <div style="width:40px; height:40px; border-radius:12px; background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center;">
                                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             </div>
                             <div>
@@ -686,14 +686,14 @@ async function renderDashboard(user) {
                                 <p style="font-size:0.75rem; color:#64748b; margin:0; margin-top:2px;">Controle das automações de cobrança</p>
                             </div>
                         </div>
-                        <button id="btn-close-modal" style="background:var(--bg-secondary); width:32px; height:32px; border-radius:50%; border:1px solid var(--border); cursor:pointer; color:#64748b; display:flex; align-items:center; justify-content:center; transition:var(--transition);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+                        <button id="btn-close-modal" style="background:var(--bg); width:32px; height:32px; border-radius:50%; border:1px solid var(--line); cursor:pointer; color:#64748b; display:flex; align-items:center; justify-content:center; transition:var(--ease);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
                     </div>
                     
                     <div style="padding:32px;">
                         <div class="gap-24">
                             
                             <!-- Toggle Automação -->
-                            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--bg-secondary); border-radius:16px; border:1px solid var(--border);">
+                            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--bg); border-radius:16px; border:1px solid var(--line);">
                                 <div>
                                     <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">Automação de WhatsApp</div>
                                     <div style="font-size:0.75rem; color:#64748b; max-width:200px; line-height:1.4; margin-top:4px;">Ative para disparar cobranças automaticamente aos clientes pendentes.</div>
@@ -709,7 +709,7 @@ async function renderDashboard(user) {
                                 </label>
                                 <div style="display:flex; gap:12px; align-items:center;">
                                     <input id="set-hour" type="number" class="form-input" min="0" max="23" value="${settings.reminder_whatsapp_hour}" style="font-weight:700; font-size:1.1rem; text-align:center; padding:12px; border-radius:12px;">
-                                    <span style="font-weight:800; color:var(--text-muted); font-size:1.2rem;">:</span>
+                                    <span style="font-weight:800; color:var(--ink-3); font-size:1.2rem;">:</span>
                                     <input id="set-min" type="number" class="form-input" min="0" max="59" value="${settings.reminder_whatsapp_minute}" style="font-weight:700; font-size:1.1rem; text-align:center; padding:12px; border-radius:12px;">
                                 </div>
                             </div>
@@ -724,12 +724,12 @@ async function renderDashboard(user) {
                                 </div>
                                 <div style="display:flex; align-items:center; position:relative;">
                                     <input id="set-day-limit" type="number" class="form-input" min="1" max="10" value="${settings.reminder_max_business_day || 3}" style="padding-right:60px; font-weight:800; font-size:1.05rem; border-radius:12px;">
-                                    <div style="position:absolute; right:16px; font-size:0.75rem; font-weight:700; color:var(--accent); background:var(--accent-soft); padding:4px 8px; border-radius:6px; pointer-events:none;">º Dia</div>
+                                    <div style="position:absolute; right:16px; font-size:0.75rem; font-weight:700; color:var(--brand); background:var(--brand-soft); padding:4px 8px; border-radius:6px; pointer-events:none;">º Dia</div>
                                 </div>
                                 <p style="font-size:0.75rem; color:#64748b; line-height:1.4; margin-top:8px;">Após este dia limite, o sistema para de enviar avisos neste mês.</p>
                             </div>
 
-                            <button class="btn btn-primary" id="btn-save-settings" style="margin-top:32px; border-radius:14px; padding:14px; width:100%; font-size:1rem; box-shadow:0 8px 16px var(--accent-glow);">
+                            <button class="btn btn-primary" id="btn-save-settings" style="margin-top:32px; border-radius:14px; padding:14px; width:100%; font-size:1rem; box-shadow:0 8px 16px var(--brand-glow);">
                                 Salvar Preferências
                             </button>
                         </div>
@@ -790,8 +790,8 @@ async function renderDashboard(user) {
             });
             const target = e.target;
             target.classList.add('active');
-            target.style.background = 'var(--accent-soft)';
-            target.style.color = 'var(--accent)';
+            target.style.background = 'var(--brand-soft)';
+            target.style.color = 'var(--brand)';
             
             const tabId = target.dataset.tab;
             if (tabId === 'summary') {
@@ -876,7 +876,7 @@ async function renderDashboard(user) {
             });
             
             card.classList.add('active-card');
-            const themeColor = card.dataset.color || 'var(--accent)';
+            const themeColor = card.dataset.color || 'var(--brand)';
             card.style.borderColor = themeColor;
             card.style.boxShadow = `0 8px 25px -5px ${themeColor}20, 0 8px 10px -6px ${themeColor}10`;
             

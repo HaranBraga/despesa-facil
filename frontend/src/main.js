@@ -87,7 +87,7 @@ function renderShell(content, activeNav) {
         <header class="app-header">
           <button class="btn-ghost" id="btn-toggle-mobile-menu">${menuIcon}</button>
           <span class="logo">
-            <svg width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+            <svg width="24" height="24" fill="none" stroke="var(--brand)" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
             <span class="text-gradient">Despesa Fácil</span>
           </span>
           <button class="btn-icon" id="btn-logout" title="Sair" style="margin-left:auto;">${logoutIcon}</button>
@@ -169,7 +169,7 @@ function renderLogin() {
         </div>
         <button class="btn btn-primary" id="btn-login">Entrar</button>
         <p class="text-center text-sm text-muted mt-8">
-          Não tem conta? <a href="#" id="go-register" style="color:var(--accent)">Cadastre-se</a>
+          Não tem conta? <a href="#" id="go-register" style="color:var(--brand)">Cadastre-se</a>
         </p>
       </div>
     </div>
@@ -224,7 +224,7 @@ async function renderRegister() {
         </div>
         <button class="btn btn-primary" id="btn-register">Criar conta</button>
         <p class="text-center text-sm text-muted mt-8">
-          Já tem conta? <a href="#" id="go-login" style="color:var(--accent)">Entrar</a>
+          Já tem conta? <a href="#" id="go-login" style="color:var(--brand)">Entrar</a>
         </p>
       </div>
     </div>
@@ -287,7 +287,7 @@ async function renderDashboard() {
     const report = cnpjs_report;
     let headerHtml = dashboardContent(cnpjs, report, month, year);
     if (user_info.office_id) {
-       headerHtml = `<div class="card" style="margin-bottom:16px; background:var(--accent-2-subtle); border-color:var(--accent-2);"><p class="text-sm">Você é um contador. <a href="/counter.html" style="font-weight:bold; color:var(--accent-2)">Acesse o Painel do Contador aqui</a> para gerenciar todas as empresas do seu escritório.</p></div>` + headerHtml;
+       headerHtml = `<div class="card" style="margin-bottom:16px; background:var(--accent-2-subtle); border-color:#8b5cf6;"><p class="text-sm">Você é um contador. <a href="/counter.html" style="font-weight:bold; color:#8b5cf6">Acesse o Painel do Contador aqui</a> para gerenciar todas as empresas do seu escritório.</p></div>` + headerHtml;
     }
     renderShell(headerHtml, 'dashboard');
     setupDashboardEvents(cnpjs, report);
@@ -581,7 +581,7 @@ function renderExpenseList(expenses) {
     <div class="expense-item" data-id="${e.id}">
       <div class="expense-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
       <div class="expense-info">
-        <div class="expense-name">${e.category_name} ${e.locked ? '<span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal">(Travado)</span>' : ''}</div>
+        <div class="expense-name">${e.category_name} ${e.locked ? '<span style="font-size:0.75rem;color:var(--ink-3);font-weight:normal">(Travado)</span>' : ''}</div>
         <div class="expense-date">${e.description || formatDate(e.expense_date)}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
@@ -590,7 +590,7 @@ function renderExpenseList(expenses) {
           <button class="btn btn-danger btn-sm" data-del="${e.id}" style="display:flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
-        ` : `<span style="color:var(--text-muted)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>`}
+        ` : `<span style="color:var(--ink-3)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>`}
       </div>
     </div>
   `).join('');
@@ -645,21 +645,21 @@ async function loadRelatorio(cnpjs, month, year) {
   const report = await api.get(`/reports/monthly?cnpj_id=${selectedCnpjId}&month=${month}&year=${year}`);
 
   const sentBadge = report.report_sent_at
-    ? `<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--success-soft);border:1px solid var(--success);border-radius:var(--radius-md);margin-bottom:8px;">
-         <svg width="20" height="20" fill="none" stroke="var(--success)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    ? `<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--green-soft);border:1px solid var(--green);border-radius:var(--radius-md);margin-bottom:8px;">
+         <svg width="20" height="20" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
          <div>
-           <div style="font-weight:700;font-size:0.85rem;color:var(--success)">Relatório Enviado ✓</div>
-           <div style="font-size:0.75rem;color:var(--text-muted)">Enviado em ${new Date(report.report_sent_at).toLocaleDateString('pt-BR')} às ${new Date(report.report_sent_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>
+           <div style="font-weight:700;font-size:0.85rem;color:var(--green)">Relatório Enviado ✓</div>
+           <div style="font-size:0.75rem;color:var(--ink-3)">Enviado em ${new Date(report.report_sent_at).toLocaleDateString('pt-BR')} às ${new Date(report.report_sent_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>
          </div>
        </div>`
     : '';
 
   const sendBtnHtml = report.report_sent_at
-    ? `<button class="btn" id="btn-send-counter" disabled style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-muted);cursor:default;">
+    ? `<button class="btn" id="btn-send-counter" disabled style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;background:var(--bg);border:1px solid var(--line);color:var(--ink-3);cursor:default;">
          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
          Já Enviado
        </button>`
-    : `<button class="btn btn-primary" id="btn-send-counter" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;background:var(--success);border-color:var(--success);">
+    : `<button class="btn btn-primary" id="btn-send-counter" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;background:var(--green);border-color:var(--green);">
          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13"></path><path d="M22 2L15 22L11 13L2 9L22 2z"></path></svg>
          Enviar Relatório para Contador
        </button>`;
@@ -678,11 +678,11 @@ async function loadRelatorio(cnpjs, month, year) {
 
       <!-- Month/Year Picker -->
       <div class="period-nav" id="period-picker-toggle" style="cursor:pointer;position:relative;">
-        <svg width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <svg width="18" height="18" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span class="period-label">${MONTHS_FULL[month]} / ${year}</span>
-        <svg width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        <svg width="16" height="16" fill="none" stroke="var(--ink-3)" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
       </div>
-      <div id="month-picker-grid" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-md);">
+      <div id="month-picker-grid" style="display:none;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-2);">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <button class="period-nav-btn" id="picker-prev-year">‹</button>
           <span style="font-weight:700;font-size:1rem;" id="picker-year-label">${year}</span>
@@ -690,7 +690,7 @@ async function loadRelatorio(cnpjs, month, year) {
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="months-grid">
           ${MONTHS.slice(1).map((m, i) => `
-            <button class="month-pill ${i + 1 === month ? 'active' : ''}" data-m="${i + 1}" style="padding:10px 4px;border-radius:var(--radius-sm);border:1.5px solid ${i + 1 === month ? 'var(--accent)' : 'var(--border)'};background:${i + 1 === month ? 'var(--accent-soft)' : 'var(--bg-secondary)'};color:${i + 1 === month ? 'var(--accent)' : 'var(--text-secondary)'};font-weight:600;font-size:0.82rem;cursor:pointer;font-family:inherit;transition:var(--transition);">${m}</button>
+            <button class="month-pill ${i + 1 === month ? 'active' : ''}" data-m="${i + 1}" style="padding:10px 4px;border-radius:var(--radius-sm);border:1.5px solid ${i + 1 === month ? 'var(--brand)' : 'var(--line)'};background:${i + 1 === month ? 'var(--brand-soft)' : 'var(--bg)'};color:${i + 1 === month ? 'var(--brand)' : 'var(--ink-2)'};font-weight:600;font-size:0.82rem;cursor:pointer;font-family:inherit;transition:var(--ease);">${m}</button>
           `).join('')}
         </div>
       </div>
@@ -708,7 +708,7 @@ async function loadRelatorio(cnpjs, month, year) {
         <div class="section-title" style="margin-bottom:12px">Por categoria</div>
         ${report.categories.map(cat => `
           <div class="report-row">
-            <span class="report-cat-name">${cat.category_name}${cat.is_filial ? ' <span style="font-size:0.7rem;color:var(--accent-2)">(Filial)</span>' : ''}</span>
+            <span class="report-cat-name">${cat.category_name}${cat.is_filial ? ' <span style="font-size:0.7rem;color:#8b5cf6">(Filial)</span>' : ''}</span>
             <span class="report-amount ${parseFloat(cat.total) === 0 ? 'zero' : ''}">${formatCurrency(cat.total)}</span>
           </div>
         `).join('')}
@@ -803,7 +803,7 @@ function configHtml(cnpjs, categories, prefs) {
           ${cnpjs.length === 0 ? '<p class="text-muted text-sm">Nenhum CNPJ cadastrado</p>' :
       cnpjs.map(c => `
               <div class="expense-item">
-                <div class="expense-icon" style="background:var(--bg-secondary);color:var(--text-primary)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg></div>
+                <div class="expense-icon" style="background:var(--bg);color:var(--ink)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg></div>
                 <div class="expense-info">
                   <div class="expense-name">${c.razao_social}</div>
                   <div class="expense-date" style="font-family:monospace">${c.cnpj}</div>
@@ -835,7 +835,7 @@ function configHtml(cnpjs, categories, prefs) {
           </div>
           <div id="categorias-list" class="gap-8" style="margin-bottom:16px;">
             ${prefs.map((p, i) => `
-              <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;">
+              <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;">
                 <span style="flex:1;font-weight:600;font-size:0.95rem">${p.name}</span>
                 <button class="btn btn-danger btn-sm btn-del-pref" data-cat-id="${p.category_id}" style="padding:6px;border-radius:8px;" title="Apagar despesa">
                   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -919,7 +919,7 @@ async function setupConfigEvents(cnpjs, categories, prefs) {
     const newPrefs = await api.get(`/preferences/${selectedCnpjId}`).catch(() => []);
     const catList = document.getElementById('categorias-list');
     catList.innerHTML = newPrefs.map((p, i) => `
-      <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;">
+      <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;">
         <span style="flex:1;font-weight:600;font-size:0.95rem">${p.name}</span>
         <button class="btn btn-danger btn-sm btn-del-pref" data-cat-id="${p.category_id}" style="padding:6px;border-radius:8px;" title="Apagar despesa">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1084,8 +1084,8 @@ async function renderGuest({ token } = {}) {
       </div>`;
 
     const tabStyle = (active) => active
-      ? 'flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.9rem;'
-      : 'flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem;';
+      ? 'flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--brand),#8b5cf6);color:white;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.9rem;'
+      : 'flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg-card);color:var(--ink-2);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem;';
 
     function renderGuestHtml() {
       return `
@@ -1097,7 +1097,7 @@ async function renderGuest({ token } = {}) {
             </svg>
             <span class="text-gradient" style="font-size:1.3rem;font-weight:800">Despesa Fácil</span>
           </div>
-          <p style="color:var(--text-secondary);font-size:0.85rem;margin:0 0 20px">${razao_social} &mdash; <span style="font-family:monospace">${cnpj}</span></p>
+          <p style="color:var(--ink-2);font-size:0.85rem;margin:0 0 20px">${razao_social} &mdash; <span style="font-family:monospace">${cnpj}</span></p>
 
           <div class="form-group" style="margin-bottom:16px">
             <label class="form-label">Data do Lançamento</label>
@@ -1164,7 +1164,7 @@ async function renderGuest({ token } = {}) {
 
     mountGuest();
   } catch (e) {
-    app.innerHTML = `<div class="auth-page"><div class="auth-logo"><span class="text-gradient">Despesa Fácil</span></div><p class="auth-sub" style="color:var(--danger)">${e.message}</p></div>`;
+    app.innerHTML = `<div class="auth-page"><div class="auth-logo"><span class="text-gradient">Despesa Fácil</span></div><p class="auth-sub" style="color:var(--red)">${e.message}</p></div>`;
   }
 }
 
@@ -1227,9 +1227,9 @@ async function renderConta() {
           <p class="text-sm text-muted" style="margin:0 0 12px">Defina um número específico para cada empresa. Deixe em branco para usar o padrão da conta.</p>
           <div class="gap-12" id="cnpj-wpp-list">
             ${cnpjs.map(c => `
-              <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+              <div style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;">
                 <div style="font-weight:600;font-size:0.9rem">${c.razao_social}</div>
-                <div style="font-size:0.8rem;color:var(--text-muted);font-family:monospace">${c.cnpj}</div>
+                <div style="font-size:0.8rem;color:var(--ink-3);font-family:monospace">${c.cnpj}</div>
                 <input type="tel" class="form-input cnpj-wpp-input" data-cnpj-id="${c.id}" placeholder="5511999999999 (ou vazio para usar padrão)" value="${c.whatsapp_number || ''}" inputmode="numeric" />
                 <div style="display:flex;align-items:center;gap:8px;">
                   <button class="btn btn-outline btn-sm btn-save-cnpj-wpp" data-cnpj-id="${c.id}">Salvar</button>
