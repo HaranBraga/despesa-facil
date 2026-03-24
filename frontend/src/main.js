@@ -51,108 +51,75 @@ function navigate(page, params = {}) {
 // ---- App Shell ----
 function renderShell(content, activeNav) {
   const app = document.getElementById('app');
+  const navItems = [
+    { id: 'dashboard', label: 'Início', icon: '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>' },
+    { id: 'lancamento', label: 'Lançar Despesa', icon: '<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>' },
+    { id: 'historico', label: 'Histórico', icon: '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>' },
+    { id: 'relatorio', label: 'Relatório Mensal', icon: '<line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>' },
+    { id: 'config', label: 'Configurações', icon: '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>' }
+  ];
+
+  const sidebarNavHtml = navItems.map(n => `
+    <button class="nav-item-side ${activeNav === n.id ? 'active' : ''}" data-page="${n.id}">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${n.icon}</svg>
+      <span class="collapse-hide">${n.label}</span>
+    </button>
+  `).join('');
+
+  const walletIcon = '<svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>';
+  const logoutIcon = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>';
+  const menuIcon = '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+
   app.innerHTML = `
     <div class="app-shell">
-      <!-- Sidebar (Desktop) -->
-      <aside class="sidebar-main">
-        <div class="logo-container" style="display:flex;align-items:center;gap:12px;margin-bottom:32px;padding:0 12px;">
-          <div style="width:40px;height:40px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px var(--accent-glow);">
-            <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-              <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
-            </svg>
-          </div>
-          <span style="font-weight:800;font-size:1.2rem;color:white;letter-spacing:-0.5px;">Despesa Fácil</span>
+      <aside class="sidebar-main" id="sidebar-main">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">${walletIcon}</div>
+          <span class="sidebar-logo-text collapse-hide">Despesa Fácil</span>
         </div>
-        
-        <nav style="display:flex;flex-direction:column;gap:8px;flex:1;">
-          <button class="nav-item-side ${activeNav === 'dashboard' ? 'active' : ''}" data-page="dashboard">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            Início
-          </button>
-          <button class="nav-item-side ${activeNav === 'lancamento' ? 'active' : ''}" data-page="lancamento">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Lançar Despesa
-          </button>
-          <button class="nav-item-side ${activeNav === 'historico' ? 'active' : ''}" data-page="historico">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-            Histórico
-          </button>
-          <button class="nav-item-side ${activeNav === 'relatorio' ? 'active' : ''}" data-page="relatorio">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-            Relatório Mensal
-          </button>
-          <button class="nav-item-side ${activeNav === 'config' ? 'active' : ''}" data-page="config">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            Configurações
-          </button>
-        </nav>
-
-        <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);">
-          <button class="nav-item-side" id="btn-logout-side" style="color:rgba(255,255,255,0.5);">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-            Sair da Conta
-          </button>
+        <nav class="sidebar-nav">${sidebarNavHtml}</nav>
+        <div class="sidebar-footer">
+          <button class="nav-item-side" id="btn-logout-side">${logoutIcon} <span class="collapse-hide">Sair da Conta</span></button>
         </div>
       </aside>
-
-      <!-- Sidebar overlay for mobile -->
       <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-      <!-- Main Layout -->
-      <div style="display:flex; flex-direction:column; flex:1; min-width:0;">
+      <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
         <header class="app-header">
-          <button class="btn-icon" id="btn-toggle-mobile-menu" style="border:none;background:transparent;margin-right:8px;box-shadow:none;">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
-          <span class="logo" style="display:flex;align-items:center;gap:8px;">
-            <svg width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="2.5" viewBox="0 0 24 24">
-              <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
-            </svg>
+          <button class="btn-ghost" id="btn-toggle-mobile-menu">${menuIcon}</button>
+          <span class="logo">
+            <svg width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
             <span class="text-gradient">Despesa Fácil</span>
           </span>
-          <button class="btn-icon" id="btn-logout" title="Sair" style="margin-left:auto;">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          </button>
+          <button class="btn-icon" id="btn-logout" title="Sair" style="margin-left:auto;">${logoutIcon}</button>
         </header>
-        <main class="page-content page-enter">
-          ${content}
-        </main>
-        </main>
+        <main class="page-content page-enter">${content}</main>
       </div>
     </div>
   `;
-  
-  // Navigation Event Listeners
+
   document.querySelectorAll('[data-page]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelector('.sidebar-main').classList.remove('show');
-      document.getElementById('sidebar-overlay').classList.remove('show');
+      document.getElementById('sidebar-main')?.classList.remove('show');
+      document.getElementById('sidebar-overlay')?.classList.remove('show');
       navigate(btn.dataset.page);
     });
   });
 
-  const btnMobileMenu = document.getElementById('btn-toggle-mobile-menu');
-  if(btnMobileMenu) {
-    btnMobileMenu.addEventListener('click', () => {
-      document.querySelector('.sidebar-main').classList.add('show');
-      document.getElementById('sidebar-overlay').classList.add('show');
-    });
-  }
+  document.getElementById('btn-toggle-mobile-menu')?.addEventListener('click', () => {
+    document.getElementById('sidebar-main')?.classList.add('show');
+    document.getElementById('sidebar-overlay')?.classList.add('show');
+  });
 
-  const overlay = document.getElementById('sidebar-overlay');
-  if(overlay) {
-    overlay.addEventListener('click', () => {
-      document.querySelector('.sidebar-main').classList.remove('show');
-      overlay.classList.remove('show');
-    });
-  }
+  document.getElementById('sidebar-overlay')?.addEventListener('click', () => {
+    document.getElementById('sidebar-main')?.classList.remove('show');
+    document.getElementById('sidebar-overlay')?.classList.remove('show');
+  });
 
   const logoutFn = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     navigate('login');
   };
-
   document.getElementById('btn-logout')?.addEventListener('click', logoutFn);
   document.getElementById('btn-logout-side')?.addEventListener('click', logoutFn);
 }
@@ -445,15 +412,12 @@ function getMonthName(m) {
 
 function lancamentoHtml(cnpjs, categories, today, now) {
   const renderRow = (cat) => `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;">
-      <span style="flex:1;font-size:0.9rem;font-weight:500;color:var(--text-primary)">
-        ${cat.name}
-      </span>
-      <div style="position:relative">
-        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none">R$</span>
+    <div class="lancamento-row">
+      <span class="lancamento-cat-name">${cat.name}</span>
+      <div class="lancamento-amount-wrap">
+        <span class="lancamento-amount-prefix">R$</span>
         <input type="number" inputmode="decimal" step="0.01" min="0"
-          class="form-input amount-input" data-cat-id="${cat.category_id}"
-          style="width:120px;padding:8px 8px 8px 32px;font-size:1rem;text-align:right" placeholder="0,00" />
+          class="lancamento-amount-input" data-cat-id="${cat.category_id}" placeholder="0,00" />
       </div>
     </div>
   `;
@@ -497,11 +461,11 @@ function setupLancamentoEvents(cnpjs, categories, now) {
       return;
     }
     grid.innerHTML = cats.map(cat => `
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;">
-        <span style="flex:1;font-size:0.9rem;font-weight:500;color:var(--text-primary)">${cat.name}</span>
-        <div style="position:relative">
-          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none">R$</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" class="form-input amount-input" data-cat-id="${cat.category_id}" style="width:120px;padding:8px 8px 8px 32px;font-size:1rem;text-align:right" placeholder="0,00" />
+      <div class="lancamento-row">
+        <span class="lancamento-cat-name">${cat.name}</span>
+        <div class="lancamento-amount-wrap">
+          <span class="lancamento-amount-prefix">R$</span>
+          <input type="number" inputmode="decimal" step="0.01" min="0" class="lancamento-amount-input" data-cat-id="${cat.category_id}" placeholder="0,00" />
         </div>
       </div>`).join('');
   };
@@ -839,7 +803,7 @@ function configHtml(cnpjs, categories, prefs) {
           ${cnpjs.length === 0 ? '<p class="text-muted text-sm">Nenhum CNPJ cadastrado</p>' :
       cnpjs.map(c => `
               <div class="expense-item">
-                <div class="expense-icon" style="background:var(--bg-app);color:var(--text-primary)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg></div>
+                <div class="expense-icon" style="background:var(--bg-secondary);color:var(--text-primary)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg></div>
                 <div class="expense-info">
                   <div class="expense-name">${c.razao_social}</div>
                   <div class="expense-date" style="font-family:monospace">${c.cnpj}</div>
@@ -871,7 +835,7 @@ function configHtml(cnpjs, categories, prefs) {
           </div>
           <div id="categorias-list" class="gap-8" style="margin-bottom:16px;">
             ${prefs.map((p, i) => `
-              <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-app);border:1px solid var(--border);border-radius:12px;">
+              <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;">
                 <span style="flex:1;font-weight:600;font-size:0.95rem">${p.name}</span>
                 <button class="btn btn-danger btn-sm btn-del-pref" data-cat-id="${p.category_id}" style="padding:6px;border-radius:8px;" title="Apagar despesa">
                   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -955,7 +919,7 @@ async function setupConfigEvents(cnpjs, categories, prefs) {
     const newPrefs = await api.get(`/preferences/${selectedCnpjId}`).catch(() => []);
     const catList = document.getElementById('categorias-list');
     catList.innerHTML = newPrefs.map((p, i) => `
-      <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-app);border:1px solid var(--border);border-radius:12px;">
+      <div class="pref-item" data-id="${p.category_id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;">
         <span style="flex:1;font-weight:600;font-size:0.95rem">${p.name}</span>
         <button class="btn btn-danger btn-sm btn-del-pref" data-cat-id="${p.category_id}" style="padding:6px;border-radius:8px;" title="Apagar despesa">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1111,12 +1075,11 @@ async function renderGuest({ token } = {}) {
     const today = new Date().toLocaleDateString('sv');
 
     const renderRow = (cat) => `
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;">
-        <span style="flex:1;font-size:0.9rem;font-weight:500;color:var(--text-primary)">${cat.name}</span>
-        <div style="position:relative">
-          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none">R$</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" class="form-input amount-input" data-cat-id="${cat.id}"
-            style="width:120px;padding:8px 8px 8px 32px;font-size:1rem;text-align:right" placeholder="0,00" />
+      <div class="lancamento-row">
+        <span class="lancamento-cat-name">${cat.name}</span>
+        <div class="lancamento-amount-wrap">
+          <span class="lancamento-amount-prefix">R$</span>
+          <input type="number" inputmode="decimal" step="0.01" min="0" class="lancamento-amount-input" data-cat-id="${cat.id}" placeholder="0,00" />
         </div>
       </div>`;
 
@@ -1264,7 +1227,7 @@ async function renderConta() {
           <p class="text-sm text-muted" style="margin:0 0 12px">Defina um número específico para cada empresa. Deixe em branco para usar o padrão da conta.</p>
           <div class="gap-12" id="cnpj-wpp-list">
             ${cnpjs.map(c => `
-              <div style="background:var(--bg-app);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+              <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;">
                 <div style="font-weight:600;font-size:0.9rem">${c.razao_social}</div>
                 <div style="font-size:0.8rem;color:var(--text-muted);font-family:monospace">${c.cnpj}</div>
                 <input type="tel" class="form-input cnpj-wpp-input" data-cnpj-id="${c.id}" placeholder="5511999999999 (ou vazio para usar padrão)" value="${c.whatsapp_number || ''}" inputmode="numeric" />

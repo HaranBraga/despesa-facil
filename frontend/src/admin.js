@@ -103,65 +103,65 @@ async function renderDashboard(user) {
 
   document.getElementById('app').innerHTML = `
     <div class="app-shell">
-      <!-- Sidebar -->
       <aside id="sidebar-main" class="sidebar-main">
-        <div class="logo-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:24px;">
-          <div class="logo" style="display:flex;align-items:center;gap:12px;overflow:hidden;">
-            <div style="width:40px;height:40px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px var(--accent-glow);flex-shrink:0;">
+        <div class="sidebar-logo" style="justify-content:space-between;width:100;">
+          <div style="display:flex;align-items:center;gap:12px;overflow:hidden;">
+            <div class="sidebar-logo-icon">
               <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
               </svg>
             </div>
-            <div class="logo-text collapse-hide">
-              <div style="font-weight:800;font-size:1.1rem;line-height:1;white-space:nowrap;color:white;">Despesa Fácil</div>
-              <div style="font-size:0.7rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Admin</div>
+            <div class="collapse-hide">
+              <div class="sidebar-logo-text">Despesa Fácil</div>
+              <div class="sidebar-logo-badge">Admin</div>
             </div>
           </div>
-          <button id="btn-toggle-sidebar" style="background:none;border:none;color:white;cursor:pointer;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:var(--transition);flex-shrink:0;">
+          <button id="btn-toggle-sidebar" class="btn-sidebar-toggle">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
         </div>
 
-        <nav style="display:flex;flex-direction:column;gap:8px;flex:1;">
+        <nav class="sidebar-nav">
           <button class="nav-item-side active" data-tab="dashboard">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-            <span class="collapse-hide nav-label">Dashboard</span>
+            <span class="collapse-hide">Dashboard</span>
           </button>
           <button class="nav-item-side" data-tab="offices">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <span class="collapse-hide nav-label">Escritórios</span>
+            <span class="collapse-hide">Escritórios</span>
           </button>
           <button class="nav-item-side" data-tab="users">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            <span class="collapse-hide nav-label">Usuários</span>
+            <span class="collapse-hide">Usuários</span>
           </button>
         </nav>
 
-        <div style="margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">
-          <button class="nav-item-side" id="btn-logout-sidebar" style="color:rgba(255,255,255,0.5);">
+        <div class="sidebar-footer">
+          <button class="nav-item-side" id="btn-logout-sidebar">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span class="collapse-hide nav-label">Sair</span>
+            <span class="collapse-hide">Sair</span>
           </button>
         </div>
       </aside>
 
-      <!-- Sidebar overlay for mobile -->
       <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-      <!-- Main Content -->
-      <div style="display:flex; flex-direction:column; flex:1; min-width:0;">
-        <header class="app-header" style="padding:16px; margin-bottom:16px; border-radius:16px; background:var(--bg-card); display:flex; align-items:center;">
-            <button class="btn-icon" id="btn-toggle-mobile-menu" style="border:none;background:transparent;">
-                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            </button>
+      <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
+        <header class="app-header">
+          <button class="btn-ghost" id="btn-toggle-mobile-menu">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <span class="logo">
+            <span class="text-gradient" style="font-weight:800;">Admin HQ</span>
+          </span>
         </header>
-        <main id="admin-main" class="page-content" style="padding:16px 40px;">
-        <div class="card" style="background:linear-gradient(135deg, rgba(79,156,249,0.1), rgba(124,58,237,0.1)); border-color:rgba(124,58,237,0.2); margin-bottom:24px;">
-          <p style="margin:0;font-weight:600;color:var(--text-primary)">Olá, ${user.name}</p>
-          <p class="text-sm text-muted" style="margin-top:4px;">Gerencie escritórios, contadores e usuários da plataforma.</p>
-        </div>
-        <div id="tab-content"></div>
-      </main>
+        <main id="admin-main" class="page-content">
+          <div class="card" style="background:linear-gradient(135deg, rgba(79,156,249,0.08), rgba(124,58,237,0.08)); border-color:rgba(124,58,237,0.15); margin-bottom:24px;">
+            <p style="margin:0;font-weight:600;color:var(--text-primary)">Olá, ${user.name}</p>
+            <p class="text-sm text-muted mt-4">Gerencie escritórios, contadores e usuários da plataforma.</p>
+          </div>
+          <div id="tab-content"></div>
+        </main>
       </div>
     </div>
   `;

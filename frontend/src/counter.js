@@ -74,41 +74,39 @@ async function renderDashboard(user) {
 
     document.getElementById('app').innerHTML = `
     <div class="app-shell">
-        <!-- Sidebar Premium -->
         <aside id="sidebar-main" class="sidebar-main">
-             <div class="logo-container" style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom: 24px;">
-                <div class="logo" style="display:flex; align-items:center; gap:12px; overflow:hidden;">
-                    <div style="width:40px; height:40px; background:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px var(--accent-glow); flex-shrink:0;">
+            <div class="sidebar-logo" style="justify-content:space-between;width:100%;">
+                <div style="display:flex;align-items:center;gap:12px;overflow:hidden;">
+                    <div class="sidebar-logo-icon">
                          <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
                             <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
                         </svg>
                     </div>
-                    <div class="logo-text collapse-hide">
-                        <div style="font-weight:800; font-size:1.1rem; line-height:1; white-space:nowrap; color: white;">Despesa Fácil</div>
-                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:4px;">Contador</div>
+                    <div class="collapse-hide">
+                        <div class="sidebar-logo-text">Despesa Fácil</div>
+                        <div class="sidebar-logo-badge">Contador</div>
                     </div>
                 </div>
-                <button id="btn-toggle-sidebar" style="background:none; border:none; color:white; cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center; transition:var(--transition); flex-shrink:0;">
+                <button id="btn-toggle-sidebar" class="btn-sidebar-toggle">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
             </div>
 
-            <nav style="display:flex; flex-direction:column; gap:8px; flex:1;">
+            <nav class="sidebar-nav">
                 <button class="nav-item-side active">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                     <span class="collapse-hide">Dashboard</span>
                 </button>
             </nav>
 
-            <div style="margin-top:auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:8px;">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-                    <div style="width:36px; height:36px; background:var(--accent-2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; color: white;">${user.name.charAt(0)}</div>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-avatar">${user.name.charAt(0)}</div>
                     <div class="collapse-hide" style="min-width:0;">
-                        <div style="font-weight:600; font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: white;">${user.name}</div>
-                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); white-space:nowrap;">Escritório Ativo</div>
+                        <div class="sidebar-user-name">${user.name}</div>
+                        <div class="sidebar-user-role">Escritório Ativo</div>
                     </div>
                 </div>
-            <div style="margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,0.1);">
                 <button class="nav-item-side" id="btn-settings">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
                     <span class="collapse-hide">Limites</span>
@@ -125,12 +123,11 @@ async function renderDashboard(user) {
 
         <!-- Main Content -->
         <main class="page-content" id="main-content">
-            
-            <!-- Mobile Header for Hamburger Toggle -->
-            <header class="app-header" style="padding:16px; margin-bottom:16px; border-radius:16px; background:var(--bg-card); display:flex; align-items:center;">
-                <button class="btn-icon" id="btn-toggle-mobile-menu" style="border:none;background:transparent;">
+            <header class="app-header">
+                <button class="btn-ghost" id="btn-toggle-mobile-menu">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
+                <span class="logo"><span class="text-gradient" style="font-weight:800;">Painel do Contador</span></span>
             </header>
             
             <!-- VIEW: DASHBOARD MESTRE -->
@@ -150,20 +147,7 @@ async function renderDashboard(user) {
                 </header>
 
                 <!-- Summary Cards Premium -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;" id="summary-container">
-                <style>
-                    .clickable-card {
-                        border: 2px solid transparent;
-                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    }
-                    .clickable-card:hover {
-                        transform: translateY(-2px);
-                        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-                    }
-                    .clickable-card.active-card {
-                        transform: translateY(-2px);
-                    }
-                </style>
+            <div class="grid-stats" id="summary-container">
                 <div class="summary-card-v2 animate-up glass clickable-card active-card" data-filter="all" data-color="var(--accent)" style="--delay:0ms; cursor:pointer; border-color: var(--accent);">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="summary-icon-box" style="background:var(--accent-soft); color:var(--accent);">
