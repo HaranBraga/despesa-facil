@@ -65,7 +65,7 @@ function renderLogin() {
         <svg width="32" height="32" fill="none" stroke="var(--brand)" stroke-width="2.5" viewBox="0 0 24 24">
           <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
         </svg>
-        <span class="text-gradient">Admin HQ</span>
+        <span class="text-gradient">Admin</span>
       </div>
       <p class="auth-sub">Acesso restrito a administradores</p>
       <div class="card auth-card gap-16">
@@ -152,7 +152,7 @@ async function renderDashboard(user) {
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
           <span class="logo">
-            <span class="text-gradient" style="font-weight:800;">Admin HQ</span>
+            <span class="text-gradient" style="font-weight:800;">Admin</span>
           </span>
         </header>
         <main id="admin-main" class="page-content">
@@ -162,6 +162,20 @@ async function renderDashboard(user) {
           </div>
           <div id="tab-content"></div>
         </main>
+        <nav class="bottom-nav">
+          <button class="nav-item active" data-tab="dashboard">
+            <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
+            <span class="nav-label">Início</span>
+          </button>
+          <button class="nav-item" data-tab="offices">
+            <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+            <span class="nav-label">Escritórios</span>
+          </button>
+          <button class="nav-item" data-tab="users">
+            <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <span class="nav-label">Usuários</span>
+          </button>
+        </nav>
       </div>
     </div>
   `;
@@ -169,9 +183,10 @@ async function renderDashboard(user) {
   // Sidebar navigation
   document.querySelectorAll('[data-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
       document.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentTab = btn.dataset.tab;
+      document.querySelectorAll(`[data-tab="${tab}"]`).forEach(b => b.classList.add('active'));
+      currentTab = tab;
       loadTab(currentTab);
     });
   });

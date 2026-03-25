@@ -17,7 +17,7 @@ const api = {
         const data = await res.json().catch(() => ({}));
         if (res.status === 401) {
             localStorage.removeItem('token');
-            window.location.href = '/admin.html'; // Redirect to login in admin.html
+            renderLogin();
             throw new Error('Sessão expirada.');
         }
         if (!res.ok) throw new Error(data.error || 'Erro na requisição');
@@ -37,11 +37,51 @@ function showToast(msg, type = '') {
     setTimeout(() => el.classList.remove('show'), 3000);
 }
 
+// ---- Login ----
+function renderLogin() {
+    document.getElementById('app').innerHTML = `
+        <div class="auth-page">
+            <div class="auth-logo" style="display:flex;align-items:center;justify-content:center;gap:12px;">
+                <svg width="32" height="32" fill="none" stroke="var(--brand)" stroke-width="2.5" viewBox="0 0 24 24">
+                    <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
+                </svg>
+                <span class="text-gradient">Despesa Fácil</span>
+            </div>
+            <p class="auth-sub">Área do Contador</p>
+            <div class="card auth-card gap-16">
+                <div class="form-group">
+                    <label class="form-label">E-mail</label>
+                    <input id="l-email" type="email" class="form-input" placeholder="contador@escritorio.com" inputmode="email" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input id="l-pass" type="password" class="form-input" placeholder="••••••" />
+                </div>
+                <button class="btn btn-primary" id="btn-login">Entrar</button>
+                <p class="text-center text-xs text-muted mt-8">Conta criada pelo seu escritório de contabilidade</p>
+            </div>
+        </div>
+    `;
+    document.getElementById('btn-login').addEventListener('click', async () => {
+        const email = document.getElementById('l-email').value.trim();
+        const password = document.getElementById('l-pass').value;
+        if (!email || !password) return showToast('Preencha todos os campos', 'error');
+        try {
+            const data = await api.post('/auth/login', { email, password });
+            if (!data.user.office_id && !data.user.is_admin) throw new Error('Acesso negado. Usuário não é um contador.');
+            localStorage.setItem('token', data.token);
+            render();
+        } catch (e) { showToast(e.message, 'error'); }
+    });
+    document.getElementById('l-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('l-pass').focus(); });
+    document.getElementById('l-pass').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-login').click(); });
+}
+
 // ---- Render ----
 async function render() {
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = '/admin.html';
+        renderLogin();
         return;
     }
 
@@ -56,7 +96,7 @@ async function render() {
         renderDashboard(me);
     } catch (e) {
         if (e.message) showToast(e.message, 'error');
-        window.location.href = '/admin.html';
+        renderLogin();
     }
 }
 
@@ -286,6 +326,20 @@ async function renderDashboard(user) {
                 </div>
             </div>
         </main>
+        <nav class="bottom-nav" id="counter-bottom-nav">
+            <button class="nav-item active" id="bn-dashboard">
+                <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
+                <span class="nav-label">Dashboard</span>
+            </button>
+            <button class="nav-item" id="bn-settings">
+                <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+                <span class="nav-label">Configurações</span>
+            </button>
+            <button class="nav-item" id="bn-logout" style="color:var(--red);">
+                <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+                <span class="nav-label">Sair</span>
+            </button>
+        </nav>
     </div>
     `;
 
@@ -770,10 +824,24 @@ async function renderDashboard(user) {
 
     document.getElementById('btn-logout').addEventListener('click', () => {
         localStorage.removeItem('token');
-        window.location.href = '/admin.html';
+        renderLogin();
     });
 
     document.getElementById('btn-settings').addEventListener('click', showSettingsModal);
+
+    // Bottom nav
+    document.getElementById('bn-dashboard')?.addEventListener('click', () => {
+        document.getElementById('dashboard-view').style.display = 'flex';
+        document.getElementById('company-detail-view').style.display = 'none';
+        selectedCompanyId = null;
+        document.querySelectorAll('#counter-bottom-nav .nav-item').forEach(b => b.classList.remove('active'));
+        document.getElementById('bn-dashboard').classList.add('active');
+    });
+    document.getElementById('bn-settings')?.addEventListener('click', showSettingsModal);
+    document.getElementById('bn-logout')?.addEventListener('click', () => {
+        localStorage.removeItem('token');
+        renderLogin();
+    });
     
     document.getElementById('sel-month').addEventListener('change', () => { loadReport(); loadIndividualExpenses(); });
     document.getElementById('sel-year').addEventListener('change', () => { loadReport(); loadIndividualExpenses(); });
