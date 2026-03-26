@@ -478,10 +478,52 @@ body {
   font-family: var(--font);
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(79,70,229,0.45);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.25s ease;
 }
 .fab-lancar:active { transform: scale(0.95); }
 .fab-lancar span { white-space: nowrap; }
+
+/* === MINI CALENDAR (Histórico) === */
+.mini-cal { user-select:none; }
+.mini-cal-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:4px 0; margin-bottom:8px;
+}
+.mini-cal-header button {
+  background:var(--bg); border:1px solid var(--line); border-radius:10px;
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--ink-2); transition:var(--ease);
+}
+.mini-cal-header button:hover { background:var(--bg-hover); }
+.mini-cal-header .cal-month-label { font-weight:700; font-size:0.92rem; color:var(--ink-1); text-transform:capitalize; }
+.mini-cal-weekdays {
+  display:grid; grid-template-columns:repeat(7,1fr);
+  text-align:center; font-size:0.7rem; font-weight:700;
+  color:var(--ink-3); text-transform:uppercase; margin-bottom:4px; letter-spacing:0.05em;
+}
+.mini-cal-days {
+  display:grid; grid-template-columns:repeat(7,1fr); gap:4px;
+}
+.mini-cal-days .cal-day {
+  aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+  font-size:0.82rem; font-weight:500; border-radius:10px;
+  color:var(--ink-3); cursor:default; transition:var(--ease);
+}
+.mini-cal-days .cal-day.has-expense {
+  background:var(--brand-soft); color:var(--brand); font-weight:700;
+  cursor:pointer; border:1.5px solid transparent;
+}
+.mini-cal-days .cal-day.has-expense:hover {
+  background:var(--brand); color:#fff;
+}
+.mini-cal-days .cal-day.selected {
+  background:var(--brand); color:#fff; font-weight:700;
+  box-shadow:0 2px 8px var(--brand-glow);
+}
+.mini-cal-days .cal-day.today {
+  border:1.5px solid var(--brand-light);
+}
+.mini-cal-days .cal-day.other-month { opacity:0.25; }
 
 /* === UTILITIES === */
 .gap-4  { display:flex; flex-direction:column; gap:4px; }

@@ -13,6 +13,29 @@ async function verifyCnpjOwner(cnpjId, userId) {
     return r.rows.length > 0;
 }
 
+// GET /expenses/dates?cnpj_id=&month=&year= — datas com lançamentos
+router.get('/dates', auth, async (req, res) => {
+    try {
+        const { cnpj_id, month, year } = req.query;
+        if (!cnpj_id) return res.status(400).json({ error: 'cnpj_id é obrigatório' });
+        if (!(await verifyCnpjOwner(cnpj_id, req.user.id))) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        let query = `SELECT DISTINCT expense_date FROM expenses WHERE cnpj_id = $1`;
+        const params = [cnpj_id];
+        if (month && year) {
+            params.push(parseInt(month), parseInt(year));
+            query += ` AND period_month = $${params.length - 1} AND period_year = $${params.length}`;
+        }
+        query += ` ORDER BY expense_date DESC`;
+        const result = await pool.query(query, params);
+        res.json(result.rows.map(r => r.expense_date));
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao buscar datas' });
+    }
+});
+
 // GET /expenses?cnpj_id=&date=&month=&year=&tipo=
 router.get('/', auth, async (req, res) => {
     try {

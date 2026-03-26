@@ -311,6 +311,12 @@ async function renderDashboard(user) {
                         <div id="report-categories-mini" style="margin-top:12px; display:none; padding-top:12px; border-top:1px solid rgba(99,102,241,0.1);"></div>
                     </div>
 
+                    <!-- Export button -->
+                    <button id="btn-export-xlsx" class="btn btn-outline btn-sm" style="align-self:flex-end; display:flex; align-items:center; gap:6px; padding:8px 14px;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Exportar XLSX
+                    </button>
+
                     <!-- Expense table -->
                     <div class="card" style="padding:0; overflow:hidden; border-radius:16px;">
                         <div style="padding:14px 16px; border-bottom:1px solid var(--line); background:var(--bg);">
@@ -508,6 +514,31 @@ async function renderDashboard(user) {
         generateMonthPills();
         loadReport();
         loadIndividualExpenses();
+
+        // Export XLSX
+        document.getElementById('btn-export-xlsx').onclick = async () => {
+            const month = document.getElementById('sel-month')?.value;
+            const year = document.getElementById('sel-year')?.value;
+            if (!month || !year) return showToast('Selecione um período', 'error');
+            const btn = document.getElementById('btn-export-xlsx');
+            btn.disabled = true; btn.textContent = 'Exportando...';
+            try {
+                const token = localStorage.getItem('counter_token');
+                const res = await fetch(`${API_URL}/counter/export?cnpj_id=${selectedCompanyId}&month=${month}&year=${year}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Erro ao exportar');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = res.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1] || `relatorio_${month}_${year}.xlsx`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('Exportado!', 'success');
+            } catch (e) { showToast(e.message, 'error'); }
+            btn.disabled = false; btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar XLSX';
+        };
     }
 
     async function loadContaTab() {

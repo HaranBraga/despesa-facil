@@ -579,9 +579,17 @@ function setupLancamentoEvents(cnpjs, categories, now) {
   });
 
   // FAB aciona o mesmo submit
-  document.getElementById('fab-lancar')?.addEventListener('click', () => {
-    document.getElementById('btn-salvar-lancamento')?.click();
-  });
+  const fabEl = document.getElementById('fab-lancar');
+  const inlineBtn = document.getElementById('btn-salvar-lancamento');
+  if (fabEl && inlineBtn) {
+    fabEl.addEventListener('click', () => inlineBtn.click());
+    // Hide FAB when inline button is visible
+    const observer = new IntersectionObserver(([entry]) => {
+      fabEl.style.opacity = entry.isIntersecting ? '0' : '1';
+      fabEl.style.pointerEvents = entry.isIntersecting ? 'none' : 'auto';
+    }, { threshold: 0.3 });
+    observer.observe(inlineBtn);
+  }
 }
 
 // ================= HISTÓRICO =================
@@ -592,17 +600,66 @@ async function renderHistorico() {
     if (cnpjs.length === 0) { renderShell(dashboardEmpty(), 'historico'); return; }
     if (!selectedCnpjId) selectedCnpjId = cnpjs[0].id;
 
-    const today = new Date().toLocaleDateString('sv');
-    const expenses = await api.get(`/expenses?cnpj_id=${selectedCnpjId}&date=${today}`);
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    const today = now.toLocaleDateString('sv');
 
-    renderShell(historicoHtml(cnpjs, expenses, today), 'historico');
-    setupHistoricoEvents(cnpjs, today);
+    const [expenses, expDates] = await Promise.all([
+      api.get(`/expenses?cnpj_id=${selectedCnpjId}&date=${today}`),
+      api.get(`/expenses/dates?cnpj_id=${selectedCnpjId}&month=${month}&year=${year}`).catch(() => [])
+    ]);
+
+    renderShell(historicoHtml(cnpjs, expenses, today, month, year, expDates), 'historico');
+    setupHistoricoEvents(cnpjs, today, month, year, expDates);
   } catch (e) {
     showToast(e.message, 'error');
   }
 }
 
-function historicoHtml(cnpjs, expenses, date) {
+function buildMiniCal(month, year, expDates, selectedDate) {
+  const WEEKDAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const today = new Date().toLocaleDateString('sv');
+
+  // Normalize expense dates to YYYY-MM-DD strings
+  const dateSet = new Set((expDates || []).map(d => {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('sv');
+  }));
+
+  const firstDay = new Date(year, month - 1, 1);
+  const startDay = firstDay.getDay(); // 0=Sun
+  const daysInMonth = new Date(year, month, 0).getDate();
+
+  let daysHtml = '';
+  // Empty slots before first day
+  for (let i = 0; i < startDay; i++) {
+    daysHtml += `<div class="cal-day other-month"></div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasExp = dateSet.has(dateStr);
+    const isToday = dateStr === today;
+    const isSelected = dateStr === selectedDate;
+    const classes = ['cal-day', hasExp && 'has-expense', isToday && 'today', isSelected && 'selected'].filter(Boolean).join(' ');
+    daysHtml += `<div class="${classes}" ${hasExp ? `data-date="${dateStr}"` : ''}>${d}</div>`;
+  }
+
+  return `
+    <div class="mini-cal card" style="padding:16px;">
+      <div class="mini-cal-header">
+        <button id="cal-prev" type="button"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+        <span class="cal-month-label">${MONTHS[month - 1]} ${year}</span>
+        <button id="cal-next" type="button"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+      </div>
+      <div class="mini-cal-weekdays">${WEEKDAYS.map(w => `<div>${w}</div>`).join('')}</div>
+      <div class="mini-cal-days">${daysHtml}</div>
+    </div>
+  `;
+}
+
+function historicoHtml(cnpjs, expenses, date, month, year, expDates) {
   const total = expenses.reduce((s, e) => s + parseFloat(e.amount), 0);
   return `
     <div class="gap-16">
@@ -617,10 +674,7 @@ function historicoHtml(cnpjs, expenses, date) {
           ${cnpjs.map(c => `<option value="${c.id}" ${c.id === selectedCnpjId ? 'selected' : ''}>${c.razao_social}</option>`).join('')}
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">Data</label>
-        <input id="h-date" type="date" class="form-input" value="${date}" />
-      </div>
+      <div id="h-calendar">${buildMiniCal(month, year, expDates, date)}</div>
       ${expenses.length > 0 ? `
         <div class="stat-card">
           <div class="stat-label">Total do dia</div>
@@ -660,14 +714,60 @@ function renderExpenseList(expenses) {
   `).join('');
 }
 
-function setupHistoricoEvents(cnpjs, initialDate) {
+function setupHistoricoEvents(cnpjs, initialDate, calMonth, calYear, expDates) {
+  let currentMonth = calMonth;
+  let currentYear = calYear;
+  let currentDate = initialDate;
+  let currentExpDates = expDates;
+
   async function loadExpenses() {
     const cnpj_id = document.getElementById('h-cnpj')?.value;
-    const date = document.getElementById('h-date')?.value;
-    if (!cnpj_id || !date) return;
-    const expenses = await api.get(`/expenses?cnpj_id=${cnpj_id}&date=${date}`).catch(() => []);
+    if (!cnpj_id || !currentDate) return;
+    const expenses = await api.get(`/expenses?cnpj_id=${cnpj_id}&date=${currentDate}`).catch(() => []);
+    const total = expenses.reduce((s, e) => s + parseFloat(e.amount), 0);
     document.getElementById('expenses-list').innerHTML = renderExpenseList(expenses);
+    // Update total card
+    const statCard = document.querySelector('.stat-card');
+    if (expenses.length > 0) {
+      if (statCard) {
+        statCard.querySelector('.stat-value').textContent = formatCurrency(total);
+      } else {
+        const list = document.getElementById('expenses-list');
+        list.insertAdjacentHTML('beforebegin', `<div class="stat-card"><div class="stat-label">Total do dia</div><div class="stat-value success">${formatCurrency(total)}</div></div>`);
+      }
+    } else if (statCard) {
+      statCard.remove();
+    }
     setupDeleteHandlers();
+  }
+
+  async function refreshCalendar() {
+    const cnpj_id = document.getElementById('h-cnpj')?.value;
+    currentExpDates = await api.get(`/expenses/dates?cnpj_id=${cnpj_id}&month=${currentMonth}&year=${currentYear}`).catch(() => []);
+    document.getElementById('h-calendar').innerHTML = buildMiniCal(currentMonth, currentYear, currentExpDates, currentDate);
+    setupCalendarHandlers();
+  }
+
+  function setupCalendarHandlers() {
+    document.getElementById('cal-prev')?.addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+      refreshCalendar();
+    });
+    document.getElementById('cal-next')?.addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+      refreshCalendar();
+    });
+    document.querySelectorAll('.cal-day.has-expense').forEach(day => {
+      day.addEventListener('click', () => {
+        currentDate = day.dataset.date;
+        // Update selected state
+        document.querySelectorAll('.cal-day.selected').forEach(d => d.classList.remove('selected'));
+        day.classList.add('selected');
+        loadExpenses();
+      });
+    });
   }
 
   function setupDeleteHandlers() {
@@ -679,13 +779,19 @@ function setupHistoricoEvents(cnpjs, initialDate) {
           await api.delete(`/expenses/${btn.dataset.del}`);
           showToast('Removido!', 'success');
           loadExpenses();
+          refreshCalendar(); // dates may change after delete
         } catch (err) { showToast(err.message, 'error'); }
       });
     });
   }
 
-  document.getElementById('h-cnpj').addEventListener('change', (e) => { selectedCnpjId = e.target.value; loadExpenses(); });
-  document.getElementById('h-date').addEventListener('change', loadExpenses);
+  document.getElementById('h-cnpj')?.addEventListener('change', (e) => {
+    selectedCnpjId = e.target.value;
+    refreshCalendar();
+    loadExpenses();
+  });
+
+  setupCalendarHandlers();
   setupDeleteHandlers();
 }
 
@@ -918,7 +1024,18 @@ function configHtml(cnpjs, categories, prefs) {
         </div>
         <div class="gap-12">
           <input id="new-cat-name" type="text" class="form-input" placeholder="Nome da nova despesa..." />
-          <button class="btn btn-outline" id="btn-add-cat">Criar e Adicionar à Lista</button>
+          ${cnpjs.length > 1 ? `
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="font-size:0.72rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em;">Adicionar também para:</div>
+            <div id="cat-cnpj-checks" class="gap-6">
+              ${cnpjs.filter(c => c.id !== selectedCnpjId).map(c => `
+                <label style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-size:0.85rem;font-weight:500;transition:var(--ease);" class="cat-cnpj-label">
+                  <input type="checkbox" class="cat-cnpj-check" data-cnpj-id="${c.id}" style="width:16px;height:16px;accent-color:var(--brand);flex-shrink:0;cursor:pointer;" />
+                  <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.razao_social}</span>
+                </label>`).join('')}
+            </div>
+          </div>` : ''}
+          <button class="btn btn-outline" id="btn-add-cat">Criar e Adicionar</button>
         </div>
       </div>
     </div>
@@ -1021,6 +1138,19 @@ async function setupConfigEvents(cnpjs, categories, prefs) {
       prefs.push({ category_id: newCat.id, sort_order: maxOrder + 1, is_visible: true });
 
       await api.put(`/preferences/${selectedCnpjId}`, { preferences: prefs });
+
+      // Salvar também para CNPJs extras marcados
+      const extraChecks = document.querySelectorAll('.cat-cnpj-check:checked');
+      for (const chk of extraChecks) {
+        const extraId = chk.dataset.cnpjId;
+        try {
+          const extraPrefs = await api.get(`/preferences/${extraId}`).catch(() => []);
+          let maxOrd = 0;
+          extraPrefs.forEach(p => { if (p.sort_order > maxOrd) maxOrd = p.sort_order; });
+          extraPrefs.push({ category_id: newCat.id, sort_order: maxOrd + 1, is_visible: true });
+          await api.put(`/preferences/${extraId}`, { preferences: extraPrefs });
+        } catch (ex) { console.warn('Erro ao salvar pref extra:', ex); }
+      }
 
       showToast('Despesa criada e adicionada à lista!', 'success');
       renderConfig(); // reload

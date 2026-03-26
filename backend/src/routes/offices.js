@@ -194,6 +194,29 @@ router.delete('/counters/:id', auth, async (req, res) => {
     }
 });
 
+// GET /offices/:id/clients — Clientes (usuários com CNPJs) vinculados ao escritório
+router.get('/:id/clients', auth, async (req, res) => {
+    try {
+        if (!req.user.is_admin) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        const result = await pool.query(
+            `SELECT DISTINCT u.id, u.name, u.email, u.is_active, u.created_at,
+                    COUNT(c.id) AS cnpj_count
+             FROM users u
+             JOIN cnpjs c ON c.user_id = u.id AND c.is_active = true
+             WHERE u.office_id = $1 AND u.is_admin = false
+             GROUP BY u.id, u.name, u.email, u.is_active, u.created_at
+             ORDER BY u.name ASC`,
+            [req.params.id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao buscar clientes' });
+    }
+});
+
 // GET /offices/:id/settings — Get office settings including webhook (Admin)
 router.get('/:id/settings', auth, async (req, res) => {
     try {

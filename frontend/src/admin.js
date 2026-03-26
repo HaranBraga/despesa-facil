@@ -310,14 +310,20 @@ async function renderDashboard(user) {
               </button>
             </div>
           </div>
-          <div id="counters-for-${o.id}" class="gap-4" style="border-top:1px solid var(--line);padding-top:8px;">
-            <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Contadores vinculados:</div>
-            <div class="counters-list text-sm">Carregando...</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;border-top:1px solid var(--line);padding-top:12px;">
+            <div id="counters-for-${o.id}" class="gap-4">
+              <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:4px;">Contadores</div>
+              <div class="counters-list text-sm">Carregando...</div>
+            </div>
+            <div id="clients-for-${o.id}" class="gap-4">
+              <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:4px;">Clientes</div>
+              <div class="clients-list text-sm">Carregando...</div>
+            </div>
           </div>
         </div>
       `).join('');
 
-      offices.forEach(o => loadCounters(o.id));
+      offices.forEach(o => { loadCounters(o.id); loadClients(o.id); });
 
       document.querySelectorAll('[data-add-c]').forEach(btn => {
         btn.addEventListener('click', () => showAddCounterModal(btn.dataset.addC));
@@ -359,6 +365,24 @@ async function renderDashboard(user) {
           try { await api.delete(`/offices/counters/${btn.dataset.delC}`); showToast('Removido', 'success'); loadCounters(officeId); } catch (e) { showToast(e.message, 'error'); }
         });
       });
+    } catch (e) { listEl.innerHTML = '<div class="text-xs text-danger">Erro.</div>'; }
+  }
+
+  async function loadClients(officeId) {
+    const listEl = document.querySelector(`#clients-for-${officeId} .clients-list`);
+    if (!listEl) return;
+    try {
+      const clients = await api.get(`/offices/${officeId}/clients`);
+      if (clients.length === 0) {
+        listEl.innerHTML = '<div class="text-xs text-muted">Nenhum cliente vinculado.</div>';
+        return;
+      }
+      listEl.innerHTML = clients.map(c => `
+        <div style="padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.05);">
+          <div style="font-weight:500;font-size:0.85rem;">${c.name}</div>
+          <div class="text-xs text-muted">${c.email} · ${c.cnpj_count} CNPJ${c.cnpj_count != 1 ? 's' : ''}</div>
+        </div>
+      `).join('');
     } catch (e) { listEl.innerHTML = '<div class="text-xs text-danger">Erro.</div>'; }
   }
 
