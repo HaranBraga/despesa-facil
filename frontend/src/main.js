@@ -1086,129 +1086,11 @@ function formatDate(dateStr) {
   render();
 })();
 
-// ================= GUEST PAGE (sem login) =================
-async function renderGuest({ token } = {}) {
-  if (!token) {
-    const params = new URLSearchParams(window.location.search);
-    token = params.get('token');
-  }
-  const app = document.getElementById('app');
-  if (!token) {
-    app.innerHTML = `<div class="auth-page"><div class="auth-logo"><span class="text-gradient">Link inválido</span></div><p class="auth-sub">Este link não é válido ou expirou.</p></div>`;
-    return;
-  }
-
-  app.innerHTML = `<div class="auth-page"><div class="skeleton" style="height:120px;margin-bottom:16px"></div><div class="skeleton" style="height:300px"></div></div>`;
-
-  try {
-    const res = await fetch(`${API_URL}/guest/cnpj?token=${token}`);
-    if (!res.ok) throw new Error('Link inválido ou expirado');
-    const data = await res.json();
-    const { cnpj_id, cnpj, razao_social, categories } = data;
-
-    const today = new Date().toLocaleDateString('sv');
-
-    const renderRow = (cat) => `
-      <div class="lancamento-row">
-        <span class="lancamento-cat-name">${cat.name}</span>
-        <div class="lancamento-amount-wrap">
-          <span class="lancamento-amount-prefix">R$</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" class="lancamento-amount-input" data-cat-id="${cat.id}" placeholder="0,00" />
-        </div>
-      </div>`;
-
-    const tabStyle = (active) => active
-      ? 'flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--brand),#8b5cf6);color:white;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.9rem;'
-      : 'flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg-card);color:var(--ink-2);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem;';
-
-    function renderGuestHtml() {
-      return `
-        <div style="max-width:480px;margin:0 auto;padding:24px 16px 80px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
-            <svg width="28" height="28" fill="none" stroke="url(#gg)" stroke-width="2.5" viewBox="0 0 24 24">
-              <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4f9cf9"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>
-              <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle>
-            </svg>
-            <span class="text-gradient" style="font-size:1.3rem;font-weight:800">Despesa Fácil</span>
-          </div>
-          <p style="color:var(--ink-2);font-size:0.85rem;margin:0 0 20px">${razao_social} &mdash; <span style="font-family:monospace">${cnpj}</span></p>
-
-          <div class="form-group" style="margin-bottom:16px">
-            <label class="form-label">Data do Lançamento</label>
-            <input id="g-date" type="date" class="form-input" value="${today}" />
-          </div>
-
-          <p class="text-sm text-muted" style="text-align:center;margin:0 0 12px">Preencha os valores das despesas:</p>
-          <div id="g-grid" class="gap-8">
-            ${categories.length === 0 ? '<p class="text-sm text-muted text-center">Nenhuma despesa configurada.</p>' : categories.map(renderRow).join('')}
-          </div>
-
-          <div class="sticky-save-bar">
-            <button id="g-btn-salvar" class="btn btn-primary" style="width:100%;max-width:480px;display:flex;align-items:center;justify-content:center;gap:8px;">
-              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-              Lançar Despesa
-            </button>
-          </div>
-        </div>`;
-    }
-
-    function mountGuest() {
-      app.innerHTML = renderGuestHtml();
-
-      document.getElementById('g-btn-salvar').addEventListener('click', async () => {
-        const d = document.getElementById('g-date')?.value;
-        if (!d) return showToast('Selecione a data', 'error');
-        const inputs = document.querySelectorAll('#g-grid input[data-cat-id]');
-        const items = Array.from(inputs)
-          .filter(i => i.value && parseFloat(i.value) > 0)
-          .map(i => ({ category_id: i.dataset.catId, amount: parseFloat(i.value) }));
-
-        if (items.length === 0) return showToast('Preencha pelo menos uma despesa', 'error');
-
-        const dateObj = new Date(d);
-        const payload = { 
-          items, 
-          expense_date: d,
-          period_month: dateObj.getUTCMonth() + 1, 
-          period_year: dateObj.getUTCFullYear(), 
-          tipo: 'diario' 
-        };
-
-        const btn = document.getElementById('g-btn-salvar');
-        btn.disabled = true; btn.textContent = 'Salvando...';
-
-        try {
-          const r = await fetch(`${API_URL}/guest/expenses/bulk?token=${token}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          const result = await r.json();
-          if (!r.ok) throw new Error(result.error || 'Erro ao salvar');
-          showToast(`${result.inserted} despesa(s) salva(s)!`, 'success');
-          inputs.forEach(i => i.value = '');
-          btn.disabled = false; btn.innerHTML = '✅ Salvo!';
-          setTimeout(() => { if (btn) btn.innerHTML = '💾 Salvar Despesas'; }, 2000);
-        } catch (e) {
-          showToast(e.message, 'error');
-          btn.disabled = false; btn.textContent = 'Salvar Despesas';
-        }
-      });
-    }
-
-    mountGuest();
-  } catch (e) {
-    app.innerHTML = `<div class="auth-page"><div class="auth-logo"><span class="text-gradient">Despesa Fácil</span></div><p class="auth-sub" style="color:var(--red)">${e.message}</p></div>`;
-  }
-}
-
 // ================= CONTA (configurações de conta) =================
 async function renderConta() {
   renderShell('<div class="skeleton" style="height:300px"></div>', 'config');
   try {
     const account = await api.get('/account');
-    const cnpjs = await api.get('/cnpjs');
-    const base = import.meta.env.VITE_API_URL?.replace('/api','') || '';
 
     renderShell(`
       <div class="gap-16">
@@ -1228,9 +1110,8 @@ async function renderConta() {
             <input type="email" class="form-input" value="${account.email}" disabled style="opacity:0.6" />
           </div>
           <div class="form-group">
-            <label class="form-label">WhatsApp padrão (para receber lembretes)</label>
+            <label class="form-label">WhatsApp (para receber lembretes)</label>
             <input id="ac-wpp" type="tel" class="form-input" placeholder="5511999999999" value="${account.whatsapp_number || ''}" inputmode="numeric" />
-            <p class="text-sm text-muted" style="margin:4px 0 0">Usado quando o CNPJ não tiver número específico.</p>
           </div>
           <button class="btn btn-primary" id="btn-save-account">Salvar Conta</button>
         </div>
@@ -1250,31 +1131,6 @@ async function renderConta() {
             <input id="ac-pass-new" type="password" class="form-input" placeholder="Mín. 6 caracteres" />
           </div>
           <button class="btn btn-outline" id="btn-save-password">Atualizar Senha</button>
-        </div>
-
-        <!-- WhatsApp por CNPJ -->
-        <div class="card">
-          <div class="section-title" style="margin-bottom:12px;font-size:1rem;display:flex;align-items:center;gap:6px;">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 11.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 0.77h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 16.92z"></path></svg>
-            WhatsApp por CNPJ
-          </div>
-          <p class="text-sm text-muted" style="margin:0 0 12px">Defina um número específico para cada empresa. Deixe em branco para usar o padrão da conta.</p>
-          <div class="gap-12" id="cnpj-wpp-list">
-            ${cnpjs.map(c => `
-              <div style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;">
-                <div style="font-weight:600;font-size:0.9rem">${c.razao_social}</div>
-                <div style="font-size:0.8rem;color:var(--ink-3);font-family:monospace">${c.cnpj}</div>
-                <input type="tel" class="form-input cnpj-wpp-input" data-cnpj-id="${c.id}" placeholder="5511999999999 (ou vazio para usar padrão)" value="${c.whatsapp_number || ''}" inputmode="numeric" />
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <button class="btn btn-outline btn-sm btn-save-cnpj-wpp" data-cnpj-id="${c.id}">Salvar</button>
-                  <button class="btn btn-outline btn-sm btn-copy-link" data-link="${c.guest_link}" style="display:flex;align-items:center;gap:4px;">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                    Copiar link
-                  </button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
         </div>
 
         <button class="btn btn-outline" id="btn-back-config">← Voltar às Configurações</button>
@@ -1302,26 +1158,6 @@ async function renderConta() {
         document.getElementById('ac-pass-cur').value = '';
         document.getElementById('ac-pass-new').value = '';
       } catch (e) { showToast(e.message, 'error'); }
-    });
-
-    // Salvar WhatsApp de CNPJ específico
-    document.querySelectorAll('.btn-save-cnpj-wpp').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.cnpjId;
-        const input = document.querySelector(`.cnpj-wpp-input[data-cnpj-id="${id}"]`);
-        const whatsapp_number = input.value.trim() || null;
-        try {
-          await api.put(`/account/cnpjs/${id}/whatsapp`, { whatsapp_number });
-          showToast('Número atualizado!', 'success');
-        } catch (e) { showToast(e.message, 'error'); }
-      });
-    });
-
-    // Copiar link guest
-    document.querySelectorAll('.btn-copy-link').forEach(btn => {
-      btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(btn.dataset.link).then(() => showToast('Link copiado!', 'success'));
-      });
     });
 
     document.getElementById('btn-back-config').addEventListener('click', () => navigate('config'));

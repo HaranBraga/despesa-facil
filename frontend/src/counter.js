@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 // ---- API Client ----
 const api = {
     async request(method, path, body) {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('counter_token');
         const res = await fetch(`${API_URL}${path}`, {
             method,
             headers: {
@@ -16,7 +16,7 @@ const api = {
         });
         const data = await res.json().catch(() => ({}));
         if (res.status === 401) {
-            localStorage.removeItem('token');
+            localStorage.removeItem('counter_token');
             renderLogin();
             throw new Error('Sessão expirada.');
         }
@@ -69,7 +69,7 @@ function renderLogin() {
         try {
             const data = await api.post('/auth/login', { email, password });
             if (!data.user.office_id && !data.user.is_admin) throw new Error('Acesso negado. Usuário não é um contador.');
-            localStorage.setItem('token', data.token);
+            localStorage.setItem('counter_token', data.token);
             render();
         } catch (e) { showToast(e.message, 'error'); }
     });
@@ -79,7 +79,7 @@ function renderLogin() {
 
 // ---- Render ----
 async function render() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('counter_token');
     if (!token) {
         renderLogin();
         return;
@@ -89,7 +89,7 @@ async function render() {
         const me = await api.get('/auth/me');
         if (!me.office_id && !me.is_admin) {
             showToast('Acesso negado.', 'error');
-            localStorage.removeItem('token');
+            localStorage.removeItem('counter_token');
             window.location.href = '/admin.html';
             return;
         }
@@ -780,7 +780,7 @@ async function renderDashboard(user) {
     }
 
     document.getElementById('btn-logout').addEventListener('click', () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('counter_token');
         renderLogin();
     });
 
@@ -796,7 +796,7 @@ async function renderDashboard(user) {
     });
     document.getElementById('bn-settings')?.addEventListener('click', showSettingsModal);
     document.getElementById('bn-logout')?.addEventListener('click', () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('counter_token');
         renderLogin();
     });
     

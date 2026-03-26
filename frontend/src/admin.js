@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 // ---- API Client ----
 const api = {
   async request(method, path, body) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('admin_token');
     const res = await fetch(`${API_URL}${path}`, {
       method,
       headers: {
@@ -16,8 +16,8 @@ const api = {
     });
     const data = await res.json().catch(() => ({}));
     if (res.status === 401) {
-      const hadToken = !!localStorage.getItem('token');
-      localStorage.removeItem('token');
+      const hadToken = !!localStorage.getItem('admin_token');
+      localStorage.removeItem('admin_token');
       renderLogin();
       if (hadToken) throw new Error('Sessão expirada. Faça login novamente.');
       throw new Error('');
@@ -41,13 +41,13 @@ function showToast(msg, type = '') {
 
 // ---- Render ----
 async function render() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('admin_token');
   if (!token) return renderLogin();
   try {
     const me = await api.get('/auth/me');
     if (!me.is_admin) {
       showToast('Acesso negado. Apenas administradores.', 'error');
-      localStorage.removeItem('token');
+      localStorage.removeItem('admin_token');
       return renderLogin();
     }
     renderDashboard(me);
@@ -88,7 +88,7 @@ function renderLogin() {
     try {
       const data = await api.post('/auth/login', { email, password });
       if (!data.user.is_admin) throw new Error('Acesso negado. Usuário não é administrador.');
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('admin_token', data.token);
       render();
     } catch (e) { showToast(e.message, 'error'); }
   });
@@ -192,7 +192,7 @@ async function renderDashboard(user) {
   });
 
   document.getElementById('btn-logout-sidebar').addEventListener('click', () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('admin_token');
     renderLogin();
   });
 
