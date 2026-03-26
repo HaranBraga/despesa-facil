@@ -265,59 +265,80 @@ async function renderDashboard(user) {
             </div> <!-- Close dashboard-view -->
             
             <!-- VIEW: DETALHE COMPANHIA -->
-            <div id="company-detail-view" style="display:none; flex-direction:column; gap:20px; transition:var(--ease);">
+            <div id="company-detail-view" style="display:none; flex-direction:column; gap:16px; transition:var(--ease);">
+                <!-- Header -->
                 <header style="display:flex; align-items:center; gap:12px;">
-                    <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--ease);" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
+                    <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; flex-shrink:0; transition:var(--ease);">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                     </button>
                     <div style="flex:1; min-width:0;">
-                        <h1 id="detail-company-name" style="font-size:1.3rem; font-weight:800; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0;">Carregando...</h1>
-                        <p id="detail-company-cnpj" style="color:#64748b; font-size:0.82rem; margin:0;">--</p>
+                        <h1 id="detail-company-name" style="font-size:1.2rem; font-weight:800; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0;">Carregando...</h1>
+                        <p id="detail-company-cnpj" style="color:#64748b; font-size:0.78rem; margin:0; font-family:monospace;">--</p>
                     </div>
                 </header>
 
-                <!-- Hidden period selectors (driven by month pills) -->
-                <select id="sel-month" style="display:none;"></select>
-                <select id="sel-year" style="display:none;"></select>
-
-                <!-- Month pills -->
-                <div>
-                    <div style="font-size:0.7rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Relatórios por período</div>
-                    <div id="month-pills-row" class="cnpj-selector"></div>
+                <!-- Tabs -->
+                <div style="display:flex; gap:4px; background:var(--bg); padding:4px; border-radius:14px; border:1px solid var(--line);">
+                    <button class="detail-tab-btn active" data-tab="relatorios" style="flex:1; padding:9px 0; border-radius:10px; border:none; font-size:0.85rem; font-weight:700; cursor:pointer; transition:var(--ease); background:white; color:var(--brand); box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                        Relatórios
+                    </button>
+                    <button class="detail-tab-btn" data-tab="conta" style="flex:1; padding:9px 0; border-radius:10px; border:none; font-size:0.85rem; font-weight:700; cursor:pointer; transition:var(--ease); background:transparent; color:var(--ink-3);">
+                        Conta
+                    </button>
                 </div>
 
-                <!-- Report summary card -->
-                <div id="report-summary-card" class="card" style="padding:16px; background:linear-gradient(135deg, var(--brand-soft), rgba(139,92,246,0.05)); border-color:rgba(99,102,241,0.2);">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-size:0.7rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total do período</div>
-                            <div id="report-total-display" style="font-size:1.6rem; font-weight:800; color:#1e293b; letter-spacing:-0.02em;">--</div>
+                <!-- TAB: RELATÓRIOS -->
+                <div id="detail-tab-relatorios" style="display:flex; flex-direction:column; gap:16px;">
+                    <!-- Hidden period selectors (driven by month pills) -->
+                    <select id="sel-month" style="display:none;"></select>
+                    <select id="sel-year" style="display:none;"></select>
+
+                    <!-- Month pills -->
+                    <div>
+                        <div style="font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Período</div>
+                        <div id="month-pills-row" class="cnpj-selector"></div>
+                    </div>
+
+                    <!-- Report summary card -->
+                    <div id="report-summary-card" class="card" style="padding:16px; background:linear-gradient(135deg, var(--brand-soft), rgba(139,92,246,0.05)); border-color:rgba(99,102,241,0.2);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total do período</div>
+                                <div id="report-total-display" style="font-size:1.5rem; font-weight:800; color:#1e293b; letter-spacing:-0.02em;">--</div>
+                            </div>
+                            <div id="report-status-badge"></div>
                         </div>
-                        <div id="report-status-badge"></div>
+                        <div id="report-categories-mini" style="margin-top:12px; display:none; padding-top:12px; border-top:1px solid rgba(99,102,241,0.1);"></div>
                     </div>
-                    <div id="report-categories-mini" style="margin-top:12px; display:none; padding-top:12px; border-top:1px solid rgba(99,102,241,0.1);"></div>
+
+                    <!-- Expense table -->
+                    <div class="card" style="padding:0; overflow:hidden; border-radius:16px;">
+                        <div style="padding:14px 16px; border-bottom:1px solid var(--line); background:var(--bg);">
+                            <h3 style="font-size:0.85rem; font-weight:700; color:#1e293b; margin:0;">Lançamentos do período</h3>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
+                                <thead>
+                                    <tr style="border-bottom:1px solid var(--line); background:rgba(241,245,249,0.5);">
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase;">Data</th>
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase;">Descrição</th>
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor</th>
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:center;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenses-list-tbody">
+                                    <tr><td colspan="5" style="padding:40px; text-align:center;"><div class="skeleton" style="height:120px; border-radius:12px;"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Expense table -->
-                <div class="card" style="padding:0; overflow:hidden; border-radius:20px;">
-                    <div style="padding:16px 20px; border-bottom:1px solid var(--line); background:var(--bg);">
-                        <h3 style="font-size:0.9rem; font-weight:700; color:#1e293b; margin:0;">Lançamentos do período</h3>
-                    </div>
-                    <div style="overflow-x:auto;">
-                        <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
-                            <thead>
-                                <tr style="border-bottom:1px solid var(--line); background:rgba(241, 245, 249, 0.5);">
-                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase;">Data</th>
-                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase;">Descrição</th>
-                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
-                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor (R$)</th>
-                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:center;">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="expenses-list-tbody">
-                                <tr><td colspan="5" style="padding:40px; text-align:center;"><div class="skeleton" style="height:200px; border-radius:12px;"></div></td></tr>
-                            </tbody>
-                        </table>
+                <!-- TAB: CONTA -->
+                <div id="detail-tab-conta" style="display:none; flex-direction:column; gap:16px;">
+                    <div id="conta-loading" class="card" style="padding:24px;">
+                        <div class="skeleton" style="height:80px; border-radius:12px;"></div>
                     </div>
                 </div>
             </div>
@@ -454,6 +475,19 @@ async function renderDashboard(user) {
         }, 200);
     }
     
+    // --- Tab switching in detail view ---
+    function switchDetailTab(tabName) {
+        document.querySelectorAll('.detail-tab-btn').forEach(btn => {
+            const isActive = btn.dataset.tab === tabName;
+            btn.style.background = isActive ? 'white' : 'transparent';
+            btn.style.color = isActive ? 'var(--brand)' : 'var(--ink-3)';
+            btn.style.boxShadow = isActive ? '0 1px 4px rgba(0,0,0,0.08)' : 'none';
+        });
+        document.getElementById('detail-tab-relatorios').style.display = tabName === 'relatorios' ? 'flex' : 'none';
+        document.getElementById('detail-tab-conta').style.display = tabName === 'conta' ? 'flex' : 'none';
+        if (tabName === 'conta') loadContaTab();
+    }
+
     // --- Navigation Master/Detail ---
     function openCompanyDetail(company) {
         selectedCompanyId = company.id;
@@ -464,9 +498,80 @@ async function renderDashboard(user) {
         document.getElementById('dashboard-view').style.display = 'none';
         document.getElementById('company-detail-view').style.display = 'flex';
 
+        // Reset to relatorios tab
+        switchDetailTab('relatorios');
+
+        document.querySelectorAll('.detail-tab-btn').forEach(btn => {
+            btn.onclick = () => switchDetailTab(btn.dataset.tab);
+        });
+
         generateMonthPills();
         loadReport();
         loadIndividualExpenses();
+    }
+
+    async function loadContaTab() {
+        const container = document.getElementById('detail-tab-conta');
+        container.innerHTML = `<div class="card" style="padding:24px;"><div class="skeleton" style="height:120px; border-radius:12px;"></div></div>`;
+        try {
+            const data = await api.get(`/counter/cnpj/${selectedCompanyId}`);
+
+            container.innerHTML = `
+                <!-- Responsável -->
+                <div class="card" style="padding:20px; display:flex; flex-direction:column; gap:16px;">
+                    <div style="font-size:0.72rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em;">Responsável pela conta</div>
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:48px; height:48px; border-radius:14px; background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; flex-shrink:0;">
+                            ${data.owner_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div style="min-width:0;">
+                            <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">${data.owner_name}</div>
+                            <div style="font-size:0.8rem; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${data.owner_email}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WhatsApp de notificação -->
+                <div class="card" style="padding:20px; display:flex; flex-direction:column; gap:14px;">
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">WhatsApp para notificações</div>
+                        <p style="font-size:0.8rem; color:#64748b; margin:0; line-height:1.4;">Número que receberá lembretes e alertas para este CNPJ. Deixe em branco para usar o número padrão da conta.</p>
+                    </div>
+
+                    ${data.account_whatsapp ? `
+                    <div style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--bg); border-radius:10px; border:1px dashed var(--line);">
+                        <svg width="14" height="14" fill="none" stroke="var(--ink-3)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 11.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 2.77h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 10.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 18.92z"></path></svg>
+                        <span style="font-size:0.78rem; color:var(--ink-3);">Padrão da conta: <strong style="color:var(--ink-2);">${data.account_whatsapp}</strong></span>
+                    </div>` : ''}
+
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input id="cnpj-wpp-counter" type="tel" class="form-input" placeholder="${data.account_whatsapp ? 'Usar padrão da conta' : '5511999999999'}" value="${data.cnpj_whatsapp || ''}" inputmode="numeric" style="flex:1;" />
+                        <button id="btn-save-cnpj-wpp" class="btn btn-primary btn-sm" style="flex-shrink:0; white-space:nowrap;">Salvar</button>
+                    </div>
+                    ${data.cnpj_whatsapp ? `<button id="btn-clear-cnpj-wpp" class="btn btn-outline btn-sm" style="align-self:flex-start; font-size:0.78rem;">Usar padrão da conta</button>` : ''}
+                </div>
+            `;
+
+            document.getElementById('btn-save-cnpj-wpp').addEventListener('click', async () => {
+                const val = document.getElementById('cnpj-wpp-counter').value.trim() || null;
+                try {
+                    await api.put(`/counter/cnpj/${selectedCompanyId}/whatsapp`, { whatsapp_number: val });
+                    showToast('WhatsApp atualizado!', 'success');
+                    loadContaTab();
+                } catch (e) { showToast(e.message, 'error'); }
+            });
+
+            document.getElementById('btn-clear-cnpj-wpp')?.addEventListener('click', async () => {
+                try {
+                    await api.put(`/counter/cnpj/${selectedCompanyId}/whatsapp`, { whatsapp_number: null });
+                    showToast('Usando padrão da conta.', 'success');
+                    loadContaTab();
+                } catch (e) { showToast(e.message, 'error'); }
+            });
+
+        } catch (e) {
+            container.innerHTML = `<div class="card" style="padding:24px; color:var(--red);">${e.message}</div>`;
+        }
     }
 
     function generateMonthPills() {

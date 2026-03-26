@@ -327,4 +327,44 @@ router.delete('/expenses/:id', auth, verifyIsCounter, async (req, res) => {
     }
 });
 
+// GET /api/counter/cnpj/:id — Dados da conta responsável pelo CNPJ
+router.get('/cnpj/:id', auth, verifyIsCounter, async (req, res) => {
+    try {
+        const belongs = await verifyCnpjInOffice(req.params.id, req.user.office_id);
+        if (!belongs) return res.status(404).json({ error: 'CNPJ não encontrado' });
+
+        const r = await pool.query(
+            `SELECT c.id, c.cnpj, c.razao_social, c.whatsapp_number as cnpj_whatsapp,
+                    u.id as user_id, u.name as owner_name, u.email as owner_email,
+                    u.whatsapp_number as account_whatsapp
+             FROM cnpjs c
+             JOIN users u ON u.id = c.user_id
+             WHERE c.id = $1`,
+            [req.params.id]
+        );
+        res.json(r.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao buscar dados do CNPJ' });
+    }
+});
+
+// PUT /api/counter/cnpj/:id/whatsapp — Contador atualiza whatsapp de notificação do CNPJ
+router.put('/cnpj/:id/whatsapp', auth, verifyIsCounter, async (req, res) => {
+    try {
+        const belongs = await verifyCnpjInOffice(req.params.id, req.user.office_id);
+        if (!belongs) return res.status(404).json({ error: 'CNPJ não encontrado' });
+
+        const { whatsapp_number } = req.body;
+        await pool.query(
+            `UPDATE cnpjs SET whatsapp_number = $1, updated_at = NOW() WHERE id = $2`,
+            [whatsapp_number || null, req.params.id]
+        );
+        res.json({ ok: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao atualizar WhatsApp' });
+    }
+});
+
 module.exports = router;

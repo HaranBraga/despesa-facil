@@ -93,6 +93,11 @@ function renderShell(content, activeNav) {
           <button class="btn-icon" id="btn-logout" title="Sair" style="margin-left:auto;">${logoutIcon}</button>
         </header>
         <main class="page-content page-enter">${content}</main>
+        ${activeNav === 'lancamento' ? `
+        <button id="fab-lancar" class="fab-lancar" title="Lançar Despesa">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>Lançar</span>
+        </button>` : ''}
         <nav class="bottom-nav">
           <button class="nav-item ${activeNav === 'dashboard' ? 'active' : ''}" data-page="dashboard">
             <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
@@ -125,6 +130,7 @@ function renderShell(content, activeNav) {
       navigate(btn.dataset.page);
     });
   });
+
 
   document.getElementById('btn-toggle-mobile-menu')?.addEventListener('click', () => {
     document.getElementById('sidebar-main')?.classList.add('show');
@@ -443,14 +449,21 @@ function lancamentoHtml(cnpjs, categories, today, now) {
   return `
     <div class="gap-16" style="padding-bottom: 80px;">
       <div class="form-group">
-        <label class="form-label">Empresa (CNPJ)</label>
+        <label class="form-label">Empresa(s) para lançamento</label>
         <select id="l-cnpj" class="form-select">
           ${cnpjs.map(c => `<option value="${c.id}" ${c.id === selectedCnpjId ? 'selected' : ''}>${c.razao_social} — ${c.cnpj}</option>`).join('')}
         </select>
         ${cnpjs.length > 1 ? `
-        <div class="cnpj-selector" style="margin-top:8px; flex-wrap:wrap; gap:6px;">
-          <button class="cnpj-pill active" id="scope-single">Apenas este CNPJ</button>
-          <button class="cnpj-pill" id="scope-all">Todos os CNPJs (${cnpjs.length})</button>
+        <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:0.72rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em;">Aplicar também para:</div>
+          <div id="cnpj-extra-checks" class="gap-6">
+            ${cnpjs.filter(c => c.id !== selectedCnpjId).map(c => `
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-size:0.88rem;font-weight:500;transition:var(--ease);" class="cnpj-extra-label">
+                <input type="checkbox" class="cnpj-extra-check" data-cnpj-id="${c.id}" style="width:16px;height:16px;accent-color:var(--brand);flex-shrink:0;cursor:pointer;" />
+                <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.razao_social}</span>
+                <span style="font-size:0.72rem;color:var(--ink-3);font-family:monospace;flex-shrink:0;">${c.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}</span>
+              </label>`).join('')}
+          </div>
         </div>` : ''}
       </div>
 
@@ -464,21 +477,16 @@ function lancamentoHtml(cnpjs, categories, today, now) {
       <div id="lancamento-grid" class="gap-8">
           ${categories.length === 0 ? '<p class="text-sm text-muted text-center">Nenhuma despesa configurada.</p>' : categories.map(renderRow).join('')}
       </div>
-      
-      <!-- Sticky Save Button -->
-      <div class="sticky-save-bar">
-        <button class="btn btn-primary" id="btn-salvar-lancamento" style="width:100%;max-width:500px;box-shadow:0 4px 12px rgba(16,185,129,0.3);display:flex;align-items:center;justify-content:center;gap:8px;">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Lançar Despesa
-        </button>
-      </div>
+
+      <button class="btn btn-primary" id="btn-salvar-lancamento" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Lançar Despesa
+      </button>
     </div>
   `;
 }
 
 function setupLancamentoEvents(cnpjs, categories, now) {
   const SAVE_BTN_HTML = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Lançar Despesa';
-  let cnpjScope = 'single';
-
   const renderGrid = (containerId, cats) => {
     const grid = document.getElementById(containerId);
     if (!grid) return;
@@ -496,28 +504,37 @@ function setupLancamentoEvents(cnpjs, categories, now) {
       </div>`).join('');
   };
 
-  // CNPJ scope toggle
-  document.getElementById('scope-single')?.addEventListener('click', () => {
-    cnpjScope = 'single';
-    document.getElementById('scope-single').classList.add('active');
-    document.getElementById('scope-all').classList.remove('active');
-    document.getElementById('l-cnpj').disabled = false;
-    document.getElementById('l-cnpj').style.opacity = '1';
-  });
-  document.getElementById('scope-all')?.addEventListener('click', () => {
-    cnpjScope = 'all';
-    document.getElementById('scope-all').classList.add('active');
-    document.getElementById('scope-single').classList.remove('active');
-    document.getElementById('l-cnpj').disabled = true;
-    document.getElementById('l-cnpj').style.opacity = '0.45';
+  // Highlight checkbox label on check
+  document.querySelectorAll('.cnpj-extra-check').forEach(chk => {
+    chk.addEventListener('change', () => {
+      chk.closest('.cnpj-extra-label').style.borderColor = chk.checked ? 'var(--brand)' : 'var(--line)';
+      chk.closest('.cnpj-extra-label').style.background = chk.checked ? 'var(--brand-soft)' : 'var(--bg)';
+    });
   });
 
-  // CNPJ change — reload categories array
+  // CNPJ change — reload categories
   document.getElementById('l-cnpj').addEventListener('change', async (e) => {
     selectedCnpjId = e.target.value;
     const prefs = await api.get(`/preferences/${selectedCnpjId}`).catch(() => []);
     const visibleCats = prefs.filter(p => p.is_visible);
     renderGrid('lancamento-grid', visibleCats);
+    // rebuild extra checkboxes (remove current cnpj, show rest)
+    const extraContainer = document.getElementById('cnpj-extra-checks');
+    if (extraContainer) {
+      const others = cnpjs.filter(c => c.id !== selectedCnpjId);
+      extraContainer.innerHTML = others.map(c => `
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-size:0.88rem;font-weight:500;transition:var(--ease);" class="cnpj-extra-label">
+          <input type="checkbox" class="cnpj-extra-check" data-cnpj-id="${c.id}" style="width:16px;height:16px;accent-color:var(--brand);flex-shrink:0;cursor:pointer;" />
+          <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.razao_social}</span>
+          <span style="font-size:0.72rem;color:var(--ink-3);font-family:monospace;flex-shrink:0;">${c.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}</span>
+        </label>`).join('');
+      document.querySelectorAll('.cnpj-extra-check').forEach(chk => {
+        chk.addEventListener('change', () => {
+          chk.closest('.cnpj-extra-label').style.borderColor = chk.checked ? 'var(--brand)' : 'var(--line)';
+          chk.closest('.cnpj-extra-label').style.background = chk.checked ? 'var(--brand-soft)' : 'var(--bg)';
+        });
+      });
+    }
   });
 
   // Salvar Bulk
@@ -535,10 +552,15 @@ function setupLancamentoEvents(cnpjs, categories, now) {
     const dateObj = new Date(expense_date);
     const period_month = dateObj.getUTCMonth() + 1;
     const period_year = dateObj.getUTCFullYear();
-    const targetCnpjs = cnpjScope === 'all' ? cnpjs.map(c => c.id) : [document.getElementById('l-cnpj').value];
+
+    const mainCnpj = document.getElementById('l-cnpj').value;
+    const extraChecked = Array.from(document.querySelectorAll('.cnpj-extra-check:checked')).map(c => c.dataset.cnpjId);
+    const targetCnpjs = [mainCnpj, ...extraChecked];
 
     const btn = document.getElementById('btn-salvar-lancamento');
+    const fabBtn = document.getElementById('fab-lancar');
     btn.disabled = true; btn.textContent = 'Lançando...';
+    if (fabBtn) { fabBtn.disabled = true; fabBtn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20" opacity="0.4"/></svg><span>Lançando...</span>'; }
 
     try {
       for (const cnpj_id of targetCnpjs) {
@@ -546,11 +568,19 @@ function setupLancamentoEvents(cnpjs, categories, now) {
       }
       showToast(targetCnpjs.length > 1 ? `Lançado para ${targetCnpjs.length} CNPJs!` : 'Lançamento concluído!', 'success');
       inputs.forEach(inp => inp.value = '');
+      document.querySelectorAll('.cnpj-extra-check:checked').forEach(c => { c.checked = false; c.dispatchEvent(new Event('change')); });
       btn.disabled = false; btn.innerHTML = SAVE_BTN_HTML;
+      if (fabBtn) { fabBtn.disabled = false; fabBtn.innerHTML = '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span>Lançar</span>'; }
     } catch (e) {
       showToast(e.message, 'error');
-      if (btn) { btn.disabled = false; btn.innerHTML = SAVE_BTN_HTML; }
+      btn.disabled = false; btn.innerHTML = SAVE_BTN_HTML;
+      if (fabBtn) { fabBtn.disabled = false; fabBtn.innerHTML = '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span>Lançar</span>'; }
     }
+  });
+
+  // FAB aciona o mesmo submit
+  document.getElementById('fab-lancar')?.addEventListener('click', () => {
+    document.getElementById('btn-salvar-lancamento')?.click();
   });
 }
 
