@@ -307,9 +307,6 @@ async function renderDashboard() {
     ]);
     const report = cnpjs_report;
     let headerHtml = dashboardContent(cnpjs, report, month, year);
-    if (user_info.office_id) {
-       headerHtml = `<div class="card" style="margin-bottom:16px; background:var(--accent-2-subtle); border-color:#8b5cf6;"><p class="text-sm">Você é um contador. <a href="/counter.html" style="font-weight:bold; color:#8b5cf6">Acesse o Painel do Contador aqui</a> para gerenciar todas as empresas do seu escritório.</p></div>` + headerHtml;
-    }
     renderShell(headerHtml, 'dashboard');
     setupDashboardEvents(cnpjs, report);
   } catch (e) {
@@ -450,6 +447,11 @@ function lancamentoHtml(cnpjs, categories, today, now) {
         <select id="l-cnpj" class="form-select">
           ${cnpjs.map(c => `<option value="${c.id}" ${c.id === selectedCnpjId ? 'selected' : ''}>${c.razao_social} — ${c.cnpj}</option>`).join('')}
         </select>
+        ${cnpjs.length > 1 ? `
+        <div class="cnpj-selector" style="margin-top:8px; flex-wrap:wrap; gap:6px;">
+          <button class="cnpj-pill active" id="scope-single">Apenas este CNPJ</button>
+          <button class="cnpj-pill" id="scope-all">Todos os CNPJs (${cnpjs.length})</button>
+        </div>` : ''}
       </div>
 
       <div class="form-group">
@@ -474,6 +476,9 @@ function lancamentoHtml(cnpjs, categories, today, now) {
 }
 
 function setupLancamentoEvents(cnpjs, categories, now) {
+  const SAVE_BTN_HTML = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Lançar Despesa';
+  let cnpjScope = 'single';
+
   const renderGrid = (containerId, cats) => {
     const grid = document.getElementById(containerId);
     if (!grid) return;
@@ -491,6 +496,22 @@ function setupLancamentoEvents(cnpjs, categories, now) {
       </div>`).join('');
   };
 
+  // CNPJ scope toggle
+  document.getElementById('scope-single')?.addEventListener('click', () => {
+    cnpjScope = 'single';
+    document.getElementById('scope-single').classList.add('active');
+    document.getElementById('scope-all').classList.remove('active');
+    document.getElementById('l-cnpj').disabled = false;
+    document.getElementById('l-cnpj').style.opacity = '1';
+  });
+  document.getElementById('scope-all')?.addEventListener('click', () => {
+    cnpjScope = 'all';
+    document.getElementById('scope-all').classList.add('active');
+    document.getElementById('scope-single').classList.remove('active');
+    document.getElementById('l-cnpj').disabled = true;
+    document.getElementById('l-cnpj').style.opacity = '0.45';
+  });
+
   // CNPJ change — reload categories array
   document.getElementById('l-cnpj').addEventListener('change', async (e) => {
     selectedCnpjId = e.target.value;
@@ -501,13 +522,10 @@ function setupLancamentoEvents(cnpjs, categories, now) {
 
   // Salvar Bulk
   document.getElementById('btn-salvar-lancamento').addEventListener('click', async () => {
-    const cnpj_id = document.getElementById('l-cnpj').value;
     const expense_date = document.getElementById('l-date').value;
-    
     if (!expense_date) return showToast('Selecione a data', 'error');
 
     const inputs = document.querySelectorAll('#lancamento-grid input[data-cat-id]');
-
     const items = Array.from(inputs)
       .filter(inp => inp.value && parseFloat(inp.value) > 0)
       .map(inp => ({ category_id: inp.dataset.catId, amount: parseFloat(inp.value) }));
@@ -515,28 +533,23 @@ function setupLancamentoEvents(cnpjs, categories, now) {
     if (items.length === 0) return showToast('Preencha o valor de pelo menos uma despesa', 'error');
 
     const dateObj = new Date(expense_date);
-    const payload = {
-      cnpj_id,
-      items,
-      expense_date,
-      period_month: dateObj.getUTCMonth() + 1,
-      period_year: dateObj.getUTCFullYear(),
-      tipo: 'diario'
-    };
+    const period_month = dateObj.getUTCMonth() + 1;
+    const period_year = dateObj.getUTCFullYear();
+    const targetCnpjs = cnpjScope === 'all' ? cnpjs.map(c => c.id) : [document.getElementById('l-cnpj').value];
+
+    const btn = document.getElementById('btn-salvar-lancamento');
+    btn.disabled = true; btn.textContent = 'Lançando...';
 
     try {
-      const btn = document.getElementById('btn-salvar-lancamento');
-      btn.disabled = true; btn.textContent = 'Lançando...';
-      const result = await api.post('/expenses/bulk', payload);
-
-      showToast(`Lançamento concluído! As despesas foram travadas.`, 'success');
-      inputs.forEach(inp => inp.value = ''); // Limpa formulário
-
-      btn.disabled = false; btn.innerHTML = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Lançar Despesa';
+      for (const cnpj_id of targetCnpjs) {
+        await api.post('/expenses/bulk', { cnpj_id, items, expense_date, period_month, period_year, tipo: 'diario' });
+      }
+      showToast(targetCnpjs.length > 1 ? `Lançado para ${targetCnpjs.length} CNPJs!` : 'Lançamento concluído!', 'success');
+      inputs.forEach(inp => inp.value = '');
+      btn.disabled = false; btn.innerHTML = SAVE_BTN_HTML;
     } catch (e) {
       showToast(e.message, 'error');
-      const btn = document.getElementById('btn-salvar-lancamento');
-      if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Lançar Despesa'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = SAVE_BTN_HTML; }
     }
   });
 }

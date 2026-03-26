@@ -174,7 +174,7 @@ async function renderDashboard(user) {
             <div id="dashboard-view" style="display:flex; flex-direction:column; gap:32px; transition:var(--ease);">
                 <header style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <h1 style="font-size:1.8rem; font-weight:800; color:#1e293b; margin-bottom:4px;">Olá, ${user.name.split(' ')[0]} 👋</h1>
+                        <h1 style="font-size:1.8rem; font-weight:800; color:#1e293b; margin-bottom:4px;">Olá, ${user.name.split(' ')[0]}</h1>
                         <p style="color:#64748b;">Aqui está o resumo contábil do seu escritório.</p>
                     </div>
                     
@@ -265,63 +265,59 @@ async function renderDashboard(user) {
             </div> <!-- Close dashboard-view -->
             
             <!-- VIEW: DETALHE COMPANHIA -->
-            <div id="company-detail-view" style="display:none; flex-direction:column; gap:32px; transition:var(--ease);">
-                <header style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:16px;">
-                        <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--ease);" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                        </button>
-                        <div>
-                            <h1 id="detail-company-name" style="font-size:1.6rem; font-weight:800; color:#1e293b; margin-bottom:0;">Carregando...</h1>
-                            <p id="detail-company-cnpj" style="color:#64748b; font-size:0.85rem; margin:0;">--</p>
-                        </div>
-                    </div>
-                    
-                    <div id="report-period-picker" style="display:flex; gap:12px; background:white; padding:8px 16px; border-radius:100px; box-shadow:var(--shadow-1); border:1px solid var(--line);">
-                        <select id="sel-month" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600;"></select>
-                        <div style="width:1px; height:20px; background:var(--line);"></div>
-                        <select id="sel-year" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600;"></select>
+            <div id="company-detail-view" style="display:none; flex-direction:column; gap:20px; transition:var(--ease);">
+                <header style="display:flex; align-items:center; gap:12px;">
+                    <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--ease);" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </button>
+                    <div style="flex:1; min-width:0;">
+                        <h1 id="detail-company-name" style="font-size:1.3rem; font-weight:800; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0;">Carregando...</h1>
+                        <p id="detail-company-cnpj" style="color:#64748b; font-size:0.82rem; margin:0;">--</p>
                     </div>
                 </header>
 
-                <!-- Tabs Navigation -->
-                <div style="display:flex; gap:8px; border-bottom:1px solid var(--line); padding-bottom:16px;">
-                    <button class="detail-tab active" data-tab="summary" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:var(--brand-soft); color:var(--brand); border:none; cursor:pointer;">Análise Comparativa</button>
-                    <button class="detail-tab" data-tab="list" style="padding:10px 20px; font-weight:600; font-size:0.9rem; border-radius:10px; background:transparent; color:#64748b; border:none; cursor:pointer; transition:var(--ease);">Transações Detalhadas</button>
+                <!-- Hidden period selectors (driven by month pills) -->
+                <select id="sel-month" style="display:none;"></select>
+                <select id="sel-year" style="display:none;"></select>
+
+                <!-- Month pills -->
+                <div>
+                    <div style="font-size:0.7rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Relatórios por período</div>
+                    <div id="month-pills-row" class="cnpj-selector"></div>
                 </div>
 
-                <!-- Tab Content: Summary -->
-                <div id="tab-summary-content" style="flex:1; display:flex; flex-direction:column;">
-                    <div id="report-content-body" class="animate-up" style="flex:1;">
-                        <div class="card glass" style="padding:48px; display:flex; flex-direction:column; align-items:center; gap:20px; border:2px dashed var(--line);">
-                            <div class="skeleton" style="width:100%; height:400px; border-radius:24px;"></div>
+                <!-- Report summary card -->
+                <div id="report-summary-card" class="card" style="padding:16px; background:linear-gradient(135deg, var(--brand-soft), rgba(139,92,246,0.05)); border-color:rgba(99,102,241,0.2);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:0.7rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total do período</div>
+                            <div id="report-total-display" style="font-size:1.6rem; font-weight:800; color:#1e293b; letter-spacing:-0.02em;">--</div>
                         </div>
+                        <div id="report-status-badge"></div>
                     </div>
+                    <div id="report-categories-mini" style="margin-top:12px; display:none; padding-top:12px; border-top:1px solid rgba(99,102,241,0.1);"></div>
                 </div>
 
-                <!-- Tab Content: List (Individual Expenses) -->
-                <div id="tab-list-content" style="display:none;">
-                    <div class="card glass" style="padding:0; overflow:hidden; border-radius:20px;">
-                        <div style="padding:20px 24px; border-bottom:1px solid var(--line); background:var(--bg); display:flex; justify-content:space-between; align-items:center;">
-                            <h3 style="font-size:0.95rem; font-weight:700; color:#1e293b; margin:0;">Extrato de Lançamentos</h3>
-                        </div>
-                        <div style="overflow-x:auto;">
-                            <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
-                                <thead>
-                                    <tr style="border-bottom:1px solid var(--line); background:rgba(241, 245, 249, 0.5);">
-                                         <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Data</th>
-                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Descrição</th>
-                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
-                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor (R$)</th>
-                                        <th style="padding:16px 24px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:center;">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="expenses-list-tbody">
-                                    <!-- Rendered dynamically -->
-                                    <tr><td colspan="5" style="padding:40px; text-align:center;"><div class="skeleton" style="height:200px; border-radius:12px;"></div></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                <!-- Expense table -->
+                <div class="card" style="padding:0; overflow:hidden; border-radius:20px;">
+                    <div style="padding:16px 20px; border-bottom:1px solid var(--line); background:var(--bg);">
+                        <h3 style="font-size:0.9rem; font-weight:700; color:#1e293b; margin:0;">Lançamentos do período</h3>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
+                            <thead>
+                                <tr style="border-bottom:1px solid var(--line); background:rgba(241, 245, 249, 0.5);">
+                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase;">Data</th>
+                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase;">Descrição</th>
+                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
+                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor (R$)</th>
+                                    <th style="padding:12px 16px; font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenses-list-tbody">
+                                <tr><td colspan="5" style="padding:40px; text-align:center;"><div class="skeleton" style="height:200px; border-radius:12px;"></div></td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -461,20 +457,51 @@ async function renderDashboard(user) {
     // --- Navigation Master/Detail ---
     function openCompanyDetail(company) {
         selectedCompanyId = company.id;
-        
-        // Update Headers
+
         document.getElementById('detail-company-name').textContent = company.razao_social;
         document.getElementById('detail-company-cnpj').textContent = company.cnpj;
-        
-        // Hide dashboard, Show detail view
-        const dashboard = document.getElementById('dashboard-view');
-        const detailView = document.getElementById('company-detail-view');
-        
-        dashboard.style.display = 'none';
-        detailView.style.display = 'flex';
-        
+
+        document.getElementById('dashboard-view').style.display = 'none';
+        document.getElementById('company-detail-view').style.display = 'flex';
+
+        generateMonthPills();
         loadReport();
         loadIndividualExpenses();
+    }
+
+    function generateMonthPills() {
+        const container = document.getElementById('month-pills-row');
+        if (!container) return;
+        const MONTHS_SHORT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        const now = new Date();
+        const currentMonth = parseInt(document.getElementById('sel-month')?.value) || (now.getMonth() + 1);
+        const currentYear = parseInt(document.getElementById('sel-year')?.value) || now.getFullYear();
+
+        const pills = [];
+        for (let i = 0; i < 12; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const m = d.getMonth() + 1;
+            const y = d.getFullYear();
+            const isActive = m === currentMonth && y === currentYear;
+            pills.push(`
+                <button class="cnpj-pill ${isActive ? 'active' : ''}" data-month="${m}" data-year="${y}" style="min-width:52px; text-align:center; padding:8px 10px;">
+                    <div style="font-weight:700; font-size:0.82rem; line-height:1.2;">${MONTHS_SHORT[m-1]}</div>
+                    ${y !== now.getFullYear() ? `<div style="font-size:0.6rem; opacity:0.65;">${y}</div>` : ''}
+                </button>
+            `);
+        }
+        container.innerHTML = pills.join('');
+
+        container.querySelectorAll('[data-month]').forEach(pill => {
+            pill.addEventListener('click', () => {
+                container.querySelectorAll('.cnpj-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                document.getElementById('sel-month').value = pill.dataset.month;
+                document.getElementById('sel-year').value = pill.dataset.year;
+                loadReport();
+                loadIndividualExpenses();
+            });
+        });
     }
     
     function closeCompanyDetail() {
@@ -493,113 +520,43 @@ async function renderDashboard(user) {
 
     async function loadReport() {
         if (!selectedCompanyId) return;
-        const month = document.getElementById('sel-month').value;
-        const year = document.getElementById('sel-year').value;
-        const container = document.getElementById('report-content-body');
-        if(!container) return; // Prevent errors if DOM not ready
-        
-        container.innerHTML = '<div class="card glass animate-fade" style="padding:48px;"><div class="skeleton" style="height:400px; border-radius:24px;"></div></div>';
+        const month = document.getElementById('sel-month')?.value;
+        const year = document.getElementById('sel-year')?.value;
+        if (!month || !year) return;
+
+        const totalEl = document.getElementById('report-total-display');
+        const badgeEl = document.getElementById('report-status-badge');
+        const catsEl = document.getElementById('report-categories-mini');
+        if (!totalEl) return;
+
+        totalEl.textContent = '...';
+        if (badgeEl) badgeEl.innerHTML = '';
+        if (catsEl) catsEl.style.display = 'none';
 
         try {
             const report = await api.get(`/reports/monthly?cnpj_id=${selectedCompanyId}&month=${month}&year=${year}`);
-            
-            if (report.categories.length === 0) {
-                container.innerHTML = `
-                    <div class="card glass animate-fade" style="padding:48px; text-align:center;">
-                        <p class="text-muted">Sem movimentações para este período.</p>
-                    </div>
-                `;
+
+            if (!report.categories || report.categories.length === 0 || report.total_geral === 0) {
+                totalEl.textContent = 'R$ 0,00';
+                if (badgeEl) badgeEl.innerHTML = `<span style="font-size:0.72rem; font-weight:700; padding:4px 12px; border-radius:100px; background:var(--line); color:var(--ink-3);">Sem lançamentos</span>`;
                 return;
             }
 
-            let topCategory = { name: '-', total: 0 };
-            if (report.categories.length > 0) {
-                const sorted = [...report.categories].sort((a,b) => parseFloat(b.total) - parseFloat(a.total));
-                topCategory = { name: sorted[0].category_name, total: parseFloat(sorted[0].total) };
+            totalEl.textContent = `R$ ${report.total_geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            if (badgeEl) badgeEl.innerHTML = `<span style="font-size:0.72rem; font-weight:700; padding:4px 12px; border-radius:100px; background:var(--green-soft); color:var(--green);">${report.categories.reduce((a,c) => a + parseInt(c.lancamentos), 0)} lançamentos</span>`;
+
+            if (catsEl) {
+                const topCats = [...report.categories].sort((a,b) => parseFloat(b.total) - parseFloat(a.total)).slice(0, 4);
+                catsEl.style.display = 'block';
+                catsEl.innerHTML = topCats.map(c => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid rgba(99,102,241,0.08); font-size:0.82rem;">
+                        <span style="color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%;">${c.category_name}</span>
+                        <span style="font-weight:700; color:var(--ink); flex-shrink:0;">R$ ${parseFloat(c.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                `).join('');
             }
-
-            container.innerHTML = `
-                <div class="card glass animate-fade" style="padding:0; border-radius:24px; overflow:hidden;">
-                    <!-- Report Header -->
-                    <div style="background:linear-gradient(135deg, var(--bg), var(--bg)); padding:32px 32px 24px; border-bottom:1px solid var(--line);">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <div>
-                                <div style="font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-                                    <svg width="14" height="14" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 15v4a2 2 0 0 0 2 2h14v-4"/><path d="M3 15h18v-4H3v4z"/></svg>
-                                    Total Despesas (${monthNames[document.getElementById('sel-month').value - 1]})
-                                </div>
-                                <div style="font-size:2rem; font-weight:800; color:#1e293b; letter-spacing:-0.5px;">R$ ${report.total_geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                            </div>
-                            <button class="btn btn-outline" id="btn-download-pdf" style="width:auto; border-radius:12px; padding:10px 16px; font-size:0.85rem; border-color:var(--line); color:var(--ink-2); background:white;">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                Exportar
-                            </button>
-                        </div>
-                        
-                        <div style="margin-top:24px; display:flex; gap:16px;">
-                            <div style="background:white; padding:12px 16px; border-radius:12px; border:1px solid var(--line); flex:1;">
-                                <div style="font-size:0.7rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Maior Despesa</div>
-                                <div style="font-size:0.95rem; font-weight:700; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${topCategory.name}">${topCategory.name}</div>
-                                <div style="font-size:0.85rem; color:var(--red); font-weight:600; margin-top:2px;">R$ ${topCategory.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                            </div>
-                            <div style="background:white; padding:12px 16px; border-radius:12px; border:1px solid var(--line); width:140px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                                <div style="font-size:0.7rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Lançamentos</div>
-                                <div style="font-size:1.4rem; font-weight:800; color:var(--brand);">${report.categories.reduce((acc, c) => acc + parseInt(c.lancamentos), 0)}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Report List -->
-                    <div style="background:white; padding:0;">
-                         <div style="padding:24px 32px 16px; border-bottom:1px solid var(--line);">
-                            <h3 style="font-size:0.85rem; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">Detalhamento por Categoria</h3>
-                        </div>
-                        <div style="overflow-x:auto;">
-                            <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
-                                <thead>
-                                    <tr style="border-bottom:1px solid var(--line); background:rgba(241, 245, 249, 0.5);">
-                                        <th style="padding:16px 32px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
-                                        <th style="padding:16px 32px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:center;">Lançamentos</th>
-                                        <th style="padding:16px 32px; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor (R$)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${report.categories.map(c => `
-                                        <tr style="border-bottom:1px solid var(--line); transition:var(--ease);" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='transparent'">
-                                            <td style="padding:20px 32px;">
-                                                <div style="display:flex; align-items:center; gap:12px;">
-                                                    <div style="width:36px; height:36px; border-radius:10px; background:var(--bg); display:flex; align-items:center; justify-content:center; color:#64748b;">
-                                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                                                    </div>
-                                                    <div>
-                                                        <div style="display:flex; align-items:center; gap:8px;">
-                                                            <span style="font-weight:700; color:#1e293b; font-size:0.9rem;">${c.category_name}</span>
-                                                            ${c.is_filial ? '<span style="font-size:0.6rem; font-weight:700; background:rgba(139,92,246,0.10); color:#8b5cf6; padding:2px 8px; border-radius:100px; text-transform:uppercase;">Filial</span>' : ''}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td style="padding:20px 32px; text-align:center;">
-                                                <div style="font-size:0.9rem; font-weight:600; color:#475569;">${c.lancamentos} item(s)</div>
-                                            </td>
-                                            <td style="padding:20px 32px; text-align:right;">
-                                                <div style="font-size:1rem; font-weight:800; color:#1e293b;">R$ ${parseFloat(c.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                                            </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('btn-download-pdf').addEventListener('click', () => {
-                showToast('Preparando download do PDF...', 'info');
-            });
-
-        } catch (e) { 
-            container.innerHTML = `<div class="card glass" style="padding:32px; color:var(--red);">${e.message}</div>`;
+        } catch (e) {
+            if (totalEl) totalEl.textContent = 'Erro';
         }
     }
 
@@ -848,29 +805,6 @@ async function renderDashboard(user) {
     
     document.getElementById('btn-back-dashboard').addEventListener('click', closeCompanyDetail);
 
-    // Tab Logic
-    document.querySelectorAll('.detail-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            document.querySelectorAll('.detail-tab').forEach(t => {
-                t.classList.remove('active');
-                t.style.background = 'transparent';
-                t.style.color = '#64748b';
-            });
-            const target = e.target;
-            target.classList.add('active');
-            target.style.background = 'var(--brand-soft)';
-            target.style.color = 'var(--brand)';
-            
-            const tabId = target.dataset.tab;
-            if (tabId === 'summary') {
-                document.getElementById('tab-summary-content').style.display = 'block';
-                document.getElementById('tab-list-content').style.display = 'none';
-            } else {
-                document.getElementById('tab-summary-content').style.display = 'none';
-                document.getElementById('tab-list-content').style.display = 'block';
-            }
-        });
-    });
 
     document.getElementById('company-search').addEventListener('input', () => {
         renderCompanies();

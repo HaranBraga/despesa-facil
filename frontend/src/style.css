@@ -615,3 +615,8 @@ body {
 @media (max-width:900px) {
   .grid-2 { grid-template-columns:1fr !important; }
 }
+
+@media (max-width:767px) {
+  .app-header { padding: calc(var(--sat) + 6px) 16px 6px; min-height:44px; }
+  #btn-toggle-mobile-menu { display:none; }
+}
