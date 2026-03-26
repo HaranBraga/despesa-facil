@@ -1091,6 +1091,7 @@ async function renderConta() {
   renderShell('<div class="skeleton" style="height:300px"></div>', 'config');
   try {
     const account = await api.get('/account');
+    const cnpjs = await api.get('/cnpjs');
 
     renderShell(`
       <div class="gap-16">
@@ -1110,8 +1111,9 @@ async function renderConta() {
             <input type="email" class="form-input" value="${account.email}" disabled style="opacity:0.6" />
           </div>
           <div class="form-group">
-            <label class="form-label">WhatsApp (para receber lembretes)</label>
+            <label class="form-label">WhatsApp padrão (para receber lembretes)</label>
             <input id="ac-wpp" type="tel" class="form-input" placeholder="5511999999999" value="${account.whatsapp_number || ''}" inputmode="numeric" />
+            <p class="text-sm text-muted" style="margin:4px 0 0">Usado quando o CNPJ não tiver número específico.</p>
           </div>
           <button class="btn btn-primary" id="btn-save-account">Salvar Conta</button>
         </div>
@@ -1132,6 +1134,28 @@ async function renderConta() {
           </div>
           <button class="btn btn-outline" id="btn-save-password">Atualizar Senha</button>
         </div>
+
+        <!-- WhatsApp por CNPJ -->
+        ${cnpjs.length > 0 ? `
+        <div class="card">
+          <div class="section-title" style="margin-bottom:12px;font-size:1rem;display:flex;align-items:center;gap:6px;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 11.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 2.77h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 10.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 18.92z"></path></svg>
+            WhatsApp por CNPJ
+          </div>
+          <p class="text-sm text-muted" style="margin:0 0 12px">Defina um número específico para cada empresa. Deixe em branco para usar o padrão da conta.</p>
+          <div class="gap-12">
+            ${cnpjs.map(c => `
+              <div style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="font-weight:600;font-size:0.9rem">${c.razao_social}</div>
+                <div style="font-size:0.8rem;color:var(--ink-3);font-family:monospace">${c.cnpj}</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="tel" class="form-input cnpj-wpp-input" data-cnpj-id="${c.id}" placeholder="Padrão da conta" value="${c.whatsapp_number || ''}" inputmode="numeric" style="flex:1;" />
+                  <button class="btn btn-outline btn-sm btn-save-cnpj-wpp" data-cnpj-id="${c.id}">Salvar</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>` : ''}
 
         <button class="btn btn-outline" id="btn-back-config">← Voltar às Configurações</button>
       </div>
@@ -1158,6 +1182,18 @@ async function renderConta() {
         document.getElementById('ac-pass-cur').value = '';
         document.getElementById('ac-pass-new').value = '';
       } catch (e) { showToast(e.message, 'error'); }
+    });
+
+    // Salvar WhatsApp por CNPJ
+    document.querySelectorAll('.btn-save-cnpj-wpp').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.cnpjId;
+        const whatsapp_number = document.querySelector(`.cnpj-wpp-input[data-cnpj-id="${id}"]`).value.trim() || null;
+        try {
+          await api.put(`/account/cnpjs/${id}/whatsapp`, { whatsapp_number });
+          showToast('Número atualizado!', 'success');
+        } catch (e) { showToast(e.message, 'error'); }
+      });
     });
 
     document.getElementById('btn-back-config').addEventListener('click', () => navigate('config'));
