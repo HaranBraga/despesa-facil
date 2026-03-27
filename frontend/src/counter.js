@@ -68,7 +68,7 @@ function renderLogin() {
         if (!email || !password) return showToast('Preencha todos os campos', 'error');
         try {
             const data = await api.post('/auth/login', { email, password });
-            if (!data.user.office_id) throw new Error('Acesso negado. Esta conta não é de um contador.');
+            if (!data.user.is_counter) throw new Error('Acesso negado. Esta conta não é de um contador.');
             localStorage.setItem('counter_token', data.token);
             render();
         } catch (e) { showToast(e.message, 'error'); }
@@ -87,7 +87,7 @@ async function render() {
 
     try {
         const me = await api.get('/auth/me');
-        if (!me.office_id) {
+        if (!me.is_counter) {
             showToast('Acesso negado. Esta conta não é de um contador.', 'error');
             localStorage.removeItem('counter_token');
             renderLogin();
@@ -113,90 +113,46 @@ async function renderDashboard(user) {
 
 
     document.getElementById('app').innerHTML = `
-    <div class="app-shell">
-        <aside id="sidebar-main" class="sidebar-main">
-            <div class="sidebar-logo" style="justify-content:space-between;width:100%;">
-                <div style="display:flex;align-items:center;gap:12px;overflow:hidden;">
-                    <div class="sidebar-logo-icon">
-                         <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-                            <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
-                        </svg>
-                    </div>
-                    <div class="collapse-hide">
-                        <div class="sidebar-logo-text">Despesa Fácil</div>
-                        <div class="sidebar-logo-badge">Contador</div>
-                    </div>
+    <div style="display:flex; flex-direction:column; min-height:100vh; background:var(--bg);">
+
+        <!-- Top Header -->
+        <header style="position:sticky; top:0; z-index:50; background:white; border-bottom:1px solid var(--line); padding:0 20px; height:56px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:32px; height:32px; border-radius:10px; background:linear-gradient(135deg,var(--brand),#8b5cf6); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
                 </div>
-                <button id="btn-toggle-sidebar" class="btn-sidebar-toggle">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                <div>
+                    <div style="font-weight:800; font-size:0.9rem; color:#1e293b; line-height:1.1;">Despesa Fácil</div>
+                    <div style="font-size:0.65rem; font-weight:700; color:var(--brand); text-transform:uppercase; letter-spacing:0.05em;">Contador</div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button id="btn-settings" style="width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--ease);" title="Configurações">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                </button>
+                <button id="btn-logout" style="width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:var(--red); cursor:pointer; transition:var(--ease);" title="Sair">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 </button>
             </div>
-
-            <nav class="sidebar-nav">
-                <button class="nav-item-side active" id="sb-filter-all" data-filter="all">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-                    <span class="collapse-hide">Todas</span>
-                </button>
-                <button class="nav-item-side" id="sb-filter-pending" data-filter="pending">
-                    <svg width="20" height="20" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-                    <span class="collapse-hide">Pendentes</span>
-                </button>
-                <button class="nav-item-side" id="sb-filter-inprogress" data-filter="in_progress">
-                    <svg width="20" height="20" fill="none" stroke="#8b5cf6" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    <span class="collapse-hide">Em Digitação</span>
-                </button>
-                <button class="nav-item-side" id="sb-filter-delivered" data-filter="delivered">
-                    <svg width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="collapse-hide">Entregues</span>
-                </button>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="sidebar-user">
-                    <div class="sidebar-avatar">${user.name.charAt(0)}</div>
-                    <div class="collapse-hide" style="min-width:0;">
-                        <div class="sidebar-user-name">${user.name}</div>
-                        <div class="sidebar-user-role">Escritório Ativo</div>
-                    </div>
-                </div>
-                <button class="nav-item-side" id="btn-settings">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-                    <span class="collapse-hide">Limites</span>
-                </button>
-                <button class="nav-item-side" id="btn-logout" style="color:var(--red);">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span class="collapse-hide">Sair</span>
-                </button>
-            </div>
-        </aside>
-        
-        <!-- Sidebar overlay for mobile -->
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        </header>
 
         <!-- Main Content -->
-        <main class="page-content" id="main-content">
-            <header class="app-header">
-                <button class="btn-ghost" id="btn-toggle-mobile-menu">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-                </button>
-                <span class="logo"><span class="text-gradient" style="font-weight:800;">Painel do Contador</span></span>
-            </header>
-            
+        <main style="flex:1; padding:20px; max-width:1200px; width:100%; margin:0 auto;" id="main-content">
+
             <!-- VIEW: DASHBOARD MESTRE -->
-            <div id="dashboard-view" style="display:flex; flex-direction:column; gap:32px; transition:var(--ease);">
-                <header style="display:flex; justify-content:space-between; align-items:center;">
+            <div id="dashboard-view" style="display:flex; flex-direction:column; gap:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                     <div>
-                        <h1 style="font-size:1.8rem; font-weight:800; color:#1e293b; margin-bottom:4px;">Olá, ${user.name.split(' ')[0]}</h1>
-                        <p style="color:#64748b;">Aqui está o resumo contábil do seu escritório.</p>
+                        <h1 style="font-size:1.5rem; font-weight:800; color:#1e293b; margin:0 0 2px;">Olá, ${user.name.split(' ')[0]}</h1>
+                        <p style="color:#64748b; margin:0; font-size:0.85rem;">Resumo contábil do seu escritório.</p>
                     </div>
-                    
-                    <div id="dashboard-period-picker" style="display:flex; gap:12px; background:white; padding:12px 20px; border-radius:16px; box-shadow:var(--shadow-1); border:1px solid var(--line); align-items:center;">
-                        <span style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Período:</span>
-                        <select id="dash-sel-month" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600; cursor:pointer;"></select>
-                        <div style="width:1px; height:20px; background:var(--line);"></div>
-                        <select id="dash-sel-year" class="form-input" style="width:auto; padding:4px 8px; border:none; background:transparent; font-weight:600; cursor:pointer;"></select>
+                    <div id="dashboard-period-picker" style="display:flex; gap:8px; background:white; padding:8px 14px; border-radius:12px; box-shadow:var(--shadow-1); border:1px solid var(--line); align-items:center;">
+                        <span style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase;">Período</span>
+                        <select id="dash-sel-month" class="form-input" style="width:auto; padding:4px 6px; border:none; background:transparent; font-weight:600; cursor:pointer; font-size:0.85rem;"></select>
+                        <div style="width:1px; height:16px; background:var(--line);"></div>
+                        <select id="dash-sel-year" class="form-input" style="width:auto; padding:4px 6px; border:none; background:transparent; font-weight:600; cursor:pointer; font-size:0.85rem;"></select>
                     </div>
-                </header>
+                </div>
 
                 <!-- Summary Cards Premium -->
             <div class="grid-stats" id="summary-container">
@@ -363,21 +319,8 @@ async function renderDashboard(user) {
                     </div>
                 </div>
             </div>
+
         </main>
-        <nav class="bottom-nav" id="counter-bottom-nav">
-            <button class="nav-item active" id="bn-dashboard">
-                <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
-                <span class="nav-label">Dashboard</span>
-            </button>
-            <button class="nav-item" id="bn-settings">
-                <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-                <span class="nav-label">Configurações</span>
-            </button>
-            <button class="nav-item" id="bn-logout" style="color:var(--red);">
-                <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-                <span class="nav-label">Sair</span>
-            </button>
-        </nav>
     </div>
     `;
 
@@ -954,27 +897,6 @@ async function renderDashboard(user) {
         } catch (e) { showToast(e.message, 'error'); }
     }
 
-    document.getElementById('btn-logout').addEventListener('click', () => {
-        localStorage.removeItem('counter_token');
-        renderLogin();
-    });
-
-    document.getElementById('btn-settings').addEventListener('click', showSettingsModal);
-
-    // Bottom nav
-    document.getElementById('bn-dashboard')?.addEventListener('click', () => {
-        document.getElementById('dashboard-view').style.display = 'flex';
-        document.getElementById('company-detail-view').style.display = 'none';
-        selectedCompanyId = null;
-        document.querySelectorAll('#counter-bottom-nav .nav-item').forEach(b => b.classList.remove('active'));
-        document.getElementById('bn-dashboard').classList.add('active');
-    });
-    document.getElementById('bn-settings')?.addEventListener('click', showSettingsModal);
-    document.getElementById('bn-logout')?.addEventListener('click', () => {
-        localStorage.removeItem('counter_token');
-        renderLogin();
-    });
-    
     document.getElementById('sel-month').addEventListener('change', () => { loadReport(); loadIndividualExpenses(); });
     document.getElementById('sel-year').addEventListener('change', () => { loadReport(); loadIndividualExpenses(); });
     
@@ -1061,64 +983,11 @@ async function renderDashboard(user) {
         });
     });
 
-    // Sidebar filter buttons
-    function setSidebarFilter(filter) {
-        currentFilter = filter;
-        document.querySelectorAll('[id^="sb-filter-"]').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.filter === filter);
-        });
-        // Sync summary cards highlight too
-        document.querySelectorAll('.clickable-card').forEach(c => {
-            const match = c.dataset.filter === filter;
-            c.classList.toggle('active-card', match);
-            c.style.borderColor = match ? (c.dataset.color || 'var(--brand)') : 'transparent';
-            c.style.boxShadow = match ? `0 8px 25px -5px ${c.dataset.color || 'var(--brand)'}20` : 'none';
-        });
-        // Return to dashboard view if in detail
-        if (document.getElementById('company-detail-view').style.display !== 'none') {
-            document.getElementById('company-detail-view').style.display = 'none';
-            document.getElementById('dashboard-view').style.display = 'flex';
-            selectedCompanyId = null;
-        }
-        renderCompanies();
-    }
-    document.getElementById('sb-filter-all')?.addEventListener('click', () => setSidebarFilter('all'));
-    document.getElementById('sb-filter-pending')?.addEventListener('click', () => setSidebarFilter('pending'));
-    document.getElementById('sb-filter-inprogress')?.addEventListener('click', () => setSidebarFilter('in_progress'));
-    document.getElementById('sb-filter-delivered')?.addEventListener('click', () => setSidebarFilter('delivered'));
-
-    // Sidebar Toggle Logic
-    const btnToggle = document.getElementById('btn-toggle-sidebar');
-    const shell = document.querySelector('.app-shell');
-    
-    if(btnToggle) {
-        btnToggle.addEventListener('click', () => {
-            isSidebarCollapsed = !isSidebarCollapsed;
-            shell.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
-            btnToggle.style.transform = isSidebarCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
-            
-            // Sidebar alignment fixes for collapsed state
-            const sidebar = document.getElementById('sidebar-main');
-            sidebar.style.width = isSidebarCollapsed ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
-            sidebar.style.padding = isSidebarCollapsed ? '32px 10px' : '32px 24px';
-        });
-    }
-
-    const btnMobileMenu = document.getElementById('btn-toggle-mobile-menu');
-    if(btnMobileMenu) {
-        btnMobileMenu.addEventListener('click', () => {
-            document.getElementById('sidebar-main').classList.add('show');
-            document.getElementById('sidebar-overlay').classList.add('show');
-        });
-    }
-
-    const overlay = document.getElementById('sidebar-overlay');
-    if(overlay) {
-        overlay.addEventListener('click', () => {
-            document.getElementById('sidebar-main').classList.remove('show');
-            overlay.classList.remove('show');
-        });
-    }
+    document.getElementById('btn-logout').addEventListener('click', () => {
+        localStorage.removeItem('counter_token');
+        renderLogin();
+    });
+    document.getElementById('btn-settings').addEventListener('click', showSettingsModal);
 }
 
 render();

@@ -132,7 +132,7 @@ router.get('/:id/counters', auth, async (req, res) => {
         }
         const { id } = req.params;
         const result = await pool.query(
-            'SELECT id, name, email, created_at FROM users WHERE office_id = $1 AND is_admin = false ORDER BY name ASC',
+            'SELECT id, name, email, created_at FROM users WHERE office_id = $1 AND is_admin = false AND is_counter = true ORDER BY name ASC',
             [id]
         );
         res.json(result.rows);
@@ -163,8 +163,8 @@ router.post('/:id/counters', auth, async (req, res) => {
 
         const hash = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO users (id, name, email, password_hash, office_id, is_admin) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, email',
-            [uuidv4(), name, email.toLowerCase(), hash, officeId, false]
+            'INSERT INTO users (id, name, email, password_hash, office_id, is_admin, is_counter) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, name, email',
+            [uuidv4(), name, email.toLowerCase(), hash, officeId, false, true]
         );
 
         res.status(201).json(result.rows[0]);
@@ -243,7 +243,7 @@ router.get('/:id/clients', auth, async (req, res) => {
                     COUNT(c.id) AS cnpj_count
              FROM users u
              JOIN cnpjs c ON c.user_id = u.id AND c.is_active = true
-             WHERE u.office_id = $1 AND u.is_admin = false
+             WHERE u.office_id = $1 AND u.is_admin = false AND (u.is_counter = false OR u.is_counter IS NULL)
              GROUP BY u.id, u.name, u.email, u.is_active, u.created_at
              ORDER BY u.name ASC`,
             [req.params.id]

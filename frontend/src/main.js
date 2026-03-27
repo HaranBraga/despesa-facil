@@ -208,7 +208,7 @@ function renderLogin() {
     try {
       const data = await api.post('/auth/login', { email, password });
       if (data.user.is_admin) throw new Error('Use o painel Admin para acessar esta conta.');
-      if (data.user.office_id) throw new Error('Use o painel do Contador para acessar esta conta.');
+      if (data.user.is_counter) throw new Error('Use o painel do Contador para acessar esta conta.');
       localStorage.setItem('token', data.token);
       navigate('dashboard');
     } catch (e) { showToast(e.message, 'error'); }
@@ -752,12 +752,11 @@ function setupHistoricoEvents(cnpjs, initialDate, calMonth, calYear, expDates) {
       if (currentMonth > 12) { currentMonth = 1; currentYear++; }
       refreshCalendar();
     });
-    document.querySelectorAll('.cal-day.has-expense').forEach(day => {
-      day.addEventListener('click', () => {
-        currentDate = day.dataset.date;
-        // Update selected state
-        document.querySelectorAll('.cal-day.selected').forEach(d => d.classList.remove('selected'));
-        day.classList.add('selected');
+    document.querySelectorAll('.cal-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        currentDate = chip.dataset.date;
+        document.querySelectorAll('.cal-chip.selected').forEach(d => d.classList.remove('selected'));
+        chip.classList.add('selected');
         loadExpenses();
       });
     });
@@ -1184,7 +1183,7 @@ function showAddCnpjModal() {
       <div class="gap-16">
         <div class="form-group">
           <label class="form-label">Razão Social</label>
-          <input id="m-razao" type="text" class="form-input" placeholder="Nome da empresa" />
+          <input id="m-razao" type="text" class="form-input" placeholder="Nome da empresa" style="text-transform:uppercase" />
         </div>
         <div class="form-group">
           <label class="form-label">CNPJ</label>
@@ -1209,7 +1208,7 @@ function showAddCnpjModal() {
   });
 
   document.getElementById('btn-confirm-cnpj').addEventListener('click', async () => {
-    const razao_social = document.getElementById('m-razao').value.trim();
+    const razao_social = document.getElementById('m-razao').value.trim().toUpperCase();
     const cnpj = document.getElementById('m-cnpj').value.trim();
     if (!razao_social || !cnpj) return showToast('Preencha todos os campos', 'error');
     try {

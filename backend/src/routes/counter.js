@@ -5,9 +5,9 @@ const XLSX = require('xlsx');
 
 const router = express.Router();
 
-// Middleware: Verify if user is associated with an office
+// Middleware: Verify if user is a counter associated with an office
 async function verifyIsCounter(req, res, next) {
-    if (!req.user.office_id) {
+    if (!req.user.is_counter || !req.user.office_id) {
         return res.status(403).json({ error: 'Acesso restrito a contadores vinculados a um escritório' });
     }
     next();
