@@ -133,9 +133,21 @@ async function renderDashboard(user) {
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-item-side active">
+                <button class="nav-item-side active" id="sb-filter-all" data-filter="all">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-                    <span class="collapse-hide">Dashboard</span>
+                    <span class="collapse-hide">Todas</span>
+                </button>
+                <button class="nav-item-side" id="sb-filter-pending" data-filter="pending">
+                    <svg width="20" height="20" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+                    <span class="collapse-hide">Pendentes</span>
+                </button>
+                <button class="nav-item-side" id="sb-filter-inprogress" data-filter="in_progress">
+                    <svg width="20" height="20" fill="none" stroke="#8b5cf6" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span class="collapse-hide">Em Digitação</span>
+                </button>
+                <button class="nav-item-side" id="sb-filter-delivered" data-filter="delivered">
+                    <svg width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="collapse-hide">Entregues</span>
                 </button>
             </nav>
 
@@ -252,10 +264,11 @@ async function renderDashboard(user) {
                         <svg width="18" height="18" fill="none" stroke="#64748b" stroke-width="2" viewBox="0 0 24 24" style="position:absolute; left:14px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </div>
                 </div>
-                <div id="companies-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:12px;">
-                    <div class="skeleton" style="height:96px; border-radius:16px;"></div>
-                    <div class="skeleton" style="height:96px; border-radius:16px;"></div>
-                    <div class="skeleton" style="height:96px; border-radius:16px;"></div>
+                <div id="companies-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:8px;">
+                    <div class="skeleton" style="height:62px; border-radius:12px;"></div>
+                    <div class="skeleton" style="height:62px; border-radius:12px;"></div>
+                    <div class="skeleton" style="height:62px; border-radius:12px;"></div>
+                    <div class="skeleton" style="height:62px; border-radius:12px;"></div>
                 </div>
             </div>
             </div> <!-- Close dashboard-view -->
@@ -447,53 +460,44 @@ async function renderDashboard(user) {
             const useGroups = ownerKeys.length > 1 && !searchTerm;
 
             function companyCard(c) {
-                const initials = c.razao_social.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                const initials = c.razao_social.split(' ').slice(0,2).map(n => n[0]).join('').toUpperCase();
                 const isActive = selectedCompanyId == c.id;
 
-                let statusColor = '#cbd5e1';
-                let statusLabel = 'Pendente';
-                let statusBg = '#f8fafc';
-                if (c.is_locked) {
-                    statusColor = 'var(--green)'; statusLabel = 'Entregue'; statusBg = 'rgba(34,197,94,0.07)';
-                } else if (c.has_expenses) {
-                    statusColor = '#8b5cf6'; statusLabel = 'Em Digitação'; statusBg = 'rgba(139,92,246,0.06)';
-                }
+                let statusColor = '#94a3b8';
+                let statusDot = '#cbd5e1';
+                if (c.is_locked) { statusColor = 'var(--green)'; statusDot = 'var(--green)'; }
+                else if (c.has_expenses) { statusColor = '#8b5cf6'; statusDot = '#8b5cf6'; }
 
                 const lateCount = parseInt(c.late_expenses_count) || 0;
-                const lateBadge = lateCount > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;background:rgba(245,158,11,0.12);border-radius:100px;font-size:0.6rem;font-weight:700;color:var(--amber);">+${lateCount} após envio</span>` : '';
+                const lateDot = lateCount > 0 ? `<span title="${lateCount} após envio" style="width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;margin-left:2px;"></span>` : '';
 
-                return `
-                <div class="clickable-company" data-id="${c.id}" style="display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:16px; border:1.5px solid ${isActive ? 'var(--brand)' : 'var(--line)'}; background:${isActive ? 'rgba(99,102,241,0.04)' : 'white'}; cursor:pointer; transition:var(--ease); position:relative; overflow:hidden;">
-                    ${isActive ? '<div style="position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--brand); border-radius:3px 0 0 3px;"></div>' : ''}
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div style="width:40px; height:40px; background:var(--bg); color:#475569; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; flex-shrink:0; border:1px solid var(--line);">${initials}</div>
-                        <div style="flex:1; min-width:0;">
-                            <div style="font-weight:700; color:#1e293b; font-size:0.88rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.razao_social}</div>
-                            <div style="font-size:0.7rem; color:#94a3b8; font-family:monospace;">${c.cnpj}</div>
+                return `<div class="clickable-company" data-id="${c.id}" title="${c.razao_social}\n${c.cnpj}" style="
+                    display:flex; align-items:center; gap:8px; padding:10px 12px;
+                    border-radius:12px; border:1.5px solid ${isActive ? 'var(--brand)' : 'var(--line)'};
+                    background:${isActive ? 'rgba(99,102,241,0.05)' : 'white'};
+                    cursor:pointer; transition:var(--ease); overflow:hidden; min-width:0;
+                ">
+                    <div style="width:32px;height:32px;border-radius:9px;background:${isActive ? 'var(--brand-soft)' : 'var(--bg)'};color:${isActive ? 'var(--brand)' : '#64748b'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.72rem;flex-shrink:0;">${initials}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;color:#1e293b;font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.razao_social}</div>
+                        <div style="display:flex;align-items:center;gap:4px;margin-top:2px;">
+                            <span style="width:6px;height:6px;border-radius:50%;background:${statusDot};flex-shrink:0;"></span>
+                            <span style="font-size:0.65rem;font-weight:600;color:${statusColor};">${c.is_locked ? 'Entregue' : c.has_expenses ? 'Em Digitação' : 'Pendente'}</span>
+                            ${lateDot}
                         </div>
-                    </div>
-                    <div style="display:flex; align-items:center; justify-content:space-between;">
-                        <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:100px;font-size:0.68rem;font-weight:700;color:${statusColor};background:${statusBg};">
-                            <span style="width:6px;height:6px;border-radius:50%;background:${statusColor};"></span>${statusLabel}
-                        </span>
-                        ${lateBadge}
                     </div>
                 </div>`;
             }
 
             if (useGroups) {
-                // Render with group headers as col-span rows
                 let html = '';
                 ownerKeys.forEach(owner => {
                     const g = grouped[owner];
-                    html += `<div style="grid-column:1/-1; display:flex; align-items:center; gap:10px; padding:4px 0; margin-top:4px;">
-                        <div style="width:28px; height:28px; border-radius:8px; background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.75rem; flex-shrink:0;">${owner.charAt(0).toUpperCase()}</div>
-                        <div>
-                            <div style="font-weight:700; font-size:0.82rem; color:#1e293b;">${owner}</div>
-                            ${g.owner_email ? `<div style="font-size:0.68rem; color:#94a3b8;">${g.owner_email}</div>` : ''}
-                        </div>
-                        <div style="flex:1; height:1px; background:var(--line);"></div>
-                        <span style="font-size:0.68rem; font-weight:700; color:var(--ink-3);">${g.companies.length} CNPJ${g.companies.length > 1 ? 's' : ''}</span>
+                    html += `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:2px 0;margin-top:6px;">
+                        <div style="width:22px;height:22px;border-radius:6px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.65rem;flex-shrink:0;">${owner.charAt(0).toUpperCase()}</div>
+                        <span style="font-weight:700;font-size:0.78rem;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${owner}</span>
+                        <div style="flex:1;height:1px;background:var(--line);"></div>
+                        <span style="font-size:0.65rem;font-weight:700;color:var(--ink-3);flex-shrink:0;">${g.companies.length}</span>
                     </div>`;
                     html += g.companies.map(companyCard).join('');
                 });
@@ -1056,6 +1060,32 @@ async function renderDashboard(user) {
             renderCompanies();
         });
     });
+
+    // Sidebar filter buttons
+    function setSidebarFilter(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('[id^="sb-filter-"]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filter);
+        });
+        // Sync summary cards highlight too
+        document.querySelectorAll('.clickable-card').forEach(c => {
+            const match = c.dataset.filter === filter;
+            c.classList.toggle('active-card', match);
+            c.style.borderColor = match ? (c.dataset.color || 'var(--brand)') : 'transparent';
+            c.style.boxShadow = match ? `0 8px 25px -5px ${c.dataset.color || 'var(--brand)'}20` : 'none';
+        });
+        // Return to dashboard view if in detail
+        if (document.getElementById('company-detail-view').style.display !== 'none') {
+            document.getElementById('company-detail-view').style.display = 'none';
+            document.getElementById('dashboard-view').style.display = 'flex';
+            selectedCompanyId = null;
+        }
+        renderCompanies();
+    }
+    document.getElementById('sb-filter-all')?.addEventListener('click', () => setSidebarFilter('all'));
+    document.getElementById('sb-filter-pending')?.addEventListener('click', () => setSidebarFilter('pending'));
+    document.getElementById('sb-filter-inprogress')?.addEventListener('click', () => setSidebarFilter('in_progress'));
+    document.getElementById('sb-filter-delivered')?.addEventListener('click', () => setSidebarFilter('delivered'));
 
     // Sidebar Toggle Logic
     const btnToggle = document.getElementById('btn-toggle-sidebar');

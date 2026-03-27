@@ -183,9 +183,10 @@ router.put('/counters/:id', auth, async (req, res) => {
         const { email, password } = req.body;
         if (!email && !password) return res.status(400).json({ error: 'Informe email ou senha para alterar' });
 
-        const check = await pool.query('SELECT id, is_admin FROM users WHERE id = $1', [id]);
+        const check = await pool.query('SELECT id, is_admin, office_id FROM users WHERE id = $1', [id]);
         if (check.rows.length === 0) return res.status(404).json({ error: 'Contador não encontrado' });
         if (check.rows[0].is_admin) return res.status(403).json({ error: 'Operação não permitida' });
+        if (!check.rows[0].office_id) return res.status(403).json({ error: 'Este usuário é um cliente do sistema, não um contador.' });
 
         const updates = [];
         const params = [];
@@ -210,20 +211,21 @@ router.put('/counters/:id', auth, async (req, res) => {
     }
 });
 
-// DELETE /offices/counters/:id — Deletar um contador
+// DELETE /offices/counters/:id — Deletar um contador (somente contadores: office_id NOT NULL, is_admin = false)
 router.delete('/counters/:id', auth, async (req, res) => {
     try {
         if (!req.user.is_admin) {
             return res.status(403).json({ error: 'Acesso negado' });
         }
         const { id } = req.params;
-        const check = await pool.query('SELECT is_admin FROM users WHERE id = $1', [id]);
-        if (check.rows.length > 0 && check.rows[0].is_admin) {
-            return res.status(403).json({ error: 'Não é possível deletar um administrador por esta rota' });
-        }
+        const check = await pool.query('SELECT is_admin, office_id FROM users WHERE id = $1', [id]);
+        if (check.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+        const u = check.rows[0];
+        if (u.is_admin) return res.status(403).json({ error: 'Não é possível remover um administrador por esta rota' });
+        if (!u.office_id) return res.status(403).json({ error: 'Este usuário é um cliente do sistema, não um contador. Use o gerenciamento de usuários.' });
 
-        await pool.query('DELETE FROM users WHERE id = $1', [id]);
-        res.json({ message: 'Contador excluído com sucesso' });
+        await pool.query('DELETE FROM users WHERE id = $1 AND office_id IS NOT NULL AND is_admin = false', [id]);
+        res.json({ message: 'Contador removido com sucesso' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro ao excluir contador' });
