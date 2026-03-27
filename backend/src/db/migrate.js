@@ -102,6 +102,25 @@ const alterStatements = [
   `ALTER TABLE accounting_office_settings ADD COLUMN IF NOT EXISTS webhook_url TEXT`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_counter BOOLEAN DEFAULT false`,
   `UPDATE users SET is_counter = false WHERE is_admin = false AND EXISTS (SELECT 1 FROM cnpjs c WHERE c.user_id = users.id AND c.is_active = true)`,
+  // Nova tabela dedicada para contadores de escritórios
+  `CREATE TABLE IF NOT EXISTS counters (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    office_id UUID NOT NULL REFERENCES accounting_offices(id) ON DELETE CASCADE,
+    whatsapp_number VARCHAR(20),
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_counters_office_id ON counters(office_id)`,
+  // Migra contadores existentes da tabela users para counters (idempotente)
+  `INSERT INTO counters (id, name, email, password_hash, office_id, whatsapp_number, is_active, created_at, updated_at)
+   SELECT id, name, email, password_hash, office_id, whatsapp_number, is_active, created_at, updated_at
+   FROM users
+   WHERE is_counter = true AND office_id IS NOT NULL AND is_admin = false
+   ON CONFLICT (id) DO NOTHING`,
   `CREATE TABLE IF NOT EXISTS report_submissions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     cnpj_id UUID NOT NULL REFERENCES cnpjs(id) ON DELETE CASCADE,

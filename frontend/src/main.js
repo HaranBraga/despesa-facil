@@ -207,8 +207,8 @@ function renderLogin() {
     if (!email || !password) return showToast('Preencha todos os campos', 'error');
     try {
       const data = await api.post('/auth/login', { email, password });
-      if (data.user.is_admin) throw new Error('Use o painel Admin para acessar esta conta.');
-      if (data.user.is_counter) throw new Error('Use o painel do Contador para acessar esta conta.');
+      if (data.user.type === 'admin') throw new Error('Use o painel Admin para acessar esta conta.');
+      if (data.user.type === 'counter') throw new Error('Use o painel do Contador para acessar esta conta.');
       localStorage.setItem('token', data.token);
       navigate('dashboard');
     } catch (e) { showToast(e.message, 'error'); }

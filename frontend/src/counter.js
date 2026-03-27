@@ -68,7 +68,7 @@ function renderLogin() {
         if (!email || !password) return showToast('Preencha todos os campos', 'error');
         try {
             const data = await api.post('/auth/login', { email, password });
-            if (!data.user.is_counter) throw new Error('Acesso negado. Esta conta não é de um contador.');
+            if (data.user.type !== 'counter') throw new Error('Acesso negado. Esta conta não é de um contador.');
             localStorage.setItem('counter_token', data.token);
             render();
         } catch (e) { showToast(e.message, 'error'); }
@@ -87,7 +87,7 @@ async function render() {
 
     try {
         const me = await api.get('/auth/me');
-        if (!me.is_counter) {
+        if (me.type !== 'counter') {
             showToast('Acesso negado. Esta conta não é de um contador.', 'error');
             localStorage.removeItem('counter_token');
             renderLogin();

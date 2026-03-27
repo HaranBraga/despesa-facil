@@ -1,17 +1,10 @@
 const express = require('express');
 const pool = require('../db/pool');
 const auth = require('../middleware/auth');
+const { requireCounter } = require('../middleware/auth');
 const XLSX = require('xlsx');
 
 const router = express.Router();
-
-// Middleware: Verify if user is a counter associated with an office
-async function verifyIsCounter(req, res, next) {
-    if (!req.user.is_counter || !req.user.office_id) {
-        return res.status(403).json({ error: 'Acesso restrito a contadores vinculados a um escritório' });
-    }
-    next();
-}
 
 // Helper: verify cnpj belongs to counter's office
 async function verifyCnpjInOffice(cnpjId, officeId) {
@@ -25,7 +18,7 @@ async function verifyCnpjInOffice(cnpjId, officeId) {
 }
 
 // GET /api/counter/companies — List companies associated with the office with current month status
-router.get('/companies', auth, verifyIsCounter, async (req, res) => {
+router.get('/companies', auth, requireCounter, async (req, res) => {
     try {
         const now = new Date();
         const month = req.query.month ? parseInt(req.query.month) : (now.getMonth() + 1);
@@ -75,7 +68,7 @@ router.get('/companies', auth, verifyIsCounter, async (req, res) => {
 });
 
 // GET /api/counter/dashboard-summary — Resumo para o dashboard do contador
-router.get('/dashboard-summary', auth, verifyIsCounter, async (req, res) => {
+router.get('/dashboard-summary', auth, requireCounter, async (req, res) => {
     try {
         const now = new Date();
         const month = req.query.month ? parseInt(req.query.month) : (now.getMonth() + 1);
@@ -118,7 +111,7 @@ router.get('/dashboard-summary', auth, verifyIsCounter, async (req, res) => {
 });
 
 // GET /api/counter/expense-comparison?cnpj_id=&year= — Monthly spending comparison
-router.get('/expense-comparison', auth, verifyIsCounter, async (req, res) => {
+router.get('/expense-comparison', auth, requireCounter, async (req, res) => {
     try {
         const { cnpj_id, year } = req.query;
         if (!cnpj_id || !year) {
@@ -173,7 +166,7 @@ router.get('/expense-comparison', auth, verifyIsCounter, async (req, res) => {
 });
 
 // GET /api/counter/settings — Get WhatsApp reminder settings for the office
-router.get('/settings', auth, verifyIsCounter, async (req, res) => {
+router.get('/settings', auth, requireCounter, async (req, res) => {
     try {
         const result = await pool.query(
             'SELECT * FROM accounting_office_settings WHERE office_id = $1',
@@ -197,7 +190,7 @@ router.get('/settings', auth, verifyIsCounter, async (req, res) => {
 });
 
 // PUT /api/counter/settings — Update WhatsApp reminder settings
-router.put('/settings', auth, verifyIsCounter, async (req, res) => {
+router.put('/settings', auth, requireCounter, async (req, res) => {
     try {
         const { reminder_whatsapp_hour, reminder_whatsapp_minute, reminder_enabled, reminder_max_business_day, webhook_url } = req.body;
         
@@ -223,7 +216,7 @@ router.put('/settings', auth, verifyIsCounter, async (req, res) => {
 });
 
 // GET /api/counter/expenses — List individual expenses for a company
-router.get('/expenses', auth, verifyIsCounter, async (req, res) => {
+router.get('/expenses', auth, requireCounter, async (req, res) => {
     try {
         const { cnpj_id, month, year } = req.query;
         if (!cnpj_id || !month || !year) {
@@ -265,7 +258,7 @@ router.get('/expenses', auth, verifyIsCounter, async (req, res) => {
 });
 
 // PUT /api/counter/expenses/:id — Counter edits an expense
-router.put('/expenses/:id', auth, verifyIsCounter, async (req, res) => {
+router.put('/expenses/:id', auth, requireCounter, async (req, res) => {
     try {
         const { amount, expense_date, description, category_id } = req.body;
         
@@ -309,7 +302,7 @@ router.put('/expenses/:id', auth, verifyIsCounter, async (req, res) => {
 });
 
 // DELETE /api/counter/expenses/:id — Counter deletes an expense
-router.delete('/expenses/:id', auth, verifyIsCounter, async (req, res) => {
+router.delete('/expenses/:id', auth, requireCounter, async (req, res) => {
     try {
         const check = await pool.query(
             `SELECT e.id FROM expenses e
@@ -329,7 +322,7 @@ router.delete('/expenses/:id', auth, verifyIsCounter, async (req, res) => {
 });
 
 // GET /api/counter/cnpj/:id — Dados da conta responsável pelo CNPJ
-router.get('/cnpj/:id', auth, verifyIsCounter, async (req, res) => {
+router.get('/cnpj/:id', auth, requireCounter, async (req, res) => {
     try {
         const belongs = await verifyCnpjInOffice(req.params.id, req.user.office_id);
         if (!belongs) return res.status(404).json({ error: 'CNPJ não encontrado' });
@@ -351,7 +344,7 @@ router.get('/cnpj/:id', auth, verifyIsCounter, async (req, res) => {
 });
 
 // PUT /api/counter/cnpj/:id/whatsapp — Contador atualiza whatsapp de notificação do CNPJ
-router.put('/cnpj/:id/whatsapp', auth, verifyIsCounter, async (req, res) => {
+router.put('/cnpj/:id/whatsapp', auth, requireCounter, async (req, res) => {
     try {
         const belongs = await verifyCnpjInOffice(req.params.id, req.user.office_id);
         if (!belongs) return res.status(404).json({ error: 'CNPJ não encontrado' });
@@ -369,7 +362,7 @@ router.put('/cnpj/:id/whatsapp', auth, verifyIsCounter, async (req, res) => {
 });
 
 // GET /api/counter/export?cnpj_id=&month=&year=&mode=detailed|grouped
-router.get('/export', auth, verifyIsCounter, async (req, res) => {
+router.get('/export', auth, requireCounter, async (req, res) => {
     try {
         const { cnpj_id, month, year, mode = 'detailed' } = req.query;
         if (!cnpj_id || !month || !year) return res.status(400).json({ error: 'cnpj_id, month e year são obrigatórios' });

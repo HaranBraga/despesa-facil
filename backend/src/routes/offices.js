@@ -2,6 +2,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const pool = require('../db/pool');
 const auth = require('../middleware/auth');
+const { requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -19,11 +20,8 @@ router.get('/', async (req, res) => {
 });
 
 // POST /offices — Criar um novo escritório (Apenas Admins)
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado. Apenas administradores.' });
-        }
         const { name } = req.body;
         if (!name) return res.status(400).json({ error: 'Nome do escritório é obrigatório' });
 
@@ -41,11 +39,8 @@ router.post('/', auth, async (req, res) => {
 });
 
 // DELETE /offices/:id — Deletar um escritório (Apenas Admins)
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado. Apenas administradores.' });
-        }
         const { id } = req.params;
         await pool.query('DELETE FROM accounting_offices WHERE id = $1', [id]);
         res.json({ message: 'Escritório excluído com sucesso' });
@@ -57,14 +52,11 @@ router.delete('/:id', auth, async (req, res) => {
 
 // --- USER MANAGEMENT (Admin) ---
 
-// GET /offices/users/all — List ALL client users across all offices
-router.get('/users/all', auth, async (req, res) => {
+// GET /offices/users/all — Lista todos os clientes (não-admin, não-counter)
+router.get('/users/all', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado' });
-        }
         const result = await pool.query(
-            `SELECT u.id, u.name, u.email, u.is_active, u.is_admin, u.office_id, u.is_counter, u.created_at,
+            `SELECT u.id, u.name, u.email, u.is_active, u.office_id, u.created_at,
                     ao.name AS office_name,
                     (SELECT COUNT(*) FROM cnpjs c WHERE c.user_id = u.id AND c.is_active = true) AS cnpj_count
              FROM users u
@@ -79,30 +71,9 @@ router.get('/users/all', auth, async (req, res) => {
     }
 });
 
-// PUT /offices/users/:id/set-counter — Force set is_counter flag (Admin repair tool)
-router.put('/users/:id/set-counter', auth, async (req, res) => {
+// PUT /offices/users/:id/toggle — Ativar/Desativar conta de cliente
+router.put('/users/:id/toggle', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) return res.status(403).json({ error: 'Acesso negado' });
-        const { id } = req.params;
-        const { is_counter } = req.body;
-        if (typeof is_counter !== 'boolean') return res.status(400).json({ error: 'is_counter deve ser boolean' });
-        const check = await pool.query('SELECT is_admin FROM users WHERE id = $1', [id]);
-        if (check.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
-        if (check.rows[0].is_admin) return res.status(403).json({ error: 'Não é possível modificar um admin' });
-        await pool.query('UPDATE users SET is_counter = $1, updated_at = NOW() WHERE id = $2', [is_counter, id]);
-        res.json({ message: `Usuário marcado como ${is_counter ? 'contador' : 'cliente'}` });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Erro ao atualizar usuário' });
-    }
-});
-
-// PUT /offices/users/:id/toggle — Enable/Disable a user account
-router.put('/users/:id/toggle', auth, async (req, res) => {
-    try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado' });
-        }
         const { id } = req.params;
         const check = await pool.query('SELECT is_active, is_admin FROM users WHERE id = $1', [id]);
         if (check.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -118,15 +89,12 @@ router.put('/users/:id/toggle', auth, async (req, res) => {
 });
 
 // GET /offices/admin/stats — Dashboard stats for admin panel
-router.get('/admin/stats', auth, async (req, res) => {
+router.get('/admin/stats', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado' });
-        }
         const offices = await pool.query('SELECT COUNT(*) as count FROM accounting_offices');
         const users = await pool.query('SELECT COUNT(*) as count FROM users WHERE is_admin = false');
         const cnpjs = await pool.query('SELECT COUNT(*) as count FROM cnpjs WHERE is_active = true');
-        const counters = await pool.query('SELECT COUNT(*) as count FROM users WHERE office_id IS NOT NULL AND is_admin = false');
+        const counters = await pool.query('SELECT COUNT(*) as count FROM counters');
 
         res.json({
             total_offices: parseInt(offices.rows[0].count),
@@ -143,14 +111,11 @@ router.get('/admin/stats', auth, async (req, res) => {
 // --- MANAGEMENT OF COUNTERS (ACCOUNTANTS) ---
 
 // GET /offices/:id/counters — Listar contadores de um escritório
-router.get('/:id/counters', auth, async (req, res) => {
+router.get('/:id/counters', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado' });
-        }
         const { id } = req.params;
         const result = await pool.query(
-            'SELECT id, name, email, created_at FROM users WHERE office_id = $1 AND is_admin = false AND is_counter = true ORDER BY name ASC',
+            'SELECT id, name, email, is_active, created_at FROM counters WHERE office_id = $1 ORDER BY name ASC',
             [id]
         );
         res.json(result.rows);
@@ -161,12 +126,9 @@ router.get('/:id/counters', auth, async (req, res) => {
 });
 
 // POST /offices/:id/counters — Criar um novo contador para o escritório
-router.post('/:id/counters', auth, async (req, res) => {
+router.post('/:id/counters', auth, requireAdmin, async (req, res) => {
     try {
         const bcrypt = require('bcryptjs');
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado' });
-        }
         const { id: officeId } = req.params;
         const { name, email, password } = req.body;
 
@@ -174,15 +136,20 @@ router.post('/:id/counters', auth, async (req, res) => {
             return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
         }
 
-        const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
+        // Verifica email único em ambas as tabelas
+        const existing = await pool.query(
+            `SELECT id FROM users WHERE email = $1
+             UNION SELECT id FROM counters WHERE email = $1`,
+            [email.toLowerCase()]
+        );
         if (existing.rows.length > 0) {
             return res.status(409).json({ error: 'E-mail já cadastrado' });
         }
 
         const hash = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO users (id, name, email, password_hash, office_id, is_admin, is_counter) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, name, email',
-            [uuidv4(), name, email.toLowerCase(), hash, officeId, false, true]
+            'INSERT INTO counters (id, name, email, password_hash, office_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, email',
+            [uuidv4(), name, email.toLowerCase(), hash, officeId]
         );
 
         res.status(201).json(result.rows[0]);
@@ -193,24 +160,25 @@ router.post('/:id/counters', auth, async (req, res) => {
 });
 
 // PUT /offices/counters/:id — Editar email/senha de um contador (Admin)
-router.put('/counters/:id', auth, async (req, res) => {
+router.put('/counters/:id', auth, requireAdmin, async (req, res) => {
     try {
         const bcrypt = require('bcryptjs');
-        if (!req.user.is_admin) return res.status(403).json({ error: 'Acesso negado' });
         const { id } = req.params;
         const { email, password } = req.body;
         if (!email && !password) return res.status(400).json({ error: 'Informe email ou senha para alterar' });
 
-        const check = await pool.query('SELECT id, is_admin, office_id FROM users WHERE id = $1', [id]);
+        const check = await pool.query('SELECT id FROM counters WHERE id = $1', [id]);
         if (check.rows.length === 0) return res.status(404).json({ error: 'Contador não encontrado' });
-        if (check.rows[0].is_admin) return res.status(403).json({ error: 'Operação não permitida' });
-        if (!check.rows[0].office_id) return res.status(403).json({ error: 'Este usuário é um cliente do sistema, não um contador.' });
 
         const updates = [];
         const params = [];
         let idx = 1;
         if (email) {
-            const dup = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email.toLowerCase(), id]);
+            const dup = await pool.query(
+                `SELECT id FROM users WHERE email = $1
+                 UNION SELECT id FROM counters WHERE email = $1 AND id != $2`,
+                [email.toLowerCase(), id]
+            );
             if (dup.rows.length > 0) return res.status(409).json({ error: 'E-mail já em uso' });
             updates.push(`email = $${idx++}`); params.push(email.toLowerCase());
         }
@@ -221,7 +189,7 @@ router.put('/counters/:id', auth, async (req, res) => {
         }
         updates.push(`updated_at = NOW()`);
         params.push(id);
-        await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}`, params);
+        await pool.query(`UPDATE counters SET ${updates.join(', ')} WHERE id = $${idx}`, params);
         res.json({ message: 'Contador atualizado com sucesso' });
     } catch (err) {
         console.error(err);
@@ -229,20 +197,14 @@ router.put('/counters/:id', auth, async (req, res) => {
     }
 });
 
-// DELETE /offices/counters/:id — Deletar um contador (somente contadores: office_id NOT NULL, is_admin = false)
-router.delete('/counters/:id', auth, async (req, res) => {
+// DELETE /offices/counters/:id — Deletar um contador
+router.delete('/counters/:id', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado' });
-        }
         const { id } = req.params;
-        const check = await pool.query('SELECT is_admin, office_id FROM users WHERE id = $1', [id]);
-        if (check.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
-        const u = check.rows[0];
-        if (u.is_admin) return res.status(403).json({ error: 'Não é possível remover um administrador por esta rota' });
-        if (!u.office_id) return res.status(403).json({ error: 'Este usuário é um cliente do sistema, não um contador. Use o gerenciamento de usuários.' });
+        const check = await pool.query('SELECT id FROM counters WHERE id = $1', [id]);
+        if (check.rows.length === 0) return res.status(404).json({ error: 'Contador não encontrado' });
 
-        await pool.query('DELETE FROM users WHERE id = $1 AND office_id IS NOT NULL AND is_admin = false', [id]);
+        await pool.query('DELETE FROM counters WHERE id = $1', [id]);
         res.json({ message: 'Contador removido com sucesso' });
     } catch (err) {
         console.error(err);
@@ -251,17 +213,14 @@ router.delete('/counters/:id', auth, async (req, res) => {
 });
 
 // GET /offices/:id/clients — Clientes (usuários com CNPJs) vinculados ao escritório
-router.get('/:id/clients', auth, async (req, res) => {
+router.get('/:id/clients', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado' });
-        }
         const result = await pool.query(
             `SELECT DISTINCT u.id, u.name, u.email, u.is_active, u.created_at,
                     COUNT(c.id) AS cnpj_count
              FROM users u
              JOIN cnpjs c ON c.user_id = u.id AND c.is_active = true
-             WHERE u.office_id = $1 AND u.is_admin = false AND (u.is_counter = false OR u.is_counter IS NULL)
+             WHERE u.office_id = $1 AND u.is_admin = false
              GROUP BY u.id, u.name, u.email, u.is_active, u.created_at
              ORDER BY u.name ASC`,
             [req.params.id]
@@ -274,11 +233,8 @@ router.get('/:id/clients', auth, async (req, res) => {
 });
 
 // GET /offices/:id/settings — Get office settings including webhook (Admin)
-router.get('/:id/settings', auth, async (req, res) => {
+router.get('/:id/settings', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado' });
-        }
         const result = await pool.query(
             'SELECT * FROM accounting_office_settings WHERE office_id = $1',
             [req.params.id]
@@ -301,11 +257,8 @@ router.get('/:id/settings', auth, async (req, res) => {
 });
 
 // PUT /offices/:id/settings — Update office settings (Admin)
-router.put('/:id/settings', auth, async (req, res) => {
+router.put('/:id/settings', auth, requireAdmin, async (req, res) => {
     try {
-        if (!req.user.is_admin) {
-            return res.status(403).json({ error: 'Acesso negado' });
-        }
         const { webhook_url, reminder_whatsapp_hour, reminder_whatsapp_minute, reminder_enabled, reminder_max_business_day } = req.body;
 
         const result = await pool.query(

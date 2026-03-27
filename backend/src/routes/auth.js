@@ -6,7 +6,35 @@ const pool = require('../db/pool');
 
 const router = express.Router();
 
-// POST /auth/register
+function buildToken(user, type) {
+    return jwt.sign(
+        {
+            id: user.id,
+            email: user.email,
+            type,
+            office_id: user.office_id || null,
+            // mantidos por compatibilidade com tokens antigos ainda em circulação
+            is_admin: type === 'admin',
+            is_counter: type === 'counter'
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '30d' }
+    );
+}
+
+function buildUserResponse(user, type) {
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        type,
+        office_id: user.office_id || null,
+        is_admin: type === 'admin',
+        is_counter: type === 'counter'
+    };
+}
+
+// POST /auth/register — Cria conta de cliente (usuário do app)
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, office_id } = req.body;
@@ -17,7 +45,12 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Senha deve ter ao menos 6 caracteres' });
         }
 
-        const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
+        // Verifica email único em ambas as tabelas
+        const existing = await pool.query(
+            `SELECT id FROM users WHERE email = $1
+             UNION SELECT id FROM counters WHERE email = $1`,
+            [email.toLowerCase()]
+        );
         if (existing.rows.length > 0) {
             return res.status(409).json({ error: 'E-mail já cadastrado' });
         }
@@ -29,21 +62,20 @@ router.post('/register', async (req, res) => {
 
         const hash = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO users (id, name, email, password_hash, office_id, is_admin) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, email, office_id, is_admin, created_at',
-            [uuidv4(), name, email.toLowerCase(), hash, office_id, false]
+            'INSERT INTO users (id, name, email, password_hash, office_id, is_admin, is_counter) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, name, email, office_id',
+            [uuidv4(), name, email.toLowerCase(), hash, office_id, false, false]
         );
 
         const user = result.rows[0];
-        const token = jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin, office_id: user.office_id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-
-        res.status(201).json({ user, token });
+        const token = buildToken(user, 'user');
+        res.status(201).json({ user: buildUserResponse(user, 'user'), token });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
-// POST /auth/login
+// POST /auth/login — Login unificado para users, counters e admins
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -51,35 +83,59 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Email e senha são obrigatórios' });
         }
 
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase()]);
-        if (result.rows.length === 0) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+        // Tenta na tabela users primeiro (clientes e admins)
+        let actor = null;
+        let actorType = null;
+
+        const userRow = await pool.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase()]);
+        if (userRow.rows.length > 0) {
+            actor = userRow.rows[0];
+            actorType = actor.is_admin ? 'admin' : 'user';
         }
 
-        const user = result.rows[0];
-        const valid = await bcrypt.compare(password, user.password_hash);
-        if (!valid) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+        // Se não encontrou, tenta na tabela counters
+        if (!actor) {
+            const counterRow = await pool.query('SELECT * FROM counters WHERE email = $1', [email.toLowerCase()]);
+            if (counterRow.rows.length > 0) {
+                actor = counterRow.rows[0];
+                actorType = 'counter';
+            }
         }
 
-        const token = jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin, office_id: user.office_id, is_counter: !!user.is_counter }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        if (!actor) return res.status(401).json({ error: 'Credenciais inválidas' });
 
-        res.json({
-            user: { id: user.id, name: user.name, email: user.email, is_admin: user.is_admin, office_id: user.office_id, is_counter: !!user.is_counter },
-            token
-        });
+        const valid = await bcrypt.compare(password, actor.password_hash);
+        if (!valid) return res.status(401).json({ error: 'Credenciais inválidas' });
+
+        const token = buildToken(actor, actorType);
+        res.json({ user: buildUserResponse(actor, actorType), token });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
-// GET /auth/me
+// GET /auth/me — Retorna dados do usuário logado
 router.get('/me', require('../middleware/auth'), async (req, res) => {
     try {
-        const result = await pool.query('SELECT id, name, email, is_admin, office_id, is_counter, created_at FROM users WHERE id = $1', [req.user.id]);
+        if (req.user.type === 'counter') {
+            const result = await pool.query(
+                'SELECT id, name, email, office_id, whatsapp_number, is_active, created_at FROM counters WHERE id = $1',
+                [req.user.id]
+            );
+            if (result.rows.length === 0) return res.status(404).json({ error: 'Contador não encontrado' });
+            const c = result.rows[0];
+            return res.json({ ...c, type: 'counter', is_counter: true, is_admin: false });
+        }
+
+        const result = await pool.query(
+            'SELECT id, name, email, is_admin, office_id, whatsapp_number, is_active, created_at FROM users WHERE id = $1',
+            [req.user.id]
+        );
         if (result.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
-        res.json(result.rows[0]);
+        const u = result.rows[0];
+        const type = u.is_admin ? 'admin' : 'user';
+        res.json({ ...u, type, is_counter: false });
     } catch (err) {
         res.status(500).json({ error: 'Erro interno' });
     }
