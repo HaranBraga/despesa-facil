@@ -64,7 +64,7 @@ router.get('/users/all', auth, async (req, res) => {
             return res.status(403).json({ error: 'Acesso negado' });
         }
         const result = await pool.query(
-            `SELECT u.id, u.name, u.email, u.is_active, u.is_admin, u.office_id, u.created_at,
+            `SELECT u.id, u.name, u.email, u.is_active, u.is_admin, u.office_id, u.is_counter, u.created_at,
                     ao.name AS office_name,
                     (SELECT COUNT(*) FROM cnpjs c WHERE c.user_id = u.id AND c.is_active = true) AS cnpj_count
              FROM users u
@@ -76,6 +76,24 @@ router.get('/users/all', auth, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro ao buscar usuários' });
+    }
+});
+
+// PUT /offices/users/:id/set-counter — Force set is_counter flag (Admin repair tool)
+router.put('/users/:id/set-counter', auth, async (req, res) => {
+    try {
+        if (!req.user.is_admin) return res.status(403).json({ error: 'Acesso negado' });
+        const { id } = req.params;
+        const { is_counter } = req.body;
+        if (typeof is_counter !== 'boolean') return res.status(400).json({ error: 'is_counter deve ser boolean' });
+        const check = await pool.query('SELECT is_admin FROM users WHERE id = $1', [id]);
+        if (check.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+        if (check.rows[0].is_admin) return res.status(403).json({ error: 'Não é possível modificar um admin' });
+        await pool.query('UPDATE users SET is_counter = $1, updated_at = NOW() WHERE id = $2', [is_counter, id]);
+        res.json({ message: `Usuário marcado como ${is_counter ? 'contador' : 'cliente'}` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao atualizar usuário' });
     }
 });
 

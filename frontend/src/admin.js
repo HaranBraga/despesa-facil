@@ -550,6 +550,7 @@ async function renderDashboard(user) {
                 <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:left;">Email</th>
                 <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:left;">Escritório</th>
                 <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:center;">CNPJs</th>
+                <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:center;">Tipo</th>
                 <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:center;">Status</th>
               </tr>
             </thead>
@@ -560,6 +561,12 @@ async function renderDashboard(user) {
                   <td style="padding:12px 16px;font-size:0.85rem;color:#64748b;">${u.email}</td>
                   <td style="padding:12px 16px;font-size:0.85rem;">${u.office_name || '<span class="text-muted">-</span>'}</td>
                   <td style="padding:12px 16px;text-align:center;font-weight:700;">${u.cnpj_count}</td>
+                  <td style="padding:12px 16px;text-align:center;">
+                    ${u.is_counter
+                      ? `<span style="font-size:0.72rem;padding:2px 8px;border-radius:100px;background:#ede9fe;color:#7c3aed;font-weight:700;">Contador</span>
+                         <button class="btn-fix-counter" data-uid="${u.id}" title="Corrigir para Cliente" style="margin-left:4px;font-size:0.7rem;padding:2px 6px;border-radius:6px;border:1px solid var(--red);background:transparent;color:var(--red);cursor:pointer;">✕ Corrigir</button>`
+                      : `<span style="font-size:0.72rem;padding:2px 8px;border-radius:100px;background:#dcfce7;color:#16a34a;font-weight:700;">Cliente</span>`}
+                  </td>
                   <td style="padding:12px 16px;text-align:center;">
                     <button class="btn btn-sm btn-toggle-user" data-uid="${u.id}" style="font-size:0.75rem;padding:4px 12px;border-radius:100px;border:1px solid ${u.is_active ? 'var(--green)' : 'var(--red)'};background:${u.is_active ? 'var(--green-soft)' : 'var(--red-soft)'};color:${u.is_active ? 'var(--green)' : 'var(--red)'};font-weight:700;cursor:pointer;">
                       ${u.is_active ? 'Ativo' : 'Inativo'}
@@ -577,6 +584,15 @@ async function renderDashboard(user) {
           try {
             const result = await api.put(`/offices/users/${btn.dataset.uid}/toggle`);
             showToast(result.message, 'success');
+            loadUsers();
+          } catch (e) { showToast(e.message, 'error'); }
+        });
+      });
+      document.querySelectorAll('.btn-fix-counter').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await api.put(`/offices/users/${btn.dataset.uid}/set-counter`, { is_counter: false });
+            showToast('Corrigido para Cliente', 'success');
             loadUsers();
           } catch (e) { showToast(e.message, 'error'); }
         });

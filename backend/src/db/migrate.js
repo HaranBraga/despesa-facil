@@ -101,7 +101,7 @@ const alterStatements = [
   `ALTER TABLE accounting_office_settings ADD COLUMN IF NOT EXISTS reminder_max_business_day INTEGER DEFAULT 3`,
   `ALTER TABLE accounting_office_settings ADD COLUMN IF NOT EXISTS webhook_url TEXT`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_counter BOOLEAN DEFAULT false`,
-  `UPDATE users SET is_counter = true WHERE office_id IS NOT NULL AND is_admin = false AND id IN (SELECT DISTINCT u.id FROM users u WHERE u.office_id IS NOT NULL AND u.is_admin = false AND NOT EXISTS (SELECT 1 FROM cnpjs c WHERE c.user_id = u.id AND c.is_active = true))`,
+  `UPDATE users SET is_counter = false WHERE is_admin = false AND EXISTS (SELECT 1 FROM cnpjs c WHERE c.user_id = users.id AND c.is_active = true)`,
   `CREATE TABLE IF NOT EXISTS report_submissions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     cnpj_id UUID NOT NULL REFERENCES cnpjs(id) ON DELETE CASCADE,
