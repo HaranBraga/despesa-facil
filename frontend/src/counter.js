@@ -68,7 +68,7 @@ function renderLogin() {
         if (!email || !password) return showToast('Preencha todos os campos', 'error');
         try {
             const data = await api.post('/auth/login', { email, password });
-            if (!data.user.office_id && !data.user.is_admin) throw new Error('Acesso negado. Usuário não é um contador.');
+            if (!data.user.office_id) throw new Error('Acesso negado. Esta conta não é de um contador.');
             localStorage.setItem('counter_token', data.token);
             render();
         } catch (e) { showToast(e.message, 'error'); }
@@ -87,10 +87,10 @@ async function render() {
 
     try {
         const me = await api.get('/auth/me');
-        if (!me.office_id && !me.is_admin) {
-            showToast('Acesso negado.', 'error');
+        if (!me.office_id) {
+            showToast('Acesso negado. Esta conta não é de um contador.', 'error');
             localStorage.removeItem('counter_token');
-            window.location.href = '/admin.html';
+            renderLogin();
             return;
         }
         renderDashboard(me);
@@ -240,27 +240,23 @@ async function renderDashboard(user) {
                 </div>
             </div>
 
-            <!-- Content Grid Area -->
-            <div class="grid-2" style="grid-template-columns: 380px 1fr; align-items: flex-start; gap:32px;">
-                <!-- Company List Area -->
-                <div class="card glass animate-up" style="--delay:300ms; padding:24px; display:flex; flex-direction:column; gap:20px;">
-                    <div class="section-header" style="margin-bottom:0;">
-                        <div>
-                            <div class="section-title">Lista de Clientes</div>
-                            <div class="text-xs text-muted" id="company-count">0 empresas</div>
-                        </div>
+            <!-- Company List Area -->
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                    <div>
+                        <div style="font-size:1.05rem; font-weight:700; color:#1e293b;">Empresas</div>
+                        <div class="text-xs text-muted" id="company-count">0 empresas</div>
                     </div>
-                    <div class="search-box" style="position:relative;">
-                        <input type="text" id="company-search" class="form-input" placeholder="Buscar empresa..." style="padding-left:40px; border-radius:12px; font-size:0.85rem;">
+                    <div class="search-box" style="position:relative; flex:1; min-width:180px; max-width:320px;">
+                        <input type="text" id="company-search" class="form-input" placeholder="Buscar empresa ou CNPJ..." style="padding-left:40px; border-radius:12px; font-size:0.85rem;">
                         <svg width="18" height="18" fill="none" stroke="#64748b" stroke-width="2" viewBox="0 0 24 24" style="position:absolute; left:14px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </div>
-                    <div id="companies-container" class="gap-12" style="max-height:500px; overflow-y:auto; padding-right:8px; flex:1;">
-                        <!-- Skeleton loader logic -->
-                        <div class="skeleton" style="height:72px; border-radius:16px;"></div>
-                        <div class="skeleton" style="height:72px; border-radius:16px;"></div>
-                    </div>
                 </div>
-
+                <div id="companies-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:12px;">
+                    <div class="skeleton" style="height:96px; border-radius:16px;"></div>
+                    <div class="skeleton" style="height:96px; border-radius:16px;"></div>
+                    <div class="skeleton" style="height:96px; border-radius:16px;"></div>
+                </div>
             </div>
             </div> <!-- Close dashboard-view -->
             
@@ -311,11 +307,17 @@ async function renderDashboard(user) {
                         <div id="report-categories-mini" style="margin-top:12px; display:none; padding-top:12px; border-top:1px solid rgba(99,102,241,0.1);"></div>
                     </div>
 
-                    <!-- Export button -->
-                    <button id="btn-export-xlsx" class="btn btn-outline btn-sm" style="align-self:flex-end; display:flex; align-items:center; gap:6px; padding:8px 14px;">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Exportar XLSX
-                    </button>
+                    <!-- Export buttons -->
+                    <div style="display:flex; gap:8px; align-self:flex-end; flex-wrap:wrap; justify-content:flex-end;">
+                        <button id="btn-export-detailed" class="btn btn-outline btn-sm" style="display:flex; align-items:center; gap:6px; padding:8px 14px;">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Detalhado
+                        </button>
+                        <button id="btn-export-grouped" class="btn btn-outline btn-sm" style="display:flex; align-items:center; gap:6px; padding:8px 14px; color:#8b5cf6; border-color:#8b5cf6;">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Por Categoria
+                        </button>
+                    </div>
 
                     <!-- Expense table -->
                     <div class="card" style="padding:0; overflow:hidden; border-radius:16px;">
@@ -394,91 +396,121 @@ async function renderDashboard(user) {
     function renderCompanies() {
         const container = document.getElementById('companies-container');
         const searchTerm = document.getElementById('company-search')?.value.toLowerCase() || '';
-        
+
         let filtered = companiesList;
-        
-        // Filter by summary card selection
+
         if (currentFilter === 'delivered') filtered = companiesList.filter(c => c.is_locked);
         if (currentFilter === 'in_progress') filtered = companiesList.filter(c => c.has_expenses && !c.is_locked);
         if (currentFilter === 'pending') filtered = companiesList.filter(c => !c.has_expenses);
 
-        // Search filter
         if (searchTerm) {
-            filtered = filtered.filter(c => 
-                c.razao_social.toLowerCase().includes(searchTerm) || 
-                c.cnpj.includes(searchTerm)
+            filtered = filtered.filter(c =>
+                c.razao_social.toLowerCase().includes(searchTerm) ||
+                c.cnpj.includes(searchTerm) ||
+                (c.owner_name && c.owner_name.toLowerCase().includes(searchTerm))
             );
         }
 
-        document.getElementById('company-count').textContent = `${filtered.length} empresas`;
-        
+        document.getElementById('company-count').textContent = `${filtered.length} empresa${filtered.length !== 1 ? 's' : ''}`;
+
         container.style.transition = 'opacity 0.2s ease';
         container.style.opacity = '0';
-        
+
         setTimeout(() => {
             if (filtered.length === 0) {
+                container.style.gridTemplateColumns = '1fr';
                 container.innerHTML = `
-                <div class="empty-state animate-fade" style="padding:40px 20px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px;">
+                <div class="empty-state animate-fade" style="padding:48px 20px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px; grid-column:1/-1;">
                     <div style="width:64px; height:64px; border-radius:50%; background:var(--bg); display:flex; align-items:center; justify-content:center; color:#94a3b8;">
                         <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </div>
                     <div>
-                        <div style="font-weight:700; color:#1e293b; font-size:1.1rem;">Nenhuma empresa</div>
-                        <div style="font-size:0.85rem; color:#64748b; max-width:250px; margin:0 auto; margin-top:4px;">Não encontramos resultados para os filtros selecionados atuais.</div>
+                        <div style="font-weight:700; color:#1e293b; font-size:1rem;">Nenhuma empresa encontrada</div>
+                        <div style="font-size:0.82rem; color:#64748b; margin-top:4px;">Tente ajustar o filtro ou a busca.</div>
                     </div>
                 </div>`;
                 container.style.opacity = '1';
                 return;
             }
-            
-        
-        container.innerHTML = filtered.map(c => {
-            const initials = c.razao_social.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-            const isActive = selectedCompanyId == c.id;
-            
-            let statusColor = '#e2e8f0';
-            let statusLabel = 'Não Iniciado';
-            if (c.is_locked) {
-                statusColor = 'var(--green)';
-                statusLabel = 'Entregue';
-            } else if (c.has_expenses) {
-                statusColor = '#8b5cf6';
-                statusLabel = 'Em Digitação';
+
+            container.style.gridTemplateColumns = '';
+
+            // Group by owner
+            const grouped = {};
+            filtered.forEach(c => {
+                const key = c.owner_name || 'Sem responsável';
+                if (!grouped[key]) grouped[key] = { owner_email: c.owner_email, companies: [] };
+                grouped[key].companies.push(c);
+            });
+
+            const ownerKeys = Object.keys(grouped).sort();
+            const useGroups = ownerKeys.length > 1 && !searchTerm;
+
+            function companyCard(c) {
+                const initials = c.razao_social.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                const isActive = selectedCompanyId == c.id;
+
+                let statusColor = '#cbd5e1';
+                let statusLabel = 'Pendente';
+                let statusBg = '#f8fafc';
+                if (c.is_locked) {
+                    statusColor = 'var(--green)'; statusLabel = 'Entregue'; statusBg = 'rgba(34,197,94,0.07)';
+                } else if (c.has_expenses) {
+                    statusColor = '#8b5cf6'; statusLabel = 'Em Digitação'; statusBg = 'rgba(139,92,246,0.06)';
+                }
+
+                const lateCount = parseInt(c.late_expenses_count) || 0;
+                const lateBadge = lateCount > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;background:rgba(245,158,11,0.12);border-radius:100px;font-size:0.6rem;font-weight:700;color:var(--amber);">+${lateCount} após envio</span>` : '';
+
+                return `
+                <div class="clickable-company" data-id="${c.id}" style="display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:16px; border:1.5px solid ${isActive ? 'var(--brand)' : 'var(--line)'}; background:${isActive ? 'rgba(99,102,241,0.04)' : 'white'}; cursor:pointer; transition:var(--ease); position:relative; overflow:hidden;">
+                    ${isActive ? '<div style="position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--brand); border-radius:3px 0 0 3px;"></div>' : ''}
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:40px; height:40px; background:var(--bg); color:#475569; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; flex-shrink:0; border:1px solid var(--line);">${initials}</div>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-weight:700; color:#1e293b; font-size:0.88rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.razao_social}</div>
+                            <div style="font-size:0.7rem; color:#94a3b8; font-family:monospace;">${c.cnpj}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:100px;font-size:0.68rem;font-weight:700;color:${statusColor};background:${statusBg};">
+                            <span style="width:6px;height:6px;border-radius:50%;background:${statusColor};"></span>${statusLabel}
+                        </span>
+                        ${lateBadge}
+                    </div>
+                </div>`;
             }
 
-            const lateCount = parseInt(c.late_expenses_count) || 0;
-            const lateBadge = lateCount > 0 ? `
-                <div style="display:flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(245,158,11,0.12);border-radius:100px;margin-top:4px;">
-                    <svg width="12" height="12" fill="none" stroke="var(--amber)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    <span style="font-size:0.6rem;font-weight:700;color:var(--amber);">${lateCount} após envio</span>
-                </div>` : '';
+            if (useGroups) {
+                // Render with group headers as col-span rows
+                let html = '';
+                ownerKeys.forEach(owner => {
+                    const g = grouped[owner];
+                    html += `<div style="grid-column:1/-1; display:flex; align-items:center; gap:10px; padding:4px 0; margin-top:4px;">
+                        <div style="width:28px; height:28px; border-radius:8px; background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.75rem; flex-shrink:0;">${owner.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div style="font-weight:700; font-size:0.82rem; color:#1e293b;">${owner}</div>
+                            ${g.owner_email ? `<div style="font-size:0.68rem; color:#94a3b8;">${g.owner_email}</div>` : ''}
+                        </div>
+                        <div style="flex:1; height:1px; background:var(--line);"></div>
+                        <span style="font-size:0.68rem; font-weight:700; color:var(--ink-3);">${g.companies.length} CNPJ${g.companies.length > 1 ? 's' : ''}</span>
+                    </div>`;
+                    html += g.companies.map(companyCard).join('');
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = filtered.map(companyCard).join('');
+            }
 
-            return `
-            <div class="expense-item clickable-company" data-id="${c.id}" style="display:flex; align-items:center; gap:16px; padding:16px; border-radius:16px; border:1px solid ${isActive ? 'var(--brand)' : 'var(--line)'}; background:${isActive ? 'rgba(79, 156, 249, 0.05)' : 'white'}; cursor:pointer; transition:var(--ease); position:relative; overflow:hidden;">
-                ${isActive ? '<div style="position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--brand);"></div>' : ''}
-                <div style="width:44px; height:44px; background:#f1f5f9; color:#475569; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;">${initials}</div>
-                <div style="flex:1; min-width:0;">
-                    <div style="font-weight:700; color:#1e293b; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.razao_social}</div>
-                    <div style="font-size:0.75rem; color:#64748b;">${c.cnpj}</div>
-                    ${lateBadge}
-                </div>
-                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-                    <div style="width:8px; height:8px; border-radius:50%; background:${statusColor};" class="status-indicator"></div>
-                    <span style="font-size:0.6rem; font-weight:700; color:${statusColor}; text-transform:uppercase;">${statusLabel}</span>
-                </div>
-            </div>
-            `;
-        }).join('');
-
-        document.querySelectorAll('.clickable-company').forEach(el => {
+            document.querySelectorAll('.clickable-company').forEach(el => {
                 el.addEventListener('click', () => {
                     const companyData = companiesList.find(c => c.id === el.dataset.id);
-                    openCompanyDetail(companyData);
+                    if (companyData) openCompanyDetail(companyData);
                 });
             });
-            
+
             container.style.opacity = '1';
-        }, 200);
+        }, 150);
     }
     
     // --- Tab switching in detail view ---
@@ -516,15 +548,16 @@ async function renderDashboard(user) {
         loadIndividualExpenses();
 
         // Export XLSX
-        document.getElementById('btn-export-xlsx').onclick = async () => {
+        async function doExport(mode) {
             const month = document.getElementById('sel-month')?.value;
             const year = document.getElementById('sel-year')?.value;
             if (!month || !year) return showToast('Selecione um período', 'error');
-            const btn = document.getElementById('btn-export-xlsx');
+            const btn = document.getElementById(mode === 'grouped' ? 'btn-export-grouped' : 'btn-export-detailed');
+            const origHtml = btn.innerHTML;
             btn.disabled = true; btn.textContent = 'Exportando...';
             try {
                 const token = localStorage.getItem('counter_token');
-                const res = await fetch(`${API_URL}/counter/export?cnpj_id=${selectedCompanyId}&month=${month}&year=${year}`, {
+                const res = await fetch(`${API_URL}/counter/export?cnpj_id=${selectedCompanyId}&month=${month}&year=${year}&mode=${mode}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Erro ao exportar');
@@ -537,8 +570,10 @@ async function renderDashboard(user) {
                 URL.revokeObjectURL(url);
                 showToast('Exportado!', 'success');
             } catch (e) { showToast(e.message, 'error'); }
-            btn.disabled = false; btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar XLSX';
-        };
+            btn.disabled = false; btn.innerHTML = origHtml;
+        }
+        document.getElementById('btn-export-detailed').onclick = () => doExport('detailed');
+        document.getElementById('btn-export-grouped').onclick = () => doExport('grouped');
     }
 
     async function loadContaTab() {

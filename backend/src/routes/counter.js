@@ -368,10 +368,10 @@ router.put('/cnpj/:id/whatsapp', auth, verifyIsCounter, async (req, res) => {
     }
 });
 
-// GET /api/counter/export?cnpj_id=&month=&year= — Exportar relatório em XLSX
+// GET /api/counter/export?cnpj_id=&month=&year=&mode=detailed|grouped
 router.get('/export', auth, verifyIsCounter, async (req, res) => {
     try {
-        const { cnpj_id, month, year } = req.query;
+        const { cnpj_id, month, year, mode = 'detailed' } = req.query;
         if (!cnpj_id || !month || !year) return res.status(400).json({ error: 'cnpj_id, month e year são obrigatórios' });
 
         const belongs = await verifyCnpjInOffice(cnpj_id, req.user.office_id);
@@ -380,32 +380,55 @@ router.get('/export', auth, verifyIsCounter, async (req, res) => {
         const cnpjRow = await pool.query('SELECT razao_social, cnpj FROM cnpjs WHERE id = $1', [cnpj_id]);
         const empresa = cnpjRow.rows[0];
 
-        const expenses = await pool.query(
-            `SELECT e.expense_date, e.description, ec.name as category_name, e.amount
-             FROM expenses e
-             JOIN expense_categories ec ON ec.id = e.category_id
-             WHERE e.cnpj_id = $1 AND e.period_month = $2 AND e.period_year = $3
-             ORDER BY e.expense_date, ec.name`,
-            [cnpj_id, parseInt(month), parseInt(year)]
-        );
-
         const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        const rows = expenses.rows.map(e => ({
-            'Data': e.expense_date ? new Date(e.expense_date).toLocaleDateString('pt-BR', {timeZone:'UTC'}) : '',
-            'Categoria': e.category_name,
-            'Descrição': e.description || '',
-            'Valor (R$)': parseFloat(e.amount)
-        }));
+        const sheetName = `${monthNames[parseInt(month)-1]} ${year}`;
 
-        const total = rows.reduce((s, r) => s + r['Valor (R$)'], 0);
-        rows.push({ 'Data': '', 'Categoria': '', 'Descrição': 'TOTAL', 'Valor (R$)': total });
-
-        const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, `${monthNames[parseInt(month)-1]} ${year}`);
+
+        if (mode === 'grouped') {
+            // Agrupado por categoria
+            const result = await pool.query(
+                `SELECT ec.name as categoria, COUNT(e.id) as lancamentos, SUM(e.amount) as total
+                 FROM expenses e
+                 JOIN expense_categories ec ON ec.id = e.category_id
+                 WHERE e.cnpj_id = $1 AND e.period_month = $2 AND e.period_year = $3
+                 GROUP BY ec.name ORDER BY total DESC`,
+                [cnpj_id, parseInt(month), parseInt(year)]
+            );
+            const rows = result.rows.map(r => ({
+                'Categoria': r.categoria,
+                'Lançamentos': parseInt(r.lancamentos),
+                'Total (R$)': parseFloat(r.total)
+            }));
+            const grandTotal = rows.reduce((s, r) => s + r['Total (R$)'], 0);
+            rows.push({ 'Categoria': 'TOTAL GERAL', 'Lançamentos': rows.reduce((s,r) => s + r['Lançamentos'], 0), 'Total (R$)': grandTotal });
+            const ws = XLSX.utils.json_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        } else {
+            // Detalhado (padrão)
+            const expenses = await pool.query(
+                `SELECT e.expense_date, e.description, ec.name as category_name, e.amount
+                 FROM expenses e
+                 JOIN expense_categories ec ON ec.id = e.category_id
+                 WHERE e.cnpj_id = $1 AND e.period_month = $2 AND e.period_year = $3
+                 ORDER BY e.expense_date, ec.name`,
+                [cnpj_id, parseInt(month), parseInt(year)]
+            );
+            const rows = expenses.rows.map(e => ({
+                'Data': e.expense_date ? new Date(e.expense_date).toLocaleDateString('pt-BR', {timeZone:'UTC'}) : '',
+                'Categoria': e.category_name,
+                'Descrição': e.description || '',
+                'Valor (R$)': parseFloat(e.amount)
+            }));
+            const total = rows.reduce((s, r) => s + r['Valor (R$)'], 0);
+            rows.push({ 'Data': '', 'Categoria': '', 'Descrição': 'TOTAL', 'Valor (R$)': total });
+            const ws = XLSX.utils.json_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        }
 
         const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
-        const filename = `${empresa.razao_social.replace(/[^a-zA-Z0-9]/g, '_')}_${month}_${year}.xlsx`;
+        const modeLabel = mode === 'grouped' ? 'agrupado' : 'detalhado';
+        const filename = `${empresa.razao_social.replace(/[^a-zA-Z0-9]/g, '_')}_${month}_${year}_${modeLabel}.xlsx`;
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.send(buf);

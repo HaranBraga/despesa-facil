@@ -207,6 +207,8 @@ function renderLogin() {
     if (!email || !password) return showToast('Preencha todos os campos', 'error');
     try {
       const data = await api.post('/auth/login', { email, password });
+      if (data.user.is_admin) throw new Error('Use o painel Admin para acessar esta conta.');
+      if (data.user.office_id) throw new Error('Use o painel do Contador para acessar esta conta.');
       localStorage.setItem('token', data.token);
       navigate('dashboard');
     } catch (e) { showToast(e.message, 'error'); }
@@ -618,43 +620,34 @@ async function renderHistorico() {
 }
 
 function buildMiniCal(month, year, expDates, selectedDate) {
-  const WEEKDAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const today = new Date().toLocaleDateString('sv');
 
   // Normalize expense dates to YYYY-MM-DD strings
-  const dateSet = new Set((expDates || []).map(d => {
-    const dt = new Date(d);
-    return dt.toLocaleDateString('sv');
-  }));
+  const normalized = (expDates || []).map(d => new Date(d).toLocaleDateString('sv')).sort();
 
-  const firstDay = new Date(year, month - 1, 1);
-  const startDay = firstDay.getDay(); // 0=Sun
-  const daysInMonth = new Date(year, month, 0).getDate();
-
-  let daysHtml = '';
-  // Empty slots before first day
-  for (let i = 0; i < startDay; i++) {
-    daysHtml += `<div class="cal-day other-month"></div>`;
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const hasExp = dateSet.has(dateStr);
+  const chips = normalized.map(dateStr => {
+    const [y, m, dd] = dateStr.split('-');
+    const dt = new Date(parseInt(y), parseInt(m)-1, parseInt(dd));
+    const label = dt.toLocaleDateString('pt-BR', { weekday:'short', day:'numeric', month:'short' });
     const isToday = dateStr === today;
     const isSelected = dateStr === selectedDate;
-    const classes = ['cal-day', hasExp && 'has-expense', isToday && 'today', isSelected && 'selected'].filter(Boolean).join(' ');
-    daysHtml += `<div class="${classes}" ${hasExp ? `data-date="${dateStr}"` : ''}>${d}</div>`;
-  }
+    return `<button class="cal-chip${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}" data-date="${dateStr}" type="button">
+      <span class="cal-chip-day">${dd}</span>
+      <span class="cal-chip-label">${label.replace(/\.$/, '')}</span>
+    </button>`;
+  });
+
+  const emptyMsg = `<div style="text-align:center;padding:24px 0;color:var(--ink-3);font-size:0.85rem;">Nenhum lançamento neste mês</div>`;
 
   return `
-    <div class="mini-cal card" style="padding:16px;">
+    <div class="mini-cal card" style="padding:14px 16px;">
       <div class="mini-cal-header">
         <button id="cal-prev" type="button"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
         <span class="cal-month-label">${MONTHS[month - 1]} ${year}</span>
         <button id="cal-next" type="button"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
       </div>
-      <div class="mini-cal-weekdays">${WEEKDAYS.map(w => `<div>${w}</div>`).join('')}</div>
-      <div class="mini-cal-days">${daysHtml}</div>
+      <div class="cal-chips-row">${chips.length ? chips.join('') : emptyMsg}</div>
     </div>
   `;
 }

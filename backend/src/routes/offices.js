@@ -174,6 +174,42 @@ router.post('/:id/counters', auth, async (req, res) => {
     }
 });
 
+// PUT /offices/counters/:id — Editar email/senha de um contador (Admin)
+router.put('/counters/:id', auth, async (req, res) => {
+    try {
+        const bcrypt = require('bcryptjs');
+        if (!req.user.is_admin) return res.status(403).json({ error: 'Acesso negado' });
+        const { id } = req.params;
+        const { email, password } = req.body;
+        if (!email && !password) return res.status(400).json({ error: 'Informe email ou senha para alterar' });
+
+        const check = await pool.query('SELECT id, is_admin FROM users WHERE id = $1', [id]);
+        if (check.rows.length === 0) return res.status(404).json({ error: 'Contador não encontrado' });
+        if (check.rows[0].is_admin) return res.status(403).json({ error: 'Operação não permitida' });
+
+        const updates = [];
+        const params = [];
+        let idx = 1;
+        if (email) {
+            const dup = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email.toLowerCase(), id]);
+            if (dup.rows.length > 0) return res.status(409).json({ error: 'E-mail já em uso' });
+            updates.push(`email = $${idx++}`); params.push(email.toLowerCase());
+        }
+        if (password) {
+            if (password.length < 6) return res.status(400).json({ error: 'Senha mínima de 6 caracteres' });
+            const hash = await bcrypt.hash(password, 10);
+            updates.push(`password_hash = $${idx++}`); params.push(hash);
+        }
+        updates.push(`updated_at = NOW()`);
+        params.push(id);
+        await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}`, params);
+        res.json({ message: 'Contador atualizado com sucesso' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao atualizar contador' });
+    }
+});
+
 // DELETE /offices/counters/:id — Deletar um contador
 router.delete('/counters/:id', auth, async (req, res) => {
     try {
