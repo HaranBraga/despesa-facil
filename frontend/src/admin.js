@@ -520,7 +520,7 @@ async function renderDashboard(user) {
       </div>
       <div class="search-box" style="position:relative;margin-bottom:16px;">
         <input type="text" id="user-search" class="form-input" placeholder="Buscar por nome ou email..." style="padding-left:40px;border-radius:12px;">
-        <svg width="18" height="18" fill="none" stroke="#64748b" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--ink-3);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       </div>
       <div id="users-container"><div class="skeleton" style="height:200px"></div></div>
     `;
@@ -541,36 +541,36 @@ async function renderDashboard(user) {
         return;
       }
 
-      container.innerHTML = `
-        <div style="overflow-x:auto;">
-          <table class="data-table" style="width:100%;border-collapse:collapse;">
-            <thead>
-              <tr style="border-bottom:2px solid var(--line);background:var(--bg);">
-                <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:left;">Nome</th>
-                <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:left;">Email</th>
-                <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:left;">Escritório</th>
-                <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:center;">CNPJs</th>
-                <th style="padding:12px 16px;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;text-align:center;">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filtered.map(u => `
-                <tr style="border-bottom:1px solid var(--line);">
-                  <td style="padding:12px 16px;font-weight:600;">${u.name}</td>
-                  <td style="padding:12px 16px;font-size:0.85rem;color:#64748b;">${u.email}</td>
-                  <td style="padding:12px 16px;font-size:0.85rem;">${u.office_name || '<span class="text-muted">-</span>'}</td>
-                  <td style="padding:12px 16px;text-align:center;font-weight:700;">${u.cnpj_count}</td>
-                  <td style="padding:12px 16px;text-align:center;">
-                    <button class="btn btn-sm btn-toggle-user" data-uid="${u.id}" style="font-size:0.75rem;padding:4px 12px;border-radius:100px;border:1px solid ${u.is_active ? 'var(--green)' : 'var(--red)'};background:${u.is_active ? 'var(--green-soft)' : 'var(--red-soft)'};color:${u.is_active ? 'var(--green)' : 'var(--red)'};font-weight:700;cursor:pointer;">
-                      ${u.is_active ? 'Ativo' : 'Inativo'}
-                    </button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+      container.innerHTML = filtered.map(u => `
+        <div class="card" style="padding:16px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;flex-shrink:0;">
+                ${u.name.charAt(0).toUpperCase()}
+              </div>
+              <div style="min-width:0;">
+                <div style="font-weight:700;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.name}</div>
+                <div style="font-size:0.78rem;color:var(--ink-3);">${u.email}</div>
+                <div style="font-size:0.72rem;color:var(--ink-3);margin-top:2px;">${u.office_name || 'Sem escritório'} · ${u.cnpj_count} CNPJ${u.cnpj_count != 1 ? 's' : ''}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+              <span style="padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:700;border:1px solid ${u.is_active ? 'var(--green)' : 'var(--red)'};background:${u.is_active ? 'var(--green-soft)' : 'var(--red-soft)'};color:${u.is_active ? 'var(--green)' : 'var(--red)'};">
+                ${u.is_active ? 'Ativo' : 'Inativo'}
+              </span>
+              <button class="action-btn edit btn-edit-user" data-uid="${u.id}" data-uname="${u.name}" data-uemail="${u.email}" title="Editar usuário">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="action-btn btn-toggle-user" data-uid="${u.id}" title="${u.is_active ? 'Desativar' : 'Ativar'}" style="color:${u.is_active ? 'var(--amber)' : 'var(--green)'};">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${u.is_active ? '<path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/>' : '<path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/>'}</svg>
+              </button>
+              <button class="action-btn delete btn-del-user" data-uid="${u.id}" data-uname="${u.name}" title="Excluir usuário">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+          </div>
         </div>
-      `;
+      `).join('');
 
       document.querySelectorAll('.btn-toggle-user').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -581,7 +581,68 @@ async function renderDashboard(user) {
           } catch (e) { showToast(e.message, 'error'); }
         });
       });
+
+      document.querySelectorAll('.btn-edit-user').forEach(btn => {
+        btn.addEventListener('click', () => showEditUserModal(btn.dataset.uid, btn.dataset.uname, btn.dataset.uemail));
+      });
+
+      document.querySelectorAll('.btn-del-user').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm(`Excluir o usuário "${btn.dataset.uname}"? Esta ação é irreversível e remove todos os seus CNPJs e lançamentos.`)) return;
+          try {
+            await api.delete(`/offices/users/${btn.dataset.uid}`);
+            showToast('Usuário excluído', 'success');
+            loadUsers();
+          } catch (e) { showToast(e.message, 'error'); }
+        });
+      });
     } catch (e) { showToast(e.message, 'error'); }
+  }
+
+  function showEditUserModal(userId, userName, userEmail) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Editar Usuário: ${userName}</div>
+        <div class="gap-16">
+          <div class="form-group">
+            <label class="form-label">Nome</label>
+            <input id="m-eu-name" type="text" class="form-input" value="${userName}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Novo E-mail</label>
+            <input id="m-eu-email" type="email" class="form-input" placeholder="${userEmail}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nova Senha <span style="color:var(--ink-3);font-weight:400;">(deixe em branco para não alterar)</span></label>
+            <input id="m-eu-pass" type="password" class="form-input" placeholder="Mín. 6 caracteres" />
+          </div>
+          <button class="btn btn-primary" id="btn-save-eu">Salvar Alterações</button>
+          <button class="btn btn-outline" id="btn-cancel-eu">Cancelar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('show'));
+    document.getElementById('btn-save-eu').addEventListener('click', async () => {
+      const name = document.getElementById('m-eu-name').value.trim();
+      const email = document.getElementById('m-eu-email').value.trim();
+      const password = document.getElementById('m-eu-pass').value;
+      const body = {};
+      if (name && name !== userName) body.name = name;
+      if (email) body.email = email;
+      if (password) body.password = password;
+      if (Object.keys(body).length === 0) return showToast('Nenhuma alteração detectada', 'error');
+      try {
+        await api.put(`/offices/users/${userId}`, body);
+        showToast('Usuário atualizado!', 'success');
+        overlay.remove();
+        loadUsers();
+      } catch (e) { showToast(e.message, 'error'); }
+    });
+    document.getElementById('btn-cancel-eu').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   }
 
   // Initial load

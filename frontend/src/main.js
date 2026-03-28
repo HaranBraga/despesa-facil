@@ -49,37 +49,47 @@ function navigate(page, params = {}) {
 }
 
 // ---- App Shell ----
+let _shellSidebarCollapsed = false;
+
 function renderShell(content, activeNav) {
   const app = document.getElementById('app');
   const navItems = [
-    { id: 'dashboard', label: 'Início', icon: '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>' },
-    { id: 'lancamento', label: 'Lançar Despesa', icon: '<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>' },
-    { id: 'historico', label: 'Histórico', icon: '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>' },
-    { id: 'relatorio', label: 'Relatório Mensal', icon: '<line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>' },
-    { id: 'config', label: 'Configurações', icon: '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>' }
+    { id: 'dashboard',  label: 'Início',          icon: '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>' },
+    { id: 'lancamento', label: 'Lançar Despesa',   icon: '<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>' },
+    { id: 'historico',  label: 'Histórico',        icon: '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>' },
+    { id: 'relatorio',  label: 'Relatório Mensal', icon: '<line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>' },
+    { id: 'config',     label: 'Configurações',    icon: '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>' }
   ];
 
   const sidebarNavHtml = navItems.map(n => `
     <button class="nav-item-side ${activeNav === n.id ? 'active' : ''}" data-page="${n.id}">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${n.icon}</svg>
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">${n.icon}</svg>
       <span class="collapse-hide">${n.label}</span>
     </button>
   `).join('');
 
-  const walletIcon = '<svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>';
-  const logoutIcon = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>';
-  const menuIcon = '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+  const walletIcon = '<svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>';
+  const logoutIcon = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>';
+  const menuIcon  = '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+  const collapseIcon = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>';
 
   app.innerHTML = `
-    <div class="app-shell">
+    <div class="app-shell${_shellSidebarCollapsed ? ' sidebar-collapsed' : ''}" id="app-shell">
       <aside class="sidebar-main" id="sidebar-main">
-        <div class="sidebar-logo">
-          <div class="sidebar-logo-icon">${walletIcon}</div>
-          <span class="sidebar-logo-text collapse-hide">Despesa Fácil</span>
+        <div class="sidebar-logo" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;overflow:hidden;">
+            <div class="sidebar-logo-icon">${walletIcon}</div>
+            <div class="collapse-hide">
+              <div class="sidebar-logo-text">Despesa Fácil</div>
+            </div>
+          </div>
+          <button id="btn-toggle-sidebar" class="btn-sidebar-toggle" title="Recolher menu">${collapseIcon}</button>
         </div>
         <nav class="sidebar-nav">${sidebarNavHtml}</nav>
         <div class="sidebar-footer">
-          <button class="nav-item-side" id="btn-logout-side">${logoutIcon} <span class="collapse-hide">Sair da Conta</span></button>
+          <button class="nav-item-side" id="btn-logout-side">
+            ${logoutIcon} <span class="collapse-hide">Sair da Conta</span>
+          </button>
         </div>
       </aside>
       <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -87,10 +97,10 @@ function renderShell(content, activeNav) {
         <header class="app-header">
           <button class="btn-ghost" id="btn-toggle-mobile-menu">${menuIcon}</button>
           <span class="logo">
-            <svg width="24" height="24" fill="none" stroke="var(--brand)" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+            <svg width="22" height="22" fill="none" stroke="var(--brand)" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
             <span class="text-gradient">Despesa Fácil</span>
           </span>
-          <button class="btn-icon" id="btn-logout" title="Sair" style="margin-left:auto;">${logoutIcon}</button>
+          <button class="btn-icon" id="btn-logout" title="Sair" style="margin-left:auto;color:var(--red);">${logoutIcon}</button>
         </header>
         <main class="page-content page-enter">${content}</main>
         ${activeNav === 'lancamento' ? `
@@ -131,6 +141,14 @@ function renderShell(content, activeNav) {
     });
   });
 
+  document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
+    _shellSidebarCollapsed = !_shellSidebarCollapsed;
+    const shell = document.getElementById('app-shell');
+    shell.classList.toggle('sidebar-collapsed', _shellSidebarCollapsed);
+    const sidebar = document.getElementById('sidebar-main');
+    sidebar.style.width = _shellSidebarCollapsed ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
+    sidebar.style.padding = _shellSidebarCollapsed ? '28px 10px' : '28px 20px';
+  });
 
   document.getElementById('btn-toggle-mobile-menu')?.addEventListener('click', () => {
     document.getElementById('sidebar-main')?.classList.add('show');
@@ -607,13 +625,18 @@ async function renderHistorico() {
     const year = now.getFullYear();
     const today = now.toLocaleDateString('sv');
 
-    const [expenses, expDates] = await Promise.all([
-      api.get(`/expenses?cnpj_id=${selectedCnpjId}&date=${today}`),
-      api.get(`/expenses/dates?cnpj_id=${selectedCnpjId}&month=${month}&year=${year}`).catch(() => [])
-    ]);
+    const expDates = await api.get(`/expenses/dates?cnpj_id=${selectedCnpjId}&month=${month}&year=${year}`).catch(() => []);
 
-    renderShell(historicoHtml(cnpjs, expenses, today, month, year, expDates), 'historico');
-    setupHistoricoEvents(cnpjs, today, month, year, expDates);
+    // Se hoje tem lançamentos usa hoje, senão usa a última data com lançamento do mês
+    const normalizedDates = expDates.map(d => new Date(d).toLocaleDateString('sv'));
+    const activeDate = normalizedDates.includes(today)
+      ? today
+      : (normalizedDates.sort().reverse()[0] || today);
+
+    const expenses = await api.get(`/expenses?cnpj_id=${selectedCnpjId}&date=${activeDate}`).catch(() => []);
+
+    renderShell(historicoHtml(cnpjs, expenses, activeDate, month, year, expDates), 'historico');
+    setupHistoricoEvents(cnpjs, activeDate, month, year, expDates);
   } catch (e) {
     showToast(e.message, 'error');
   }

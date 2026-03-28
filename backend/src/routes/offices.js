@@ -88,6 +88,63 @@ router.put('/users/:id/toggle', auth, requireAdmin, async (req, res) => {
     }
 });
 
+// PUT /offices/users/:id — Editar email/senha de um usuário (Admin)
+router.put('/users/:id', auth, requireAdmin, async (req, res) => {
+    try {
+        const bcrypt = require('bcryptjs');
+        const { id } = req.params;
+        const { name, email, password } = req.body;
+
+        const check = await pool.query('SELECT id, is_admin FROM users WHERE id = $1', [id]);
+        if (check.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+        if (check.rows[0].is_admin) return res.status(403).json({ error: 'Não é possível editar um admin por aqui' });
+
+        const updates = [];
+        const params = [];
+        let idx = 1;
+
+        if (name) { updates.push(`name = $${idx++}`); params.push(name.trim()); }
+        if (email) {
+            const dup = await pool.query(
+                `SELECT id FROM users WHERE email = $1 AND id != $2
+                 UNION SELECT id FROM counters WHERE email = $1`,
+                [email.toLowerCase(), id]
+            );
+            if (dup.rows.length > 0) return res.status(409).json({ error: 'E-mail já em uso' });
+            updates.push(`email = $${idx++}`); params.push(email.toLowerCase());
+        }
+        if (password) {
+            if (password.length < 6) return res.status(400).json({ error: 'Senha mínima de 6 caracteres' });
+            const hash = await bcrypt.hash(password, 10);
+            updates.push(`password_hash = $${idx++}`); params.push(hash);
+        }
+        if (updates.length === 0) return res.status(400).json({ error: 'Nenhum campo para atualizar' });
+        updates.push(`updated_at = NOW()`);
+        params.push(id);
+        await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}`, params);
+        res.json({ message: 'Usuário atualizado com sucesso' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao atualizar usuário' });
+    }
+});
+
+// DELETE /offices/users/:id — Deletar um usuário (Admin)
+router.delete('/users/:id', auth, requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const check = await pool.query('SELECT id, is_admin FROM users WHERE id = $1', [id]);
+        if (check.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+        if (check.rows[0].is_admin) return res.status(403).json({ error: 'Não é possível excluir um admin' });
+
+        await pool.query('DELETE FROM users WHERE id = $1', [id]);
+        res.json({ message: 'Usuário excluído com sucesso' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao excluir usuário' });
+    }
+});
+
 // GET /offices/admin/stats — Dashboard stats for admin panel
 router.get('/admin/stats', auth, requireAdmin, async (req, res) => {
     try {
