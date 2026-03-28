@@ -100,9 +100,7 @@ const alterStatements = [
   )`,
   `ALTER TABLE accounting_office_settings ADD COLUMN IF NOT EXISTS reminder_max_business_day INTEGER DEFAULT 3`,
   `ALTER TABLE accounting_office_settings ADD COLUMN IF NOT EXISTS webhook_url TEXT`,
-  `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_counter BOOLEAN DEFAULT false`,
-  `UPDATE users SET is_counter = false WHERE is_admin = false AND EXISTS (SELECT 1 FROM cnpjs c WHERE c.user_id = users.id AND c.is_active = true)`,
-  // Nova tabela dedicada para contadores de escritórios
+  // Nova tabela dedicada para contadores de escritórios (separada de users)
   `CREATE TABLE IF NOT EXISTS counters (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
@@ -115,12 +113,18 @@ const alterStatements = [
     updated_at TIMESTAMP DEFAULT NOW()
   )`,
   `CREATE INDEX IF NOT EXISTS idx_counters_office_id ON counters(office_id)`,
-  // Migra contadores existentes da tabela users para counters (idempotente)
+  // Garante que is_counter existe temporariamente para migração legada
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_counter BOOLEAN DEFAULT false`,
+  // Migra contadores legados da tabela users para counters (idempotente)
   `INSERT INTO counters (id, name, email, password_hash, office_id, whatsapp_number, is_active, created_at, updated_at)
    SELECT id, name, email, password_hash, office_id, whatsapp_number, is_active, created_at, updated_at
    FROM users
    WHERE is_counter = true AND office_id IS NOT NULL AND is_admin = false
-   ON CONFLICT (id) DO NOTHING`,
+   ON CONFLICT (email) DO NOTHING`,
+  // Remove contadores migrados da tabela users e remove a coluna is_counter
+  `DELETE FROM users WHERE is_counter = true AND office_id IS NOT NULL AND is_admin = false
+   AND email IN (SELECT email FROM counters)`,
+  `ALTER TABLE users DROP COLUMN IF EXISTS is_counter`,
   `CREATE TABLE IF NOT EXISTS report_submissions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     cnpj_id UUID NOT NULL REFERENCES cnpjs(id) ON DELETE CASCADE,

@@ -60,7 +60,7 @@ router.post('/', auth, async (req, res) => {
 
         const result = await pool.query(
             'INSERT INTO cnpjs (id, user_id, cnpj, razao_social) VALUES ($1,$2,$3,$4) RETURNING *',
-            [uuidv4(), req.user.id, formatted, razao_social.trim()]
+            [uuidv4(), req.user.id, formatted, razao_social.trim().toUpperCase()]
         );
 
         res.status(201).json(result.rows[0]);
@@ -77,7 +77,7 @@ router.put('/:id', auth, async (req, res) => {
         const result = await pool.query(
             `UPDATE cnpjs SET razao_social = $1, updated_at = NOW()
        WHERE id = $2 AND user_id = $3 RETURNING *`,
-            [razao_social, req.params.id, req.user.id]
+            [razao_social?.trim().toUpperCase(), req.params.id, req.user.id]
         );
         if (result.rows.length === 0) return res.status(404).json({ error: 'CNPJ não encontrado' });
         res.json(result.rows[0]);
