@@ -122,12 +122,12 @@ async function renderDashboard(user) {
                     <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
                 </div>
                 <div>
-                    <div style="font-weight:800; font-size:0.9rem; color:#1e293b; line-height:1.1;">Despesa Fácil</div>
+                    <div style="font-weight:800; font-size:0.9rem; color:var(--ink); line-height:1.1;">Despesa Fácil</div>
                     <div style="font-size:0.65rem; font-weight:700; color:var(--brand); text-transform:uppercase; letter-spacing:0.05em;">Contador</div>
                 </div>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
-                <button id="btn-settings" style="width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; transition:var(--ease);" title="Configurações">
+                <button id="btn-settings" style="width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:var(--ink-3); cursor:pointer; transition:var(--ease);" title="Configurações">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
                 </button>
                 <button id="btn-logout" style="width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:var(--red); cursor:pointer; transition:var(--ease);" title="Sair">
@@ -143,11 +143,11 @@ async function renderDashboard(user) {
             <div id="dashboard-view" style="display:flex; flex-direction:column; gap:24px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                     <div>
-                        <h1 style="font-size:1.5rem; font-weight:800; color:#1e293b; margin:0 0 2px;">Olá, ${user.name.split(' ')[0]}</h1>
-                        <p style="color:#64748b; margin:0; font-size:0.85rem;">Resumo contábil do seu escritório.</p>
+                        <h1 style="font-size:1.5rem; font-weight:800; color:var(--ink); margin:0 0 2px;">Olá, ${user.name.split(' ')[0]}</h1>
+                        <p style="color:var(--ink-3); margin:0; font-size:0.85rem;">Resumo contábil do seu escritório.</p>
                     </div>
                     <div id="dashboard-period-picker" style="display:flex; gap:8px; background:white; padding:8px 14px; border-radius:12px; box-shadow:var(--shadow-1); border:1px solid var(--line); align-items:center;">
-                        <span style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase;">Período</span>
+                        <span style="font-size:0.72rem; font-weight:700; color:var(--ink-3); text-transform:uppercase;">Período</span>
                         <select id="dash-sel-month" class="form-input" style="width:auto; padding:4px 6px; border:none; background:transparent; font-weight:600; cursor:pointer; font-size:0.85rem;"></select>
                         <div style="width:1px; height:16px; background:var(--line);"></div>
                         <select id="dash-sel-year" class="form-input" style="width:auto; padding:4px 6px; border:none; background:transparent; font-weight:600; cursor:pointer; font-size:0.85rem;"></select>
@@ -163,8 +163,8 @@ async function renderDashboard(user) {
                         </div>
                     </div>
                     <div>
-                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Total de Empresas</div>
-                        <div style="font-size:1.8rem; font-weight:800; color:#1e293b;" id="summ-total">-</div>
+                        <div style="font-size:0.85rem; color:var(--ink-3); font-weight:600;">Total de Empresas</div>
+                        <div style="font-size:1.8rem; font-weight:800; color:var(--ink);" id="summ-total">-</div>
                     </div>
                 </div>
 
@@ -176,8 +176,8 @@ async function renderDashboard(user) {
                         <div id="prog-delivered" style="font-size:0.75rem; font-weight:700; color:var(--green); background:var(--green-soft); padding:4px 10px; border-radius:100px;">0%</div>
                     </div>
                     <div>
-                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Entregues</div>
-                        <div style="font-size:1.8rem; font-weight:800; color:#1e293b;" id="summ-delivered">-</div>
+                        <div style="font-size:0.85rem; color:var(--ink-3); font-weight:600;">Entregues</div>
+                        <div style="font-size:1.8rem; font-weight:800; color:var(--ink);" id="summ-delivered">-</div>
                     </div>
                 </div>
 
@@ -189,8 +189,8 @@ async function renderDashboard(user) {
                         <div id="prog-in-progress" style="font-size:0.75rem; font-weight:700; color:#8b5cf6; background:rgba(139,92,246,0.10); padding:4px 10px; border-radius:100px;">0%</div>
                     </div>
                     <div>
-                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Em Digitação</div>
-                        <div style="font-size:1.8rem; font-weight:800; color:#1e293b;" id="summ-in-progress">-</div>
+                        <div style="font-size:0.85rem; color:var(--ink-3); font-weight:600;">Em Digitação</div>
+                        <div style="font-size:1.8rem; font-weight:800; color:var(--ink);" id="summ-in-progress">-</div>
                     </div>
                 </div>
 
@@ -202,8 +202,8 @@ async function renderDashboard(user) {
                         <div id="prog-pending" style="font-size:0.75rem; font-weight:700; color:var(--red); background:var(--red-soft); padding:4px 10px; border-radius:100px;">0%</div>
                     </div>
                     <div>
-                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Pendente</div>
-                        <div style="font-size:1.8rem; font-weight:800; color:#1e293b;" id="summ-pending">-</div>
+                        <div style="font-size:0.85rem; color:var(--ink-3); font-weight:600;">Pendente</div>
+                        <div style="font-size:1.8rem; font-weight:800; color:var(--ink);" id="summ-pending">-</div>
                     </div>
                 </div>
             </div>
@@ -212,12 +212,12 @@ async function renderDashboard(user) {
             <div style="display:flex; flex-direction:column; gap:16px;">
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
                     <div>
-                        <div style="font-size:1.05rem; font-weight:700; color:#1e293b;">Empresas</div>
+                        <div style="font-size:1.05rem; font-weight:700; color:var(--ink);">Empresas</div>
                         <div class="text-xs text-muted" id="company-count">0 empresas</div>
                     </div>
                     <div class="search-box" style="position:relative; flex:1; min-width:180px; max-width:320px;">
                         <input type="text" id="company-search" class="form-input" placeholder="Buscar empresa ou CNPJ..." style="padding-left:40px; border-radius:12px; font-size:0.85rem;">
-                        <svg width="18" height="18" fill="none" stroke="#64748b" stroke-width="2" viewBox="0 0 24 24" style="position:absolute; left:14px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <svg width="18" height="18" fill="none" stroke="var(--ink-3)" stroke-width="2" viewBox="0 0 24 24" style="position:absolute; left:14px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </div>
                 </div>
                 <div id="companies-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:8px;">
@@ -233,12 +233,12 @@ async function renderDashboard(user) {
             <div id="company-detail-view" style="display:none; flex-direction:column; gap:16px; transition:var(--ease);">
                 <!-- Header -->
                 <header style="display:flex; align-items:center; gap:12px;">
-                    <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:#64748b; cursor:pointer; flex-shrink:0; transition:var(--ease);">
+                    <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:var(--ink-3); cursor:pointer; flex-shrink:0; transition:var(--ease);">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                     </button>
                     <div style="flex:1; min-width:0;">
-                        <h1 id="detail-company-name" style="font-size:1.2rem; font-weight:800; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0;">Carregando...</h1>
-                        <p id="detail-company-cnpj" style="color:#64748b; font-size:0.78rem; margin:0; font-family:monospace;">--</p>
+                        <h1 id="detail-company-name" style="font-size:1.2rem; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0;">Carregando...</h1>
+                        <p id="detail-company-cnpj" style="color:var(--ink-3); font-size:0.78rem; margin:0; font-family:monospace;">--</p>
                     </div>
                 </header>
 
@@ -269,7 +269,7 @@ async function renderDashboard(user) {
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div>
                                 <div style="font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total do período</div>
-                                <div id="report-total-display" style="font-size:1.5rem; font-weight:800; color:#1e293b; letter-spacing:-0.02em;">--</div>
+                                <div id="report-total-display" style="font-size:1.5rem; font-weight:800; color:var(--ink); letter-spacing:-0.02em;">--</div>
                             </div>
                             <div id="report-status-badge"></div>
                         </div>
@@ -291,17 +291,17 @@ async function renderDashboard(user) {
                     <!-- Expense table -->
                     <div class="card" style="padding:0; overflow:hidden; border-radius:16px;">
                         <div style="padding:14px 16px; border-bottom:1px solid var(--line); background:var(--bg);">
-                            <h3 style="font-size:0.85rem; font-weight:700; color:#1e293b; margin:0;">Lançamentos do período</h3>
+                            <h3 style="font-size:0.85rem; font-weight:700; color:var(--ink); margin:0;">Lançamentos do período</h3>
                         </div>
                         <div style="overflow-x:auto;">
                             <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
                                 <thead>
                                     <tr style="border-bottom:1px solid var(--line); background:rgba(241,245,249,0.5);">
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase;">Data</th>
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase;">Descrição</th>
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase;">Categoria</th>
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:right;">Valor</th>
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; text-align:center;">Ações</th>
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase;">Data</th>
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase;">Descrição</th>
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase;">Categoria</th>
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; text-align:right;">Valor</th>
+                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; text-align:center;">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="expenses-list-tbody">
@@ -381,8 +381,8 @@ async function renderDashboard(user) {
                         <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </div>
                     <div>
-                        <div style="font-weight:700; color:#1e293b; font-size:1rem;">Nenhuma empresa encontrada</div>
-                        <div style="font-size:0.82rem; color:#64748b; margin-top:4px;">Tente ajustar o filtro ou a busca.</div>
+                        <div style="font-weight:700; color:var(--ink); font-size:1rem;">Nenhuma empresa encontrada</div>
+                        <div style="font-size:0.82rem; color:var(--ink-3); margin-top:4px;">Tente ajustar o filtro ou a busca.</div>
                     </div>
                 </div>`;
                 container.style.opacity = '1';
@@ -420,9 +420,9 @@ async function renderDashboard(user) {
                     background:${isActive ? 'rgba(99,102,241,0.05)' : 'white'};
                     cursor:pointer; transition:var(--ease); overflow:hidden; min-width:0;
                 ">
-                    <div style="width:32px;height:32px;border-radius:9px;background:${isActive ? 'var(--brand-soft)' : 'var(--bg)'};color:${isActive ? 'var(--brand)' : '#64748b'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.72rem;flex-shrink:0;">${initials}</div>
+                    <div style="width:32px;height:32px;border-radius:9px;background:${isActive ? 'var(--brand-soft)' : 'var(--bg)'};color:${isActive ? 'var(--brand)' : 'var(--ink-3)'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.72rem;flex-shrink:0;">${initials}</div>
                     <div style="flex:1;min-width:0;">
-                        <div style="font-weight:700;color:#1e293b;font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.razao_social}</div>
+                        <div style="font-weight:700;color:var(--ink);font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.razao_social}</div>
                         <div style="display:flex;align-items:center;gap:4px;margin-top:2px;">
                             <span style="width:6px;height:6px;border-radius:50%;background:${statusDot};flex-shrink:0;"></span>
                             <span style="font-size:0.65rem;font-weight:600;color:${statusColor};">${c.is_locked ? 'Entregue' : c.has_expenses ? 'Em Digitação' : 'Pendente'}</span>
@@ -438,7 +438,7 @@ async function renderDashboard(user) {
                     const g = grouped[owner];
                     html += `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:2px 0;margin-top:6px;">
                         <div style="width:22px;height:22px;border-radius:6px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.65rem;flex-shrink:0;">${owner.charAt(0).toUpperCase()}</div>
-                        <span style="font-weight:700;font-size:0.78rem;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${owner}</span>
+                        <span style="font-weight:700;font-size:0.78rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${owner}</span>
                         <div style="flex:1;height:1px;background:var(--line);"></div>
                         <span style="font-size:0.65rem;font-weight:700;color:var(--ink-3);flex-shrink:0;">${g.companies.length}</span>
                     </div>`;
@@ -538,8 +538,8 @@ async function renderDashboard(user) {
                             ${data.owner_name.charAt(0).toUpperCase()}
                         </div>
                         <div style="min-width:0;">
-                            <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">${data.owner_name}</div>
-                            <div style="font-size:0.8rem; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${data.owner_email}</div>
+                            <div style="font-weight:700; color:var(--ink); font-size:0.95rem;">${data.owner_name}</div>
+                            <div style="font-size:0.8rem; color:var(--ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${data.owner_email}</div>
                         </div>
                     </div>
                 </div>
@@ -548,7 +548,7 @@ async function renderDashboard(user) {
                 <div class="card" style="padding:20px; display:flex; flex-direction:column; gap:14px;">
                     <div>
                         <div style="font-size:0.72rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">WhatsApp para notificações</div>
-                        <p style="font-size:0.8rem; color:#64748b; margin:0; line-height:1.4;">Número que receberá lembretes e alertas para este CNPJ. Deixe em branco para usar o número padrão da conta.</p>
+                        <p style="font-size:0.8rem; color:var(--ink-3); margin:0; line-height:1.4;">Número que receberá lembretes e alertas para este CNPJ. Deixe em branco para usar o número padrão da conta.</p>
                     </div>
 
                     ${data.account_whatsapp ? `
@@ -594,6 +594,12 @@ async function renderDashboard(user) {
         const now = new Date();
         const currentMonth = parseInt(document.getElementById('sel-month')?.value) || (now.getMonth() + 1);
         const currentYear = parseInt(document.getElementById('sel-year')?.value) || now.getFullYear();
+
+        // Ensure hidden selects are initialized with the active period
+        const selMonth = document.getElementById('sel-month');
+        const selYear = document.getElementById('sel-year');
+        if (selMonth && !selMonth.value) selMonth.value = currentMonth;
+        if (selYear && !selYear.value) selYear.value = currentYear;
 
         const pills = [];
         for (let i = 0; i < 12; i++) {
@@ -691,7 +697,7 @@ async function renderDashboard(user) {
             if (expenses.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" style="padding:48px 24px; text-align:center; color:#64748b;">
+                        <td colspan="5" style="padding:48px 24px; text-align:center; color:var(--ink-3);">
                             <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:12px; opacity:0.5;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             <p style="margin:0;">Nenhum lançamento registrado neste mês.</p>
                         </td>
@@ -704,19 +710,19 @@ async function renderDashboard(user) {
                 const lateBadge = e.is_late ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-left:6px;" title="Adicionada após envio do relatório"></span>' : '';
                 return `
                 <tr style="border-bottom:1px solid var(--line); transition:var(--ease);${e.is_late ? 'background:rgba(245,158,11,0.04);' : ''}" onmouseover="this.style.background='rgba(241, 245, 249, 0.4)'" onmouseout="this.style.background='${e.is_late ? 'rgba(245,158,11,0.04)' : 'transparent'}'}">
-                    <td style="padding:16px 24px; font-size:0.85rem; color:#64748b; white-space:nowrap;">
+                    <td style="padding:16px 24px; font-size:0.85rem; color:var(--ink-3); white-space:nowrap;">
                         ${e.expense_date ? new Date(e.expense_date).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-'}${lateBadge}
                     </td>
                     <td style="padding:16px 24px;">
-                        <div style="font-weight:600; color:#1e293b; font-size:0.9rem;">${e.description || '-'}</div>
+                        <div style="font-weight:600; color:var(--ink); font-size:0.9rem;">${e.description || '-'}</div>
                     </td>
                     <td style="padding:16px 24px;">
-                        <div style="display:inline-flex; align-items:center; gap:6px; background:var(--bg); padding:4px 10px; border-radius:100px; font-size:0.75rem; font-weight:600; color:#475569;">
+                        <div style="display:inline-flex; align-items:center; gap:6px; background:var(--bg); padding:4px 10px; border-radius:100px; font-size:0.75rem; font-weight:600; color:var(--ink-2);">
                             ${e.category_name}
                             ${e.is_filial ? '<span style="color:#8b5cf6; font-weight:800;">\u2022 Filial</span>' : ''}
                         </div>
                     </td>
-                    <td style="padding:16px 24px; text-align:right; font-weight:700; color:#1e293b; font-size:0.95rem;">
+                    <td style="padding:16px 24px; text-align:right; font-weight:700; color:var(--ink); font-size:0.95rem;">
                         R$ ${parseFloat(e.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td style="padding:16px 24px; text-align:center;">
@@ -811,11 +817,11 @@ async function renderDashboard(user) {
                                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             </div>
                             <div>
-                                <h2 style="font-size:1.15rem; font-weight:800; color:#1e293b; margin:0;">Regras & Lembretes</h2>
-                                <p style="font-size:0.75rem; color:#64748b; margin:0; margin-top:2px;">Controle das automações de cobrança</p>
+                                <h2 style="font-size:1.15rem; font-weight:800; color:var(--ink); margin:0;">Regras & Lembretes</h2>
+                                <p style="font-size:0.75rem; color:var(--ink-3); margin:0; margin-top:2px;">Controle das automações de cobrança</p>
                             </div>
                         </div>
-                        <button id="btn-close-modal" style="background:var(--bg); width:32px; height:32px; border-radius:50%; border:1px solid var(--line); cursor:pointer; color:#64748b; display:flex; align-items:center; justify-content:center; transition:var(--ease);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+                        <button id="btn-close-modal" style="background:var(--bg); width:32px; height:32px; border-radius:50%; border:1px solid var(--line); cursor:pointer; color:var(--ink-3); display:flex; align-items:center; justify-content:center; transition:var(--ease);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
                     </div>
                     
                     <div style="padding:32px;">
@@ -824,8 +830,8 @@ async function renderDashboard(user) {
                             <!-- Toggle Automação -->
                             <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--bg); border-radius:16px; border:1px solid var(--line);">
                                 <div>
-                                    <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">Automação de WhatsApp</div>
-                                    <div style="font-size:0.75rem; color:#64748b; max-width:200px; line-height:1.4; margin-top:4px;">Ative para disparar cobranças automaticamente aos clientes pendentes.</div>
+                                    <div style="font-weight:700; color:var(--ink); font-size:0.95rem;">Automação de WhatsApp</div>
+                                    <div style="font-size:0.75rem; color:var(--ink-3); max-width:200px; line-height:1.4; margin-top:4px;">Ative para disparar cobranças automaticamente aos clientes pendentes.</div>
                                 </div>
                                 <div id="set-enabled" class="set-toggle ${settings.reminder_enabled ? 'on' : ''}" data-checked="${settings.reminder_enabled}"></div>
                             </div>
@@ -855,7 +861,7 @@ async function renderDashboard(user) {
                                     <input id="set-day-limit" type="number" class="form-input" min="1" max="10" value="${settings.reminder_max_business_day || 3}" style="padding-right:60px; font-weight:800; font-size:1.05rem; border-radius:12px;">
                                     <div style="position:absolute; right:16px; font-size:0.75rem; font-weight:700; color:var(--brand); background:var(--brand-soft); padding:4px 8px; border-radius:6px; pointer-events:none;">º Dia</div>
                                 </div>
-                                <p style="font-size:0.75rem; color:#64748b; line-height:1.4; margin-top:8px;">Após este dia limite, o sistema para de enviar avisos neste mês.</p>
+                                <p style="font-size:0.75rem; color:var(--ink-3); line-height:1.4; margin-top:8px;">Após este dia limite, o sistema para de enviar avisos neste mês.</p>
                             </div>
 
                             <button class="btn btn-primary" id="btn-save-settings" style="margin-top:32px; border-radius:14px; padding:14px; width:100%; font-size:1rem; box-shadow:0 8px 16px var(--brand-glow);">

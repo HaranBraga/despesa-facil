@@ -625,13 +625,13 @@ async function renderHistorico() {
     const year = now.getFullYear();
     const today = now.toLocaleDateString('sv');
 
-    const expDates = await api.get(`/expenses/dates?cnpj_id=${selectedCnpjId}&month=${month}&year=${year}`).catch(() => []);
+    const expDatesRaw = await api.get(`/expenses/dates?cnpj_id=${selectedCnpjId}&month=${month}&year=${year}`).catch(() => []);
+    const expDates = expDatesRaw.map(d => String(d).split('T')[0]);
 
     // Se hoje tem lançamentos usa hoje, senão usa a última data com lançamento do mês
-    const normalizedDates = expDates.map(d => new Date(d).toLocaleDateString('sv'));
-    const activeDate = normalizedDates.includes(today)
+    const activeDate = expDates.includes(today)
       ? today
-      : (normalizedDates.sort().reverse()[0] || today);
+      : ([...expDates].sort().reverse()[0] || today);
 
     const expenses = await api.get(`/expenses?cnpj_id=${selectedCnpjId}&date=${activeDate}`).catch(() => []);
 
@@ -646,8 +646,8 @@ function buildMiniCal(month, year, expDates, selectedDate) {
   const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const today = new Date().toLocaleDateString('sv');
 
-  // Normalize expense dates to YYYY-MM-DD strings
-  const normalized = (expDates || []).map(d => new Date(d).toLocaleDateString('sv')).sort();
+  // Dates are already YYYY-MM-DD strings from the API — sort them
+  const normalized = (expDates || []).map(d => String(d).split('T')[0]).sort();
 
   const chips = normalized.map(dateStr => {
     const [y, m, dd] = dateStr.split('-');
@@ -759,7 +759,8 @@ function setupHistoricoEvents(cnpjs, initialDate, calMonth, calYear, expDates) {
 
   async function refreshCalendar() {
     const cnpj_id = document.getElementById('h-cnpj')?.value;
-    currentExpDates = await api.get(`/expenses/dates?cnpj_id=${cnpj_id}&month=${currentMonth}&year=${currentYear}`).catch(() => []);
+    const raw = await api.get(`/expenses/dates?cnpj_id=${cnpj_id}&month=${currentMonth}&year=${currentYear}`).catch(() => []);
+    currentExpDates = raw.map(d => String(d).split('T')[0]);
     document.getElementById('h-calendar').innerHTML = buildMiniCal(currentMonth, currentYear, currentExpDates, currentDate);
     setupCalendarHandlers();
   }
