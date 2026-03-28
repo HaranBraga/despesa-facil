@@ -104,11 +104,11 @@ async function renderDashboard(user) {
   document.getElementById('app').innerHTML = `
     <div class="app-shell">
       <aside id="sidebar-main" class="sidebar-main">
-        <div class="sidebar-logo" style="justify-content:space-between;width:100;">
+        <div class="sidebar-logo" style="justify-content:space-between;">
           <div style="display:flex;align-items:center;gap:12px;overflow:hidden;">
             <div class="sidebar-logo-icon">
-              <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+              <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                <rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>
               </svg>
             </div>
             <div class="collapse-hide">
@@ -152,7 +152,8 @@ async function renderDashboard(user) {
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
           <span class="logo">
-            <span class="text-gradient" style="font-weight:800;">Admin</span>
+            <svg width="22" height="22" fill="none" stroke="var(--brand)" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+            <span class="text-gradient">Admin</span>
           </span>
         </header>
         <main id="admin-main" class="page-content">

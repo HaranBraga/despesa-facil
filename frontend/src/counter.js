@@ -112,39 +112,58 @@ async function renderDashboard(user) {
     let dashboardYear = now.getFullYear();
 
 
+    const walletIcon = '<svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>';
+    const logoutIcon = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>';
+    const menuIcon = '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+    const collapseIcon = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>';
+    const homeIcon = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>';
+    const settingsIcon = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>';
+
     document.getElementById('app').innerHTML = `
-    <div style="display:flex; flex-direction:column; min-height:100vh; background:var(--bg);">
-
-        <!-- Top Header -->
-        <header style="position:sticky; top:0; z-index:50; background:white; border-bottom:1px solid var(--line); padding:0 20px; height:56px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="width:32px; height:32px; border-radius:10px; background:linear-gradient(135deg,var(--brand),#8b5cf6); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                    <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
-                </div>
-                <div>
-                    <div style="font-weight:800; font-size:0.9rem; color:var(--ink); line-height:1.1;">Despesa Fácil</div>
-                    <div style="font-size:0.65rem; font-weight:700; color:var(--brand); text-transform:uppercase; letter-spacing:0.05em;">Contador</div>
-                </div>
+    <div class="app-shell${isSidebarCollapsed ? ' sidebar-collapsed' : ''}" id="app-shell">
+      <aside class="sidebar-main" id="sidebar-main">
+        <div class="sidebar-logo" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;overflow:hidden;">
+            <div class="sidebar-logo-icon">${walletIcon}</div>
+            <div class="collapse-hide">
+              <div class="sidebar-logo-text">Despesa Fácil</div>
+              <div class="sidebar-logo-badge">Contador</div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <button id="btn-settings" style="width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:var(--ink-3); cursor:pointer; transition:var(--ease);" title="Configurações">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-                </button>
-                <button id="btn-logout" style="width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:var(--red); cursor:pointer; transition:var(--ease);" title="Sair">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                </button>
-            </div>
+          </div>
+          <button id="btn-toggle-sidebar" class="btn-sidebar-toggle" title="Recolher menu">${collapseIcon}</button>
+        </div>
+        <nav class="sidebar-nav">
+          <button class="nav-item-side active" data-nav="dashboard">
+            ${homeIcon} <span class="collapse-hide">Início</span>
+          </button>
+          <button class="nav-item-side" data-nav="settings">
+            ${settingsIcon} <span class="collapse-hide">Configurações</span>
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="nav-item-side" id="btn-logout-side">
+            ${logoutIcon} <span class="collapse-hide">Sair</span>
+          </button>
+        </div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebar-overlay"></div>
+      <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
+        <header class="app-header">
+          <button class="btn-ghost" id="btn-toggle-mobile-menu">${menuIcon}</button>
+          <span class="logo">
+            <svg width="22" height="22" fill="none" stroke="var(--brand)" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+            <span class="text-gradient">Contador</span>
+          </span>
+          <button class="btn-icon" id="btn-logout" title="Sair" style="margin-left:auto;color:var(--red);">${logoutIcon}</button>
         </header>
-
-        <!-- Main Content -->
-        <main style="flex:1; padding:20px; max-width:1200px; width:100%; margin:0 auto;" id="main-content">
+        <main class="page-content page-enter" id="main-content">
 
             <!-- VIEW: DASHBOARD MESTRE -->
-            <div id="dashboard-view" style="display:flex; flex-direction:column; gap:24px;">
+            <div id="dashboard-view" class="gap-24">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                     <div>
-                        <h1 style="font-size:1.5rem; font-weight:800; color:var(--ink); margin:0 0 2px;">Olá, ${user.name.split(' ')[0]}</h1>
-                        <p style="color:var(--ink-3); margin:0; font-size:0.85rem;">Resumo contábil do seu escritório.</p>
+                        <h1 class="page-title" style="font-size:1.5rem;">Olá, ${user.name.split(' ')[0]}</h1>
+                        <p class="page-sub">Resumo contábil do seu escritório.</p>
                     </div>
                     <div id="dashboard-period-picker" style="display:flex; gap:8px; background:white; padding:8px 14px; border-radius:12px; box-shadow:var(--shadow-1); border:1px solid var(--line); align-items:center;">
                         <span style="font-size:0.72rem; font-weight:700; color:var(--ink-3); text-transform:uppercase;">Período</span>
@@ -209,15 +228,14 @@ async function renderDashboard(user) {
             </div>
 
             <!-- Company List Area -->
-            <div style="display:flex; flex-direction:column; gap:16px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+            <div class="gap-16">
+                <div class="section-header">
                     <div>
-                        <div style="font-size:1.05rem; font-weight:700; color:var(--ink);">Empresas</div>
-                        <div class="text-xs text-muted" id="company-count">0 empresas</div>
+                        <div class="section-title">Empresas</div>
+                        <div class="section-sub" id="company-count">0 empresas</div>
                     </div>
-                    <div class="search-box" style="position:relative; flex:1; min-width:180px; max-width:320px;">
-                        <input type="text" id="company-search" class="form-input" placeholder="Buscar empresa ou CNPJ..." style="padding-left:40px; border-radius:12px; font-size:0.85rem;">
-                        <svg width="18" height="18" fill="none" stroke="var(--ink-3)" stroke-width="2" viewBox="0 0 24 24" style="position:absolute; left:14px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <div class="search-box" style="flex:1; min-width:180px; max-width:320px;">
+                        <input type="text" id="company-search" class="form-input" placeholder="Buscar empresa ou CNPJ...">
                     </div>
                 </div>
                 <div id="companies-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:8px;">
@@ -230,30 +248,30 @@ async function renderDashboard(user) {
             </div> <!-- Close dashboard-view -->
             
             <!-- VIEW: DETALHE COMPANHIA -->
-            <div id="company-detail-view" style="display:none; flex-direction:column; gap:16px; transition:var(--ease);">
+            <div id="company-detail-view" style="display:none;" class="gap-16">
                 <!-- Header -->
                 <header style="display:flex; align-items:center; gap:12px;">
-                    <button id="btn-back-dashboard" style="width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:white; display:flex; align-items:center; justify-content:center; color:var(--ink-3); cursor:pointer; flex-shrink:0; transition:var(--ease);">
+                    <button id="btn-back-dashboard" class="btn-icon" style="flex-shrink:0;">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                     </button>
                     <div style="flex:1; min-width:0;">
-                        <h1 id="detail-company-name" style="font-size:1.2rem; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0;">Carregando...</h1>
-                        <p id="detail-company-cnpj" style="color:var(--ink-3); font-size:0.78rem; margin:0; font-family:monospace;">--</p>
+                        <h1 id="detail-company-name" class="page-title" style="font-size:1.2rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Carregando...</h1>
+                        <p id="detail-company-cnpj" class="section-sub" style="font-family:monospace;">--</p>
                     </div>
                 </header>
 
                 <!-- Tabs -->
-                <div style="display:flex; gap:4px; background:var(--bg); padding:4px; border-radius:14px; border:1px solid var(--line);">
-                    <button class="detail-tab-btn active" data-tab="relatorios" style="flex:1; padding:9px 0; border-radius:10px; border:none; font-size:0.85rem; font-weight:700; cursor:pointer; transition:var(--ease); background:white; color:var(--brand); box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                <div style="display:flex; gap:4px; background:var(--bg); padding:4px; border-radius:var(--r-lg); border:1px solid var(--line);">
+                    <button class="detail-tab-btn detail-tab active" data-tab="relatorios" style="flex:1;">
                         Relatórios
                     </button>
-                    <button class="detail-tab-btn" data-tab="conta" style="flex:1; padding:9px 0; border-radius:10px; border:none; font-size:0.85rem; font-weight:700; cursor:pointer; transition:var(--ease); background:transparent; color:var(--ink-3);">
+                    <button class="detail-tab-btn detail-tab" data-tab="conta" style="flex:1;">
                         Conta
                     </button>
                 </div>
 
                 <!-- TAB: RELATÓRIOS -->
-                <div id="detail-tab-relatorios" style="display:flex; flex-direction:column; gap:16px;">
+                <div id="detail-tab-relatorios" class="gap-16">
                     <!-- Hidden period selectors (driven by month pills) -->
                     <select id="sel-month" style="display:none;"></select>
                     <select id="sel-year" style="display:none;"></select>
@@ -268,8 +286,8 @@ async function renderDashboard(user) {
                     <div id="report-summary-card" class="card" style="padding:16px; background:linear-gradient(135deg, var(--brand-soft), rgba(139,92,246,0.05)); border-color:rgba(99,102,241,0.2);">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div>
-                                <div style="font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total do período</div>
-                                <div id="report-total-display" style="font-size:1.5rem; font-weight:800; color:var(--ink); letter-spacing:-0.02em;">--</div>
+                                <div class="stat-label">Total do período</div>
+                                <div id="report-total-display" class="stat-value">--</div>
                             </div>
                             <div id="report-status-badge"></div>
                         </div>
@@ -289,19 +307,19 @@ async function renderDashboard(user) {
                     </div>
 
                     <!-- Expense table -->
-                    <div class="card" style="padding:0; overflow:hidden; border-radius:16px;">
+                    <div class="card" style="padding:0; overflow:hidden;">
                         <div style="padding:14px 16px; border-bottom:1px solid var(--line); background:var(--bg);">
-                            <h3 style="font-size:0.85rem; font-weight:700; color:var(--ink); margin:0;">Lançamentos do período</h3>
+                            <h3 class="section-title" style="font-size:0.85rem;">Lançamentos do período</h3>
                         </div>
                         <div style="overflow-x:auto;">
-                            <table class="data-table" style="width:100%; border-collapse:collapse; text-align:left;">
+                            <table class="data-table">
                                 <thead>
-                                    <tr style="border-bottom:1px solid var(--line); background:rgba(241,245,249,0.5);">
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase;">Data</th>
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase;">Descrição</th>
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase;">Categoria</th>
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; text-align:right;">Valor</th>
-                                        <th style="padding:10px 14px; font-size:0.68rem; font-weight:700; color:var(--ink-3); text-transform:uppercase; text-align:center;">Ações</th>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Descrição</th>
+                                        <th>Categoria</th>
+                                        <th style="text-align:right;">Valor</th>
+                                        <th style="text-align:center;">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="expenses-list-tbody">
@@ -321,6 +339,17 @@ async function renderDashboard(user) {
             </div>
 
         </main>
+        <nav class="bottom-nav">
+          <button class="nav-item active" data-nav="dashboard">
+            <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+            <span class="nav-label">Início</span>
+          </button>
+          <button class="nav-item" data-nav="settings">
+            <div class="nav-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
+            <span class="nav-label">Config</span>
+          </button>
+        </nav>
+      </div>
     </div>
     `;
 
@@ -464,9 +493,7 @@ async function renderDashboard(user) {
     function switchDetailTab(tabName) {
         document.querySelectorAll('.detail-tab-btn').forEach(btn => {
             const isActive = btn.dataset.tab === tabName;
-            btn.style.background = isActive ? 'white' : 'transparent';
-            btn.style.color = isActive ? 'var(--brand)' : 'var(--ink-3)';
-            btn.style.boxShadow = isActive ? '0 1px 4px rgba(0,0,0,0.08)' : 'none';
+            btn.classList.toggle('active', isActive);
         });
         document.getElementById('detail-tab-relatorios').style.display = tabName === 'relatorios' ? 'flex' : 'none';
         document.getElementById('detail-tab-conta').style.display = tabName === 'conta' ? 'flex' : 'none';
@@ -798,34 +825,15 @@ async function renderDashboard(user) {
             const settings = await api.get('/counter/settings');
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
-            // Custom CSS only for the modal elements
-            const innerStyles = `
-                <style>
-                    .set-toggle { width:48px; height:24px; background:#cbd5e1; border-radius:34px; position:relative; cursor:pointer; transition:0.3s; }
-                    .set-toggle::after { content:''; position:absolute; width:20px; height:20px; border-radius:50%; background:white; top:2px; left:2px; transition:0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
-                    .set-toggle.on { background:var(--brand); }
-                    .set-toggle.on::after { transform:translateX(24px); }
-                </style>
-            `;
             overlay.innerHTML = `
-                ${innerStyles}
-                <div class="modal animate-up" style="max-width:440px; border-radius:24px; padding:0; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow-3);">
+                <div class="modal" style="max-width:440px; padding:0; overflow:hidden;">
                     
-                    <div style="background:linear-gradient(135deg, var(--bg), var(--bg)); padding:24px 32px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between;">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <div style="width:40px; height:40px; border-radius:12px; background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center;">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            </div>
-                            <div>
-                                <h2 style="font-size:1.15rem; font-weight:800; color:var(--ink); margin:0;">Regras & Lembretes</h2>
-                                <p style="font-size:0.75rem; color:var(--ink-3); margin:0; margin-top:2px;">Controle das automações de cobrança</p>
-                            </div>
-                        </div>
-                        <button id="btn-close-modal" style="background:var(--bg); width:32px; height:32px; border-radius:50%; border:1px solid var(--line); cursor:pointer; color:var(--ink-3); display:flex; align-items:center; justify-content:center; transition:var(--ease);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+                    <div class="modal-handle"></div>
+                    <div class="modal-title">
+                        <svg width="20" height="20" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Regras & Lembretes
                     </div>
-                    
-                    <div style="padding:32px;">
-                        <div class="gap-24">
+                    <div class="gap-24" style="padding:0 20px 24px;">
                             
                             <!-- Toggle Automação -->
                             <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--bg); border-radius:16px; border:1px solid var(--line);">
@@ -864,10 +872,10 @@ async function renderDashboard(user) {
                                 <p style="font-size:0.75rem; color:var(--ink-3); line-height:1.4; margin-top:8px;">Após este dia limite, o sistema para de enviar avisos neste mês.</p>
                             </div>
 
-                            <button class="btn btn-primary" id="btn-save-settings" style="margin-top:32px; border-radius:14px; padding:14px; width:100%; font-size:1rem; box-shadow:0 8px 16px var(--brand-glow);">
+                            <button class="btn btn-primary" id="btn-save-settings" style="margin-top:16px;">
                                 Salvar Preferências
                             </button>
-                        </div>
+                            <button class="btn btn-outline" id="btn-close-modal">Cancelar</button>
                     </div>
                 </div>
             `;
@@ -900,6 +908,7 @@ async function renderDashboard(user) {
             });
 
             document.getElementById('btn-close-modal').addEventListener('click', () => overlay.remove());
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
         } catch (e) { showToast(e.message, 'error'); }
     }
 
@@ -989,11 +998,42 @@ async function renderDashboard(user) {
         });
     });
 
-    document.getElementById('btn-logout').addEventListener('click', () => {
-        localStorage.removeItem('counter_token');
-        renderLogin();
+    // Logout handlers
+    const logoutFn = () => { localStorage.removeItem('counter_token'); renderLogin(); };
+    document.getElementById('btn-logout')?.addEventListener('click', logoutFn);
+    document.getElementById('btn-logout-side')?.addEventListener('click', logoutFn);
+
+    // Sidebar toggle (desktop)
+    document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
+        isSidebarCollapsed = !isSidebarCollapsed;
+        const shell = document.getElementById('app-shell');
+        shell.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
+        const sidebar = document.getElementById('sidebar-main');
+        sidebar.style.width = isSidebarCollapsed ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
+        sidebar.style.padding = isSidebarCollapsed ? '28px 10px' : '28px 20px';
     });
-    document.getElementById('btn-settings').addEventListener('click', showSettingsModal);
+
+    // Mobile menu
+    document.getElementById('btn-toggle-mobile-menu')?.addEventListener('click', () => {
+        document.getElementById('sidebar-main')?.classList.add('show');
+        document.getElementById('sidebar-overlay')?.classList.add('show');
+    });
+    document.getElementById('sidebar-overlay')?.addEventListener('click', () => {
+        document.getElementById('sidebar-main')?.classList.remove('show');
+        document.getElementById('sidebar-overlay')?.classList.remove('show');
+    });
+
+    // Nav items (sidebar + bottom-nav) — settings opens modal, dashboard is default
+    document.querySelectorAll('[data-nav]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('sidebar-main')?.classList.remove('show');
+            document.getElementById('sidebar-overlay')?.classList.remove('show');
+            if (btn.dataset.nav === 'settings') {
+                showSettingsModal();
+            }
+            // dashboard is already the default view
+        });
+    });
 }
 
 render();
