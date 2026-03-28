@@ -46,19 +46,26 @@ router.get('/companies', auth, requireCounter, async (req, res) => {
                 ) as is_locked,
                 rs.sent_at as report_sent_at,
                 (
-                    SELECT COUNT(*) FROM expenses e 
-                    WHERE e.cnpj_id = c.id 
-                    AND e.period_month = $2 
+                    SELECT COUNT(*) FROM expenses e
+                    WHERE e.cnpj_id = c.id
+                    AND e.period_month = $2
                     AND e.period_year = $3
                     AND rs.sent_at IS NOT NULL
                     AND e.created_at > rs.sent_at
-                ) as late_expenses_count
+                ) as late_expenses_count,
+                EXISTS (
+                    SELECT 1 FROM counter_collected_reports ccr
+                    WHERE ccr.cnpj_id = c.id
+                    AND ccr.period_month = $2
+                    AND ccr.period_year = $3
+                    AND ccr.counter_id = $4
+                ) as is_collected
              FROM cnpjs c
              JOIN users u ON u.id = c.user_id
              LEFT JOIN report_submissions rs ON rs.cnpj_id = c.id AND rs.period_month = $2 AND rs.period_year = $3
              WHERE u.office_id = $1 AND c.is_active = true
              ORDER BY c.razao_social`,
-            [req.user.office_id, month, year]
+            [req.user.office_id, month, year, req.user.id]
         );
         res.json(result.rows);
     } catch (err) {
@@ -358,6 +365,70 @@ router.put('/cnpj/:id/whatsapp', auth, requireCounter, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro ao atualizar WhatsApp' });
+    }
+});
+
+// GET /api/counter/report?cnpj_id=&month=&year= — Monthly report for a company (counter version)
+router.get('/report', auth, requireCounter, async (req, res) => {
+    try {
+        const { cnpj_id, month, year } = req.query;
+        if (!cnpj_id || !month || !year) return res.status(400).json({ error: 'cnpj_id, month e year são obrigatórios' });
+        if (!(await verifyCnpjInOffice(cnpj_id, req.user.office_id))) return res.status(403).json({ error: 'Acesso negado' });
+
+        const result = await pool.query(
+            `SELECT ec.name AS category_name, ec.is_filial,
+                    COALESCE(SUM(e.amount), 0) AS total,
+                    COUNT(e.id) AS lancamentos
+             FROM expense_categories ec
+             LEFT JOIN expenses e ON e.category_id = ec.id AND e.cnpj_id = $1 AND e.period_month = $2 AND e.period_year = $3
+             WHERE ec.is_default = true
+             GROUP BY ec.id, ec.name, ec.is_filial
+             ORDER BY ec.is_filial, ec.name`,
+            [cnpj_id, parseInt(month), parseInt(year)]
+        );
+
+        const total_geral = result.rows.reduce((sum, r) => sum + parseFloat(r.total), 0);
+        res.json({ categories: result.rows, total_geral });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao buscar relatório' });
+    }
+});
+
+// POST /api/counter/collected — Mark a company's report as collected for a month
+router.post('/collected', auth, requireCounter, async (req, res) => {
+    try {
+        const { cnpj_id, month, year } = req.body;
+        if (!cnpj_id || !month || !year) return res.status(400).json({ error: 'cnpj_id, month e year são obrigatórios' });
+        if (!(await verifyCnpjInOffice(cnpj_id, req.user.office_id))) return res.status(403).json({ error: 'Acesso negado' });
+
+        await pool.query(
+            `INSERT INTO counter_collected_reports (cnpj_id, period_month, period_year, counter_id)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (cnpj_id, period_month, period_year, counter_id) DO NOTHING`,
+            [cnpj_id, parseInt(month), parseInt(year), req.user.id]
+        );
+        res.json({ collected: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao marcar como coletado' });
+    }
+});
+
+// DELETE /api/counter/collected — Unmark a company's report as collected
+router.delete('/collected', auth, requireCounter, async (req, res) => {
+    try {
+        const { cnpj_id, month, year } = req.query;
+        if (!cnpj_id || !month || !year) return res.status(400).json({ error: 'cnpj_id, month e year são obrigatórios' });
+
+        await pool.query(
+            `DELETE FROM counter_collected_reports WHERE cnpj_id = $1 AND period_month = $2 AND period_year = $3 AND counter_id = $4`,
+            [cnpj_id, parseInt(month), parseInt(year), req.user.id]
+        );
+        res.json({ collected: false });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao desmarcar' });
     }
 });
 

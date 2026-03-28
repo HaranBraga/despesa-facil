@@ -443,6 +443,11 @@ async function renderDashboard(user) {
                 const lateCount = parseInt(c.late_expenses_count) || 0;
                 const lateDot = lateCount > 0 ? `<span title="${lateCount} após envio" style="width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;margin-left:2px;"></span>` : '';
 
+                const isCollected = c.is_collected;
+                const checkIcon = isCollected
+                    ? '<svg width="14" height="14" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
+                    : '<svg width="14" height="14" fill="none" stroke="var(--ink-3)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>';
+
                 return `<div class="clickable-company" data-id="${c.id}" title="${c.razao_social}\n${c.cnpj}" style="
                     display:flex; align-items:center; gap:8px; padding:10px 12px;
                     border-radius:12px; border:1.5px solid ${isActive ? 'var(--brand)' : 'var(--line)'};
@@ -458,6 +463,9 @@ async function renderDashboard(user) {
                             ${lateDot}
                         </div>
                     </div>
+                    <button class="btn-collect" data-cid="${c.id}" data-collected="${isCollected}" title="${isCollected ? 'Desmarcar coletado' : 'Marcar como coletado'}" style="flex-shrink:0;width:28px;height:28px;border-radius:8px;border:1px solid ${isCollected ? 'var(--green)' : 'var(--line)'};background:${isCollected ? 'var(--green-soft)' : 'transparent'};display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--ease);">
+                        ${checkIcon}
+                    </button>
                 </div>`;
             }
 
@@ -482,6 +490,24 @@ async function renderDashboard(user) {
                 el.addEventListener('click', () => {
                     const companyData = companiesList.find(c => c.id === el.dataset.id);
                     if (companyData) openCompanyDetail(companyData);
+                });
+            });
+
+            document.querySelectorAll('.btn-collect').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const cid = btn.dataset.cid;
+                    const isCollected = btn.dataset.collected === 'true';
+                    try {
+                        if (isCollected) {
+                            await api.delete(`/counter/collected?cnpj_id=${cid}&month=${dashboardMonth}&year=${dashboardYear}`);
+                        } else {
+                            await api.post('/counter/collected', { cnpj_id: cid, month: dashboardMonth, year: dashboardYear });
+                        }
+                        const company = companiesList.find(c => c.id === cid);
+                        if (company) company.is_collected = !isCollected;
+                        renderCompanies();
+                    } catch (err) { showToast(err.message, 'error'); }
                 });
             });
 
@@ -685,7 +711,7 @@ async function renderDashboard(user) {
         if (catsEl) catsEl.style.display = 'none';
 
         try {
-            const report = await api.get(`/reports/monthly?cnpj_id=${selectedCompanyId}&month=${month}&year=${year}`);
+            const report = await api.get(`/counter/report?cnpj_id=${selectedCompanyId}&month=${month}&year=${year}`);
 
             if (!report.categories || report.categories.length === 0 || report.total_geral === 0) {
                 totalEl.textContent = 'R$ 0,00';
@@ -826,14 +852,13 @@ async function renderDashboard(user) {
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
             overlay.innerHTML = `
-                <div class="modal" style="max-width:440px; padding:0; overflow:hidden;">
-                    
+                <div class="modal" style="max-width:440px;">
                     <div class="modal-handle"></div>
                     <div class="modal-title">
                         <svg width="20" height="20" fill="none" stroke="var(--brand)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         Regras & Lembretes
                     </div>
-                    <div class="gap-24" style="padding:0 20px 24px;">
+                    <div class="gap-16">
                             
                             <!-- Toggle Automação -->
                             <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--bg); border-radius:16px; border:1px solid var(--line);">
@@ -844,35 +869,20 @@ async function renderDashboard(user) {
                                 <div id="set-enabled" class="set-toggle ${settings.reminder_enabled ? 'on' : ''}" data-checked="${settings.reminder_enabled}"></div>
                             </div>
 
-                            <!-- Grupo Horário -->
-                            <div class="form-group" style="margin-top:24px;">
-                                <label class="form-label" style="font-size:0.75rem; display:flex; align-items:center; gap:6px;">
-                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                    Horário de Disparo
-                                </label>
+                            <div class="form-group">
+                                <label class="form-label">Horário de Disparo</label>
                                 <div style="display:flex; gap:12px; align-items:center;">
-                                    <input id="set-hour" type="number" class="form-input" min="0" max="23" value="${settings.reminder_whatsapp_hour}" style="font-weight:700; font-size:1.1rem; text-align:center; padding:12px; border-radius:12px;">
+                                    <input id="set-hour" type="number" class="form-input" min="0" max="23" value="${settings.reminder_whatsapp_hour}" style="font-weight:700; text-align:center;">
                                     <span style="font-weight:800; color:var(--ink-3); font-size:1.2rem;">:</span>
-                                    <input id="set-min" type="number" class="form-input" min="0" max="59" value="${settings.reminder_whatsapp_minute}" style="font-weight:700; font-size:1.1rem; text-align:center; padding:12px; border-radius:12px;">
+                                    <input id="set-min" type="number" class="form-input" min="0" max="59" value="${settings.reminder_whatsapp_minute}" style="font-weight:700; text-align:center;">
                                 </div>
                             </div>
-
-                            <!-- Limite de Dia Útil -->
-                            <div class="form-group" style="margin-top:24px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <label class="form-label" style="margin:0; font-size:0.75rem; display:flex; align-items:center; gap:6px;">
-                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                        Limite do Mês (Dias Úteis)
-                                    </label>
-                                </div>
-                                <div style="display:flex; align-items:center; position:relative;">
-                                    <input id="set-day-limit" type="number" class="form-input" min="1" max="10" value="${settings.reminder_max_business_day || 3}" style="padding-right:60px; font-weight:800; font-size:1.05rem; border-radius:12px;">
-                                    <div style="position:absolute; right:16px; font-size:0.75rem; font-weight:700; color:var(--brand); background:var(--brand-soft); padding:4px 8px; border-radius:6px; pointer-events:none;">º Dia</div>
-                                </div>
-                                <p style="font-size:0.75rem; color:var(--ink-3); line-height:1.4; margin-top:8px;">Após este dia limite, o sistema para de enviar avisos neste mês.</p>
+                            <div class="form-group">
+                                <label class="form-label">Limite do Mês (Dias Úteis)</label>
+                                <input id="set-day-limit" type="number" class="form-input" min="1" max="10" value="${settings.reminder_max_business_day || 3}" style="font-weight:700;">
+                                <p class="text-xs text-muted" style="margin-top:4px;">Após este dia útil, o sistema para de enviar avisos neste mês.</p>
                             </div>
-
-                            <button class="btn btn-primary" id="btn-save-settings" style="margin-top:16px;">
+                            <button class="btn btn-primary" id="btn-save-settings">
                                 Salvar Preferências
                             </button>
                             <button class="btn btn-outline" id="btn-close-modal">Cancelar</button>

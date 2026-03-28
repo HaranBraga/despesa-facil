@@ -132,6 +132,15 @@ const alterStatements = [
     period_year INTEGER NOT NULL,
     sent_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(cnpj_id, period_month, period_year)
+  )`,
+  `CREATE TABLE IF NOT EXISTS counter_collected_reports (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    cnpj_id UUID NOT NULL REFERENCES cnpjs(id) ON DELETE CASCADE,
+    period_month INTEGER NOT NULL,
+    period_year INTEGER NOT NULL,
+    counter_id UUID NOT NULL,
+    collected_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(cnpj_id, period_month, period_year, counter_id)
   )`
 ];
 
