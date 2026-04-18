@@ -387,7 +387,7 @@ async function renderDashboard(user) {
       listEl.innerHTML = clients.map(c => `
         <div style="padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.05);">
           <div style="font-weight:500;font-size:0.85rem;">${c.name}</div>
-          <div class="text-xs text-muted">${c.email} · ${c.cnpj_count} CNPJ${c.cnpj_count != 1 ? 's' : ''}</div>
+          <div class="text-xs text-muted">${c.username ? '@' + c.username : '—'} · ${c.cnpj_count} CNPJ${c.cnpj_count != 1 ? 's' : ''}</div>
         </div>
       `).join('');
     } catch (e) { listEl.innerHTML = '<div class="text-xs text-danger">Erro.</div>'; }

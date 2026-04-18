@@ -315,12 +315,12 @@ router.delete('/counters/:id', auth, requireAdmin, async (req, res) => {
 router.get('/:id/clients', auth, requireAdmin, async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT DISTINCT u.id, u.name, u.email, u.is_active, u.created_at,
+            `SELECT DISTINCT u.id, u.name, u.username, u.is_active, u.created_at,
                     COUNT(c.id) AS cnpj_count
              FROM users u
              JOIN cnpjs c ON c.user_id = u.id AND c.is_active = true
              WHERE u.office_id = $1 AND u.is_admin = false
-             GROUP BY u.id, u.name, u.email, u.is_active, u.created_at
+             GROUP BY u.id, u.name, u.username, u.is_active, u.created_at
              ORDER BY u.name ASC`,
             [req.params.id]
         );
