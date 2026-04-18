@@ -510,20 +510,19 @@ async function renderDashboard(user) {
         } catch (e) { showToast(e.message, 'error'); }
       });
       document.getElementById('btn-test-wh').addEventListener('click', async () => {
-        const url = document.getElementById('wh-url').value.trim();
-        if (!url) return showToast('Informe a URL do webhook antes de testar', 'error');
+        const urlField = document.getElementById('wh-url').value.trim();
+        if (!urlField) return showToast('Informe a URL do webhook antes de testar', 'error');
         const btn = document.getElementById('btn-test-wh');
         btn.disabled = true;
-        btn.textContent = 'Enviando...';
+        btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Enviando...';
         try {
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ test: true, source: 'Despesa Fácil', timestamp: new Date().toISOString() })
-          });
-          showToast(res.ok ? `Webhook respondeu: ${res.status} OK` : `Resposta: ${res.status}`, res.ok ? 'success' : 'error');
+          const result = await api.post(`/offices/${officeId}/webhook/test`, {});
+          const msg = result.ok
+            ? `Enviado! ${result.total_pendentes} empresa(s) pendente(s) este mês`
+            : `Webhook respondeu ${result.status} — verifique a URL`;
+          showToast(msg, result.ok ? 'success' : 'error');
         } catch (e) {
-          showToast('Erro ao conectar: ' + e.message, 'error');
+          showToast('Erro: ' + e.message, 'error');
         } finally {
           btn.disabled = false;
           btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Testar Webhook';
@@ -568,7 +567,7 @@ async function renderDashboard(user) {
         <div class="gap-16">
           <div class="form-group"><label class="form-label">Nome completo</label><input id="m-nu-name" type="text" class="form-input" placeholder="João Silva"/></div>
           <div class="form-group"><label class="form-label">Usuário <span class="text-muted text-xs">(para fazer login)</span></label><input id="m-nu-username" type="text" class="form-input" placeholder="joaosilva" autocomplete="off"/></div>
-          <div class="form-group"><label class="form-label">Telefone / WhatsApp <span class="text-muted text-xs">(opcional)</span></label><input id="m-nu-phone" type="tel" class="form-input" placeholder="5511999999999" inputmode="tel"/></div>
+          <div class="form-group"><label class="form-label">Telefone / WhatsApp <span class="text-muted text-xs">(opcional)</span></label><input id="m-nu-phone" type="tel" class="form-input" placeholder="11999999999" inputmode="tel"/></div>
           <div class="form-group"><label class="form-label">Escritório Contábil</label>
             <select id="m-nu-office" class="form-select">
               <option value="">Selecione...</option>
@@ -630,7 +629,7 @@ async function renderDashboard(user) {
               <span style="padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:700;border:1px solid ${u.is_active ? 'var(--green)' : 'var(--red)'};background:${u.is_active ? 'var(--green-soft)' : 'var(--red-soft)'};color:${u.is_active ? 'var(--green)' : 'var(--red)'};">
                 ${u.is_active ? 'Ativo' : 'Inativo'}
               </span>
-              <button class="action-btn edit btn-edit-user" data-uid="${u.id}" data-uname="${u.name}" data-uemail="${u.email}" title="Editar usuário">
+              <button class="action-btn edit btn-edit-user" data-uid="${u.id}" data-uname="${u.name}" data-uemail="${u.email || ''}" data-uusername="${u.username || ''}" data-uphone="${u.phone || ''}" title="Editar usuário">
                 <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
               <button class="action-btn btn-toggle-user" data-uid="${u.id}" title="${u.is_active ? 'Desativar' : 'Ativar'}" style="color:${u.is_active ? 'var(--amber)' : 'var(--green)'};">
@@ -655,7 +654,7 @@ async function renderDashboard(user) {
       });
 
       document.querySelectorAll('.btn-edit-user').forEach(btn => {
-        btn.addEventListener('click', () => showEditUserModal(btn.dataset.uid, btn.dataset.uname, btn.dataset.uemail));
+        btn.addEventListener('click', () => showEditUserModal(btn.dataset.uid, btn.dataset.uname, btn.dataset.uemail, btn.dataset.uusername, btn.dataset.uphone));
       });
 
       document.querySelectorAll('.btn-del-user').forEach(btn => {
@@ -671,7 +670,7 @@ async function renderDashboard(user) {
     } catch (e) { showToast(e.message, 'error'); }
   }
 
-  function showEditUserModal(userId, userName, userEmail) {
+  function showEditUserModal(userId, userName, userEmail, userUsername, userPhone) {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
@@ -684,8 +683,12 @@ async function renderDashboard(user) {
             <input id="m-eu-name" type="text" class="form-input" value="${userName}" />
           </div>
           <div class="form-group">
-            <label class="form-label">Novo E-mail</label>
-            <input id="m-eu-email" type="email" class="form-input" placeholder="${userEmail}" />
+            <label class="form-label">Usuário <span style="color:var(--ink-3);font-weight:400;">(para login)</span></label>
+            <input id="m-eu-username" type="text" class="form-input" value="${userUsername}" placeholder="usuario" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefone / WhatsApp <span style="color:var(--ink-3);font-weight:400;">(opcional)</span></label>
+            <input id="m-eu-phone" type="tel" class="form-input" value="${userPhone}" placeholder="11999999999" inputmode="tel" />
           </div>
           <div class="form-group">
             <label class="form-label">Nova Senha <span style="color:var(--ink-3);font-weight:400;">(deixe em branco para não alterar)</span></label>
@@ -699,11 +702,13 @@ async function renderDashboard(user) {
     requestAnimationFrame(() => overlay.classList.add('show'));
     document.getElementById('btn-save-eu').addEventListener('click', async () => {
       const name = document.getElementById('m-eu-name').value.trim();
-      const email = document.getElementById('m-eu-email').value.trim();
+      const username = document.getElementById('m-eu-username').value.trim();
+      const phone = document.getElementById('m-eu-phone').value.trim();
       const password = document.getElementById('m-eu-pass').value;
       const body = {};
       if (name && name !== userName) body.name = name;
-      if (email) body.email = email;
+      if (username !== userUsername) body.username = username || '';
+      if (phone !== userPhone) body.phone = phone || '';
       if (password) body.password = password;
       if (Object.keys(body).length === 0) return showToast('Nenhuma alteração detectada', 'error');
       try {

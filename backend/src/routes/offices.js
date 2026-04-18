@@ -147,6 +147,17 @@ router.put('/users/:id', auth, requireAdmin, async (req, res) => {
             if (dup.rows.length > 0) return res.status(409).json({ error: 'E-mail já em uso' });
             updates.push(`email = $${idx++}`); params.push(email.toLowerCase());
         }
+        if (req.body.username !== undefined) {
+            const un = req.body.username ? req.body.username.toLowerCase().trim() : null;
+            if (un) {
+                const dup = await pool.query('SELECT id FROM users WHERE username = $1 AND id != $2', [un, id]);
+                if (dup.rows.length > 0) return res.status(409).json({ error: 'Usuário já em uso' });
+            }
+            updates.push(`username = $${idx++}`); params.push(un);
+        }
+        if (req.body.phone !== undefined) {
+            updates.push(`phone = $${idx++}`); params.push(req.body.phone ? req.body.phone.trim() : null);
+        }
         if (password) {
             if (password.length < 6) return res.status(400).json({ error: 'Senha mínima de 6 caracteres' });
             const hash = await bcrypt.hash(password, 10);
@@ -370,6 +381,59 @@ router.put('/:id/settings', auth, requireAdmin, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro ao atualizar configurações' });
+    }
+});
+
+// POST /offices/:id/webhook/test — Testa webhook com CNPJs sem declaração mensal do mês atual
+router.post('/:id/webhook/test', auth, requireAdmin, async (req, res) => {
+    try {
+        const { id: officeId } = req.params;
+        const settings = await pool.query('SELECT webhook_url FROM accounting_office_settings WHERE office_id = $1', [officeId]);
+        const webhookUrl = settings.rows[0]?.webhook_url;
+        if (!webhookUrl) return res.status(400).json({ error: 'Webhook URL não configurada para este escritório' });
+
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+
+        const base = process.env.DF_BASE_URL || 'https://despesafacil.azecode.cloud';
+        const result = await pool.query(
+            `SELECT c.id AS cnpj_id, c.cnpj, c.razao_social, c.whatsapp_token,
+                    COALESCE(c.whatsapp_number, u.whatsapp_number) AS whatsapp,
+                    u.name AS user_name
+             FROM cnpjs c
+             JOIN users u ON u.id = c.user_id
+             WHERE c.is_active = true AND u.is_active = true AND u.office_id = $1
+               AND c.id NOT IN (
+                 SELECT DISTINCT cnpj_id FROM expenses
+                 WHERE period_month = $2 AND period_year = $3 AND tipo = 'mensal'
+               )
+             ORDER BY u.name, c.razao_social`,
+            [officeId, month, year]
+        );
+
+        const cnpjs = result.rows.map(r => ({
+            cnpj_id: r.cnpj_id,
+            cnpj: r.cnpj,
+            razao_social: r.razao_social,
+            user_name: r.user_name,
+            whatsapp: r.whatsapp,
+            guest_link: `${base.replace(/\/$/, '')}/lancamento?token=${r.whatsapp_token}`
+        }));
+
+        const payload = { test: true, month, year, total_pendentes: cnpjs.length, cnpjs };
+
+        const fetchRes = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(10000)
+        });
+
+        res.json({ status: fetchRes.status, ok: fetchRes.ok, total_pendentes: cnpjs.length });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message || 'Erro ao testar webhook' });
     }
 });
 
