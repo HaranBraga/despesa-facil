@@ -487,6 +487,10 @@ async function renderDashboard(user) {
               <input id="wh-day" type="number" class="form-input" min="1" max="10" value="${settings.reminder_max_business_day || 3}" style="font-weight:700;">
             </div>
             <button class="btn btn-primary" id="btn-save-wh">Salvar Configurações</button>
+            <button class="btn btn-outline" id="btn-test-wh" style="display:flex;align-items:center;gap:6px;">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Testar Webhook
+            </button>
             <button class="btn btn-outline" id="btn-cancel-wh">Cancelar</button>
           </div>
         </div>`;
@@ -505,6 +509,26 @@ async function renderDashboard(user) {
           overlay.remove();
         } catch (e) { showToast(e.message, 'error'); }
       });
+      document.getElementById('btn-test-wh').addEventListener('click', async () => {
+        const url = document.getElementById('wh-url').value.trim();
+        if (!url) return showToast('Informe a URL do webhook antes de testar', 'error');
+        const btn = document.getElementById('btn-test-wh');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ test: true, source: 'Despesa Fácil', timestamp: new Date().toISOString() })
+          });
+          showToast(res.ok ? `Webhook respondeu: ${res.status} OK` : `Resposta: ${res.status}`, res.ok ? 'success' : 'error');
+        } catch (e) {
+          showToast('Erro ao conectar: ' + e.message, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Testar Webhook';
+        }
+      });
       document.getElementById('btn-cancel-wh').addEventListener('click', () => overlay.remove());
       overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
     } catch (e) { showToast(e.message, 'error'); }
@@ -518,22 +542,69 @@ async function renderDashboard(user) {
           <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
           Gerenciamento de Usuários
         </div>
+        <button class="btn btn-primary btn-sm" id="btn-new-user" style="display:flex;align-items:center;gap:4px;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Novo Usuário
+        </button>
       </div>
       <div class="search-box" style="position:relative;margin-bottom:16px;">
-        <input type="text" id="user-search" class="form-input" placeholder="Buscar por nome ou email..." style="padding-left:40px;border-radius:12px;">
+        <input type="text" id="user-search" class="form-input" placeholder="Buscar por nome ou usuário..." style="padding-left:40px;border-radius:12px;">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--ink-3);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       </div>
       <div id="users-container"><div class="skeleton" style="height:200px"></div></div>
     `;
     loadUsers();
     document.getElementById('user-search').addEventListener('input', loadUsers);
+    document.getElementById('btn-new-user').addEventListener('click', () => showAddUserModal());
+  }
+
+  async function showAddUserModal() {
+    let offices = [];
+    try { offices = await api.get('/offices'); } catch (e) { showToast('Erro ao carregar escritórios', 'error'); return; }
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal"><div class="modal-handle"></div>
+        <div class="modal-title">Cadastrar Novo Usuário</div>
+        <div class="gap-16">
+          <div class="form-group"><label class="form-label">Nome completo</label><input id="m-nu-name" type="text" class="form-input" placeholder="João Silva"/></div>
+          <div class="form-group"><label class="form-label">Usuário <span class="text-muted text-xs">(para fazer login)</span></label><input id="m-nu-username" type="text" class="form-input" placeholder="joaosilva" autocomplete="off"/></div>
+          <div class="form-group"><label class="form-label">Telefone / WhatsApp <span class="text-muted text-xs">(opcional)</span></label><input id="m-nu-phone" type="tel" class="form-input" placeholder="5511999999999" inputmode="tel"/></div>
+          <div class="form-group"><label class="form-label">Escritório Contábil</label>
+            <select id="m-nu-office" class="form-select">
+              <option value="">Selecione...</option>
+              ${offices.map(o => `<option value="${o.id}">${o.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Senha</label><input id="m-nu-pass" type="password" class="form-input" placeholder="Mín. 6 caracteres"/></div>
+          <button class="btn btn-primary" id="btn-save-nu">Criar Usuário</button>
+          <button class="btn btn-outline" id="btn-cancel-nu">Cancelar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('show'));
+    document.getElementById('btn-save-nu').addEventListener('click', async () => {
+      const name = document.getElementById('m-nu-name').value.trim();
+      const username = document.getElementById('m-nu-username').value.trim();
+      const phone = document.getElementById('m-nu-phone').value.trim();
+      const office_id = document.getElementById('m-nu-office').value;
+      const password = document.getElementById('m-nu-pass').value;
+      if (!name || !username || !office_id || !password) return showToast('Preencha nome, usuário, escritório e senha', 'error');
+      try {
+        await api.post('/offices/users/register', { name, username, phone: phone || undefined, office_id, password });
+        showToast('Usuário criado!', 'success');
+        overlay.remove();
+        loadUsers();
+      } catch (e) { showToast(e.message, 'error'); }
+    });
+    document.getElementById('btn-cancel-nu').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   }
 
   async function loadUsers() {
     try {
       const users = await api.get('/offices/users/all');
       const search = document.getElementById('user-search')?.value.toLowerCase() || '';
-      const filtered = users.filter(u => u.name.toLowerCase().includes(search) || u.email.toLowerCase().includes(search));
+      const filtered = users.filter(u => u.name.toLowerCase().includes(search) || (u.email || '').toLowerCase().includes(search) || (u.username || '').toLowerCase().includes(search));
       const container = document.getElementById('users-container');
       if (!container) return;
 
@@ -551,7 +622,7 @@ async function renderDashboard(user) {
               </div>
               <div style="min-width:0;">
                 <div style="font-weight:700;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.name}</div>
-                <div style="font-size:0.78rem;color:var(--ink-3);">${u.email}</div>
+                <div style="font-size:0.78rem;color:var(--ink-3);">${u.username ? '@' + u.username : u.email || '—'}${u.phone ? ' · ' + u.phone : ''}</div>
                 <div style="font-size:0.72rem;color:var(--ink-3);margin-top:2px;">${u.office_name || 'Sem escritório'} · ${u.cnpj_count} CNPJ${u.cnpj_count != 1 ? 's' : ''}</div>
               </div>
             </div>

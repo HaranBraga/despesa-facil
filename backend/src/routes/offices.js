@@ -52,11 +52,45 @@ router.delete('/:id', auth, requireAdmin, async (req, res) => {
 
 // --- USER MANAGEMENT (Admin) ---
 
+// POST /offices/users/register — Cadastrar novo usuário via admin (sem email)
+router.post('/users/register', auth, requireAdmin, async (req, res) => {
+    try {
+        const bcrypt = require('bcryptjs');
+        const { name, username, phone, password, office_id } = req.body;
+        if (!name || !username || !password || !office_id) {
+            return res.status(400).json({ error: 'Nome, usuário, senha e escritório são obrigatórios' });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Senha deve ter ao menos 6 caracteres' });
+        }
+        const existing = await pool.query(
+            'SELECT id FROM users WHERE username = $1',
+            [username.toLowerCase()]
+        );
+        if (existing.rows.length > 0) {
+            return res.status(409).json({ error: 'Usuário já cadastrado' });
+        }
+        const existingOffice = await pool.query('SELECT id FROM accounting_offices WHERE id = $1', [office_id]);
+        if (existingOffice.rows.length === 0) {
+            return res.status(400).json({ error: 'Escritório selecionado não existe' });
+        }
+        const hash = await bcrypt.hash(password, 10);
+        const result = await pool.query(
+            'INSERT INTO users (id, name, username, phone, password_hash, office_id, is_admin) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, name, username, phone, office_id',
+            [uuidv4(), name, username.toLowerCase(), phone || null, hash, office_id, false]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
 // GET /offices/users/all — Lista todos os clientes (não-admin, não-counter)
 router.get('/users/all', auth, requireAdmin, async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT u.id, u.name, u.email, u.is_active, u.office_id, u.created_at,
+            `SELECT u.id, u.name, u.email, u.username, u.phone, u.is_active, u.office_id, u.created_at,
                     ao.name AS office_name,
                     (SELECT COUNT(*) FROM cnpjs c WHERE c.user_id = u.id AND c.is_active = true) AS cnpj_count
              FROM users u

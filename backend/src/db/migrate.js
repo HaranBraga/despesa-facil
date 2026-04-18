@@ -141,7 +141,10 @@ const alterStatements = [
     counter_id UUID NOT NULL,
     collected_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(cnpj_id, period_month, period_year, counter_id)
-  )`
+  )`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20)`,
+  `ALTER TABLE users ALTER COLUMN email DROP NOT NULL`
 ];
 
 async function migrate() {

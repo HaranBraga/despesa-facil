@@ -205,17 +205,14 @@ function renderLogin() {
       <p class="auth-sub">Gestão de despesas por CNPJ</p>
       <div class="card auth-card gap-16">
         <div class="form-group">
-          <label class="form-label">E-mail</label>
-          <input id="l-email" type="email" class="form-input" placeholder="seu@email.com" inputmode="email" />
+          <label class="form-label">E-mail ou Usuário</label>
+          <input id="l-email" type="text" class="form-input" placeholder="seu@email.com ou usuario" inputmode="email" />
         </div>
         <div class="form-group">
           <label class="form-label">Senha</label>
           <input id="l-pass" type="password" class="form-input" placeholder="••••••" />
         </div>
         <button class="btn btn-primary" id="btn-login">Entrar</button>
-        <p class="text-center text-sm text-muted mt-8">
-          Não tem conta? <a href="#" id="go-register" style="color:var(--brand)">Cadastre-se</a>
-        </p>
       </div>
     </div>
   `;
@@ -230,9 +227,6 @@ function renderLogin() {
       localStorage.setItem('token', data.token);
       navigate('dashboard');
     } catch (e) { showToast(e.message, 'error'); }
-  });
-  document.getElementById('go-register').addEventListener('click', (e) => {
-    e.preventDefault(); navigate('register');
   });
   document.getElementById('l-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('l-pass').focus(); });
   document.getElementById('l-pass').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-login').click(); });
@@ -973,7 +967,7 @@ function configHtml(cnpjs, categories, prefs) {
       <!-- Botão Minha Conta -->
       <button id="btn-goto-conta" class="btn btn-outline" style="display:flex;align-items:center;gap:8px;width:100%;">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path></svg>
-        Minha Conta &amp; WhatsApp
+        Minha Conta
       </button>
 
 

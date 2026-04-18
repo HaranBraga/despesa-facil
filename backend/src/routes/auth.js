@@ -80,14 +80,17 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+            return res.status(400).json({ error: 'Usuário/email e senha são obrigatórios' });
         }
 
-        // Tenta na tabela users primeiro (clientes e admins)
+        // Tenta na tabela users por email ou username
         let actor = null;
         let actorType = null;
 
-        const userRow = await pool.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase()]);
+        const userRow = await pool.query(
+            'SELECT * FROM users WHERE email = $1 OR username = $1',
+            [email.toLowerCase()]
+        );
         if (userRow.rows.length > 0) {
             actor = userRow.rows[0];
             actorType = actor.is_admin ? 'admin' : 'user';

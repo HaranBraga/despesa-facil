@@ -13,6 +13,41 @@
 <body>
   <div id="app"></div>
   <div class="toast" id="toast"></div>
+  <div id="pwa-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:14px 16px 20px;background:var(--card,#1a1d27);border-top:1px solid rgba(99,102,241,0.25);box-shadow:0 -4px 24px rgba(0,0,0,0.35);display:none;align-items:center;gap:12px;">
+    <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+    </div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:700;font-size:0.9rem;color:var(--ink,#e8eaf0);">Adicionar à tela inicial</div>
+      <div style="font-size:0.75rem;color:var(--ink-3,#8b8fa8);margin-top:1px;">Use como um app nativo, sem abrir o navegador</div>
+    </div>
+    <button id="pwa-install-btn" style="padding:8px 16px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:white;border:none;font-weight:700;font-size:0.85rem;cursor:pointer;flex-shrink:0;">Instalar</button>
+    <button id="pwa-dismiss-btn" style="padding:8px;border-radius:8px;background:transparent;border:1px solid var(--line,rgba(255,255,255,0.08));color:var(--ink-3,#8b8fa8);cursor:pointer;flex-shrink:0;">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <script>
+    (function() {
+      let deferredPrompt = null;
+      const banner = document.getElementById('pwa-banner');
+      const dismissed = localStorage.getItem('pwa-banner-dismissed');
+      if (dismissed) return;
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        banner.style.display = 'flex';
+      });
+      document.getElementById('pwa-install-btn').addEventListener('click', function() {
+        banner.style.display = 'none';
+        if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(function() { deferredPrompt = null; }); }
+      });
+      document.getElementById('pwa-dismiss-btn').addEventListener('click', function() {
+        banner.style.display = 'none';
+        localStorage.setItem('pwa-banner-dismissed', '1');
+      });
+      window.addEventListener('appinstalled', function() { banner.style.display = 'none'; });
+    })();
+  </script>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
