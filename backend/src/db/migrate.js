@@ -144,7 +144,27 @@ const alterStatements = [
   )`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20)`,
-  `ALTER TABLE users ALTER COLUMN email DROP NOT NULL`
+  `ALTER TABLE users ALTER COLUMN email DROP NOT NULL`,
+  `ALTER TABLE counters ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE`,
+  `ALTER TABLE counters ALTER COLUMN email DROP NOT NULL`,
+  `WITH ranked AS (
+    SELECT id,
+           LOWER(SPLIT_PART(email, '@', 1)) AS base,
+           ROW_NUMBER() OVER (PARTITION BY LOWER(SPLIT_PART(email, '@', 1)) ORDER BY created_at) - 1 AS rn
+    FROM users WHERE username IS NULL AND email IS NOT NULL
+  )
+  UPDATE users u
+  SET username = CASE WHEN r.rn = 0 THEN r.base ELSE r.base || r.rn::text END
+  FROM ranked r WHERE u.id = r.id`,
+  `WITH ranked AS (
+    SELECT id,
+           LOWER(SPLIT_PART(email, '@', 1)) AS base,
+           ROW_NUMBER() OVER (PARTITION BY LOWER(SPLIT_PART(email, '@', 1)) ORDER BY created_at) - 1 AS rn
+    FROM counters WHERE username IS NULL AND email IS NOT NULL
+  )
+  UPDATE counters c
+  SET username = CASE WHEN r.rn = 0 THEN r.base ELSE r.base || r.rn::text END
+  FROM ranked r WHERE c.id = r.id`
 ];
 
 async function migrate() {

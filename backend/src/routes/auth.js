@@ -78,27 +78,28 @@ router.post('/register', async (req, res) => {
 // POST /auth/login — Login unificado para users, counters e admins
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Usuário/email e senha são obrigatórios' });
+        const { email: loginField, password } = req.body;
+        if (!loginField || !password) {
+            return res.status(400).json({ error: 'Usuário e senha são obrigatórios' });
         }
+        const identifier = loginField.toLowerCase().trim();
 
-        // Tenta na tabela users por email ou username
         let actor = null;
         let actorType = null;
 
+        // Busca por username em users (inclui admin)
         const userRow = await pool.query(
-            'SELECT * FROM users WHERE email = $1 OR username = $1',
-            [email.toLowerCase()]
+            'SELECT * FROM users WHERE username = $1',
+            [identifier]
         );
         if (userRow.rows.length > 0) {
             actor = userRow.rows[0];
             actorType = actor.is_admin ? 'admin' : 'user';
         }
 
-        // Se não encontrou, tenta na tabela counters
+        // Se não encontrou em users, busca por username em counters
         if (!actor) {
-            const counterRow = await pool.query('SELECT * FROM counters WHERE email = $1', [email.toLowerCase()]);
+            const counterRow = await pool.query('SELECT * FROM counters WHERE username = $1', [identifier]);
             if (counterRow.rows.length > 0) {
                 actor = counterRow.rows[0];
                 actorType = 'counter';

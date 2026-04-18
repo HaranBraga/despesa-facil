@@ -70,8 +70,8 @@ function renderLogin() {
       <p class="auth-sub">Acesso restrito a administradores</p>
       <div class="card auth-card gap-16">
         <div class="form-group">
-          <label class="form-label">E-mail</label>
-          <input id="l-email" type="email" class="form-input" placeholder="admin@despesafacil.com" inputmode="email" />
+          <label class="form-label">Usuário</label>
+          <input id="l-email" type="text" class="form-input" placeholder="admin" autocomplete="username" />
         </div>
         <div class="form-group">
           <label class="form-label">Senha</label>
@@ -356,9 +356,9 @@ async function renderDashboard(user) {
       }
       listEl.innerHTML = counters.map(c => `
         <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.05);">
-          <div><div style="font-weight:500;">${c.name}</div><div class="text-xs text-muted">${c.email}</div></div>
+          <div><div style="font-weight:500;">${c.name}</div><div class="text-xs text-muted">@${c.username || '—'}</div></div>
           <div style="display:flex;gap:4px;">
-            <button class="btn-icon btn-edit-c" data-cid="${c.id}" data-cemail="${c.email}" data-cname="${c.name}" title="Editar" style="padding:4px;color:var(--brand);"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="btn-icon btn-edit-c" data-cid="${c.id}" data-cusername="${c.username || ''}" data-cname="${c.name}" title="Editar" style="padding:4px;color:var(--brand);"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
             <button class="btn-icon" style="color:var(--red);padding:4px;" data-del-c="${c.id}" title="Remover"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
           </div>
         </div>
@@ -370,7 +370,7 @@ async function renderDashboard(user) {
         });
       });
       listEl.querySelectorAll('.btn-edit-c').forEach(btn => {
-        btn.addEventListener('click', () => showEditCounterModal(btn.dataset.cid, btn.dataset.cname, btn.dataset.cemail, officeId));
+        btn.addEventListener('click', () => showEditCounterModal(btn.dataset.cid, btn.dataset.cname, btn.dataset.cusername, officeId));
       });
     } catch (e) { listEl.innerHTML = '<div class="text-xs text-danger">Erro.</div>'; }
   }
@@ -408,13 +408,13 @@ async function renderDashboard(user) {
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   }
 
-  function showEditCounterModal(counterId, counterName, counterEmail, officeId) {
+  function showEditCounterModal(counterId, counterName, counterUsername, officeId) {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `<div class="modal"><div class="modal-handle"></div>
       <div class="modal-title">Editar Contador: ${counterName}</div>
       <div class="gap-16">
-        <div class="form-group"><label class="form-label">Novo E-mail</label><input id="m-ec-email" type="email" class="form-input" placeholder="${counterEmail}"/></div>
+        <div class="form-group"><label class="form-label">Usuário <span class="text-muted">(atual: ${counterUsername || '—'})</span></label><input id="m-ec-username" type="text" class="form-input" placeholder="novo.usuario" autocomplete="off"/></div>
         <div class="form-group"><label class="form-label">Nova Senha <span class="text-muted">(deixe em branco para não alterar)</span></label><input id="m-ec-pass" type="password" class="form-input" placeholder="Min 6 caracteres"/></div>
         <button class="btn btn-primary" id="btn-save-ec">Salvar Alterações</button>
         <button class="btn btn-outline" id="btn-cancel-ec">Cancelar</button>
@@ -422,11 +422,11 @@ async function renderDashboard(user) {
     document.body.appendChild(overlay);
     requestAnimationFrame(() => overlay.classList.add('show'));
     document.getElementById('btn-save-ec').addEventListener('click', async () => {
-      const email = document.getElementById('m-ec-email').value.trim();
+      const username = document.getElementById('m-ec-username').value.trim();
       const password = document.getElementById('m-ec-pass').value;
-      if (!email && !password) return showToast('Informe email ou senha para alterar', 'error');
+      if (!username && !password) return showToast('Informe usuário ou senha para alterar', 'error');
       const body = {};
-      if (email) body.email = email;
+      if (username) body.username = username;
       if (password) body.password = password;
       try {
         await api.put(`/offices/counters/${counterId}`, body);
@@ -442,15 +442,15 @@ async function renderDashboard(user) {
   function showAddCounterModal(officeId) {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
-    overlay.innerHTML = `<div class="modal"><div class="modal-handle"></div><div class="modal-title">Novo Contador</div><div class="gap-16"><div class="form-group"><label class="form-label">Nome</label><input id="m-c-name" type="text" class="form-input" placeholder="João Silva"/></div><div class="form-group"><label class="form-label">E-mail</label><input id="m-c-email" type="email" class="form-input" placeholder="joao@escritorio.com"/></div><div class="form-group"><label class="form-label">Senha Inicial</label><input id="m-c-pass" type="password" class="form-input" placeholder="Min 6 caracteres"/></div><button class="btn btn-primary" id="btn-save-counter">Criar Acesso</button><button class="btn btn-outline" id="btn-cancel-counter">Cancelar</button></div></div>`;
+    overlay.innerHTML = `<div class="modal"><div class="modal-handle"></div><div class="modal-title">Novo Contador</div><div class="gap-16"><div class="form-group"><label class="form-label">Nome</label><input id="m-c-name" type="text" class="form-input" placeholder="João Silva"/></div><div class="form-group"><label class="form-label">Usuário <span class="text-muted text-xs">(para login)</span></label><input id="m-c-username" type="text" class="form-input" placeholder="joaosilva" autocomplete="off"/></div><div class="form-group"><label class="form-label">Senha Inicial</label><input id="m-c-pass" type="password" class="form-input" placeholder="Min 6 caracteres"/></div><button class="btn btn-primary" id="btn-save-counter">Criar Acesso</button><button class="btn btn-outline" id="btn-cancel-counter">Cancelar</button></div></div>`;
     document.body.appendChild(overlay);
     requestAnimationFrame(() => overlay.classList.add('show'));
     document.getElementById('btn-save-counter').addEventListener('click', async () => {
       const name = document.getElementById('m-c-name').value.trim();
-      const email = document.getElementById('m-c-email').value.trim();
+      const username = document.getElementById('m-c-username').value.trim();
       const password = document.getElementById('m-c-pass').value;
-      if (!name || !email || !password) return showToast('Preencha todos os campos', 'error');
-      try { await api.post(`/offices/${officeId}/counters`, { name, email, password }); showToast('Contador criado!', 'success'); overlay.remove(); loadCounters(officeId); } catch (e) { showToast(e.message, 'error'); }
+      if (!name || !username || !password) return showToast('Preencha todos os campos', 'error');
+      try { await api.post(`/offices/${officeId}/counters`, { name, username, password }); showToast('Contador criado!', 'success'); overlay.remove(); loadCounters(officeId); } catch (e) { showToast(e.message, 'error'); }
     });
     document.getElementById('btn-cancel-counter').addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });

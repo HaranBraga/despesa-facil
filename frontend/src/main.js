@@ -205,8 +205,8 @@ function renderLogin() {
       <p class="auth-sub">Gestão de despesas por CNPJ</p>
       <div class="card auth-card gap-16">
         <div class="form-group">
-          <label class="form-label">E-mail ou Usuário</label>
-          <input id="l-email" type="text" class="form-input" placeholder="seu@email.com ou usuario" inputmode="email" />
+          <label class="form-label">Usuário</label>
+          <input id="l-email" type="text" class="form-input" placeholder="seu.usuario" autocomplete="username" />
         </div>
         <div class="form-group">
           <label class="form-label">Senha</label>

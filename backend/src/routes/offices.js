@@ -217,7 +217,7 @@ router.get('/:id/counters', auth, requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const result = await pool.query(
-            'SELECT id, name, email, is_active, created_at FROM counters WHERE office_id = $1 ORDER BY name ASC',
+            'SELECT id, name, username, is_active, created_at FROM counters WHERE office_id = $1 ORDER BY name ASC',
             [id]
         );
         res.json(result.rows);
@@ -232,26 +232,24 @@ router.post('/:id/counters', auth, requireAdmin, async (req, res) => {
     try {
         const bcrypt = require('bcryptjs');
         const { id: officeId } = req.params;
-        const { name, email, password } = req.body;
+        const { name, username, password } = req.body;
 
-        if (!name || !email || !password) {
-            return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
+        if (!name || !username || !password) {
+            return res.status(400).json({ error: 'Nome, usuário e senha são obrigatórios' });
         }
 
-        // Verifica email único em ambas as tabelas
         const existing = await pool.query(
-            `SELECT id FROM users WHERE email = $1
-             UNION SELECT id FROM counters WHERE email = $1`,
-            [email.toLowerCase()]
+            'SELECT id FROM counters WHERE username = $1 UNION SELECT id FROM users WHERE username = $1',
+            [username.toLowerCase()]
         );
         if (existing.rows.length > 0) {
-            return res.status(409).json({ error: 'E-mail já cadastrado' });
+            return res.status(409).json({ error: 'Usuário já cadastrado' });
         }
 
         const hash = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO counters (id, name, email, password_hash, office_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, email',
-            [uuidv4(), name, email.toLowerCase(), hash, officeId]
+            'INSERT INTO counters (id, name, username, password_hash, office_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, username',
+            [uuidv4(), name, username.toLowerCase(), hash, officeId]
         );
 
         res.status(201).json(result.rows[0]);
@@ -266,8 +264,8 @@ router.put('/counters/:id', auth, requireAdmin, async (req, res) => {
     try {
         const bcrypt = require('bcryptjs');
         const { id } = req.params;
-        const { email, password } = req.body;
-        if (!email && !password) return res.status(400).json({ error: 'Informe email ou senha para alterar' });
+        const { username, password } = req.body;
+        if (!username && !password) return res.status(400).json({ error: 'Informe usuário ou senha para alterar' });
 
         const check = await pool.query('SELECT id FROM counters WHERE id = $1', [id]);
         if (check.rows.length === 0) return res.status(404).json({ error: 'Contador não encontrado' });
@@ -275,14 +273,13 @@ router.put('/counters/:id', auth, requireAdmin, async (req, res) => {
         const updates = [];
         const params = [];
         let idx = 1;
-        if (email) {
+        if (username) {
             const dup = await pool.query(
-                `SELECT id FROM users WHERE email = $1
-                 UNION SELECT id FROM counters WHERE email = $1 AND id != $2`,
-                [email.toLowerCase(), id]
+                'SELECT id FROM counters WHERE username = $1 AND id != $2 UNION SELECT id FROM users WHERE username = $1',
+                [username.toLowerCase(), id]
             );
-            if (dup.rows.length > 0) return res.status(409).json({ error: 'E-mail já em uso' });
-            updates.push(`email = $${idx++}`); params.push(email.toLowerCase());
+            if (dup.rows.length > 0) return res.status(409).json({ error: 'Usuário já em uso' });
+            updates.push(`username = $${idx++}`); params.push(username.toLowerCase());
         }
         if (password) {
             if (password.length < 6) return res.status(400).json({ error: 'Senha mínima de 6 caracteres' });

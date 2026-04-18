@@ -50,8 +50,8 @@ function renderLogin() {
             <p class="auth-sub">Área do Contador</p>
             <div class="card auth-card gap-16">
                 <div class="form-group">
-                    <label class="form-label">E-mail</label>
-                    <input id="l-email" type="email" class="form-input" placeholder="contador@escritorio.com" inputmode="email" />
+                    <label class="form-label">Usuário</label>
+                    <input id="l-email" type="text" class="form-input" placeholder="seu.usuario" autocomplete="username" />
                 </div>
                 <div class="form-group">
                     <label class="form-label">Senha</label>
