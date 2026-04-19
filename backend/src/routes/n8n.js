@@ -92,6 +92,7 @@ router.get('/missing-today', apiKeyAuth, async (req, res) => {
 
         const result = await pool.query(query, params);
 
+        const sysUrl = (process.env.DF_BASE_URL || 'https://despesafacil.azecode.cloud').replace(/\/$/, '');
         const rows = result.rows.map(r => ({
             cnpj_id: r.cnpj_id,
             cnpj: r.cnpj,
@@ -99,7 +100,7 @@ router.get('/missing-today', apiKeyAuth, async (req, res) => {
             user_id: r.user_id,
             user_name: r.user_name,
             whatsapp: resolveWhatsapp(r.cnpj_whatsapp, r.user_whatsapp),
-            guest_link: buildGuestLink(r.whatsapp_token, req)
+            link: sysUrl
         }));
 
         res.json({ date: today, total: rows.length, cnpjs: rows });
@@ -157,6 +158,7 @@ router.get('/missing-monthly', apiKeyAuth, async (req, res) => {
 
         const result = await pool.query(query, params);
 
+        const sysUrl2 = (process.env.DF_BASE_URL || 'https://despesafacil.azecode.cloud').replace(/\/$/, '');
         const rows = result.rows.map(r => ({
             cnpj_id: r.cnpj_id,
             cnpj: r.cnpj,
@@ -164,7 +166,7 @@ router.get('/missing-monthly', apiKeyAuth, async (req, res) => {
             user_id: r.user_id,
             user_name: r.user_name,
             whatsapp: resolveWhatsapp(r.cnpj_whatsapp, r.user_whatsapp),
-            guest_link: buildGuestLink(r.whatsapp_token, req)
+            link: sysUrl2
         }));
 
         res.json({ month: m, year: y, total: rows.length, cnpjs: rows });
@@ -202,35 +204,6 @@ router.get('/last-expense', apiKeyAuth, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro ao buscar última despesa' });
-    }
-});
-
-/**
- * POST /api/n8n/api-keys
- * Gera uma nova API Key para um escritório. Requer x-api-key master ou auth admin.
- * Body: { description, office_id }
- * Retorna: { key } — salvo apenas uma vez, armazena o hash.
- */
-router.post('/api-keys', apiKeyAuth, async (req, res) => {
-    try {
-        const { description, office_id } = req.body;
-
-        // Gera key aleatória segura
-        const rawKey = require('crypto').randomBytes(32).toString('hex');
-        const hash = await bcrypt.hash(rawKey, 10);
-
-        await pool.query(
-            'INSERT INTO api_keys (key_hash, description, office_id) VALUES ($1, $2, $3)',
-            [hash, description || 'API Key', office_id || req.apiKey.office_id]
-        );
-
-        res.status(201).json({
-            message: 'API Key criada. Guarde-a agora — não será exibida novamente.',
-            key: rawKey
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Erro ao criar API Key' });
     }
 });
 

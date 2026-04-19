@@ -75,9 +75,10 @@ router.post('/users/register', auth, requireAdmin, async (req, res) => {
             return res.status(400).json({ error: 'Escritório selecionado não existe' });
         }
         const hash = await bcrypt.hash(password, 10);
+        const phoneVal = phone || null;
         const result = await pool.query(
-            'INSERT INTO users (id, name, username, phone, password_hash, office_id, is_admin) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, name, username, phone, office_id',
-            [uuidv4(), name, username.toLowerCase(), phone || null, hash, office_id, false]
+            'INSERT INTO users (id, name, username, phone, whatsapp_number, password_hash, office_id, is_admin) VALUES ($1,$2,$3,$4,$4,$5,$6,$7) RETURNING id, name, username, phone, office_id',
+            [uuidv4(), name, username.toLowerCase(), phoneVal, hash, office_id, false]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
@@ -389,13 +390,15 @@ router.post('/:id/webhook/test', auth, requireAdmin, async (req, res) => {
         const webhookUrl = settings.rows[0]?.webhook_url;
         if (!webhookUrl) return res.status(400).json({ error: 'Webhook URL não configurada para este escritório' });
 
+        // Lembrete é sempre do MÊS ANTERIOR (prazo de envio do relatório do mês que passou)
         const now = new Date();
-        const month = now.getMonth() + 1;
-        const year = now.getFullYear();
+        let month = now.getMonth(); // getMonth() = 0..11; mês atual - 1
+        let year = now.getFullYear();
+        if (month === 0) { month = 12; year--; } // janeiro → dezembro do ano anterior
 
-        const base = process.env.DF_BASE_URL || 'https://despesafacil.azecode.cloud';
+        const sysUrl = (process.env.DF_BASE_URL || 'https://despesafacil.azecode.cloud').replace(/\/$/, '');
         const result = await pool.query(
-            `SELECT c.id AS cnpj_id, c.cnpj, c.razao_social, c.whatsapp_token,
+            `SELECT c.id AS cnpj_id, c.cnpj, c.razao_social,
                     COALESCE(c.whatsapp_number, u.whatsapp_number) AS whatsapp,
                     u.name AS user_name
              FROM cnpjs c
@@ -415,7 +418,7 @@ router.post('/:id/webhook/test', auth, requireAdmin, async (req, res) => {
             razao_social: r.razao_social,
             user_name: r.user_name,
             whatsapp: r.whatsapp,
-            guest_link: `${base.replace(/\/$/, '')}/lancamento?token=${r.whatsapp_token}`
+            link: sysUrl
         }));
 
         const payload = { test: true, month, year, total_pendentes: cnpjs.length, cnpjs };

@@ -1277,12 +1277,12 @@ async function renderConta() {
             <input id="ac-name" type="text" class="form-input" value="${account.name}" />
           </div>
           <div class="form-group">
-            <label class="form-label">E-mail</label>
-            <input type="email" class="form-input" value="${account.email}" disabled style="opacity:0.6" />
+            <label class="form-label">Usuário</label>
+            <input type="text" class="form-input" value="${account.username || ''}" disabled style="opacity:0.6" />
           </div>
           <div class="form-group">
             <label class="form-label">WhatsApp padrão (para receber lembretes)</label>
-            <input id="ac-wpp" type="tel" class="form-input" placeholder="5511999999999" value="${account.whatsapp_number || ''}" inputmode="numeric" />
+            <input id="ac-wpp" type="tel" class="form-input" placeholder="11999999999" value="${account.whatsapp_number || ''}" inputmode="numeric" />
             <p class="text-sm text-muted" style="margin:4px 0 0">Usado quando o CNPJ não tiver número específico.</p>
           </div>
           <button class="btn btn-primary" id="btn-save-account">Salvar Conta</button>

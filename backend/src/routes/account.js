@@ -12,7 +12,7 @@ const router = express.Router();
 router.get('/', auth, async (req, res) => {
     try {
         const result = await pool.query(
-            'SELECT id, name, email, whatsapp_number, is_admin, office_id, created_at FROM users WHERE id = $1',
+            'SELECT id, name, username, phone, whatsapp_number, is_admin, office_id, created_at FROM users WHERE id = $1',
             [req.user.id]
         );
         if (result.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -58,7 +58,7 @@ router.put('/', auth, async (req, res) => {
             `UPDATE users
              SET name = $1, whatsapp_number = $2, password_hash = $3, updated_at = NOW()
              WHERE id = $4
-             RETURNING id, name, email, whatsapp_number, is_admin, office_id, created_at`,
+             RETURNING id, name, username, phone, whatsapp_number, is_admin, office_id, created_at`,
             [updatedName, updatedWhatsapp, newHash, req.user.id]
         );
 
