@@ -29,8 +29,8 @@ router.get('/companies', auth, requireCounter, async (req, res) => {
                 c.id, 
                 c.cnpj, 
                 c.razao_social, 
-                u.name as owner_name, 
-                u.email as owner_email,
+                u.name as owner_name,
+                u.username as owner_username,
                 EXISTS (
                     SELECT 1 FROM expenses e 
                     WHERE e.cnpj_id = c.id 
@@ -336,8 +336,8 @@ router.get('/cnpj/:id', auth, requireCounter, async (req, res) => {
 
         const r = await pool.query(
             `SELECT c.id, c.cnpj, c.razao_social, c.whatsapp_number as cnpj_whatsapp,
-                    u.id as user_id, u.name as owner_name, u.email as owner_email,
-                    u.whatsapp_number as account_whatsapp
+                    u.id as user_id, u.name as owner_name, u.username as owner_username,
+                    COALESCE(u.whatsapp_number, u.phone) as account_whatsapp
              FROM cnpjs c
              JOIN users u ON u.id = c.user_id
              WHERE c.id = $1`,

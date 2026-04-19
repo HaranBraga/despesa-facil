@@ -424,7 +424,7 @@ async function renderDashboard(user) {
             const grouped = {};
             filtered.forEach(c => {
                 const key = c.owner_name || 'Sem responsável';
-                if (!grouped[key]) grouped[key] = { owner_email: c.owner_email, companies: [] };
+                if (!grouped[key]) grouped[key] = { owner_username: c.owner_username, companies: [] };
                 grouped[key].companies.push(c);
             });
 
@@ -592,7 +592,7 @@ async function renderDashboard(user) {
                         </div>
                         <div style="min-width:0;">
                             <div style="font-weight:700; color:var(--ink); font-size:0.95rem;">${data.owner_name}</div>
-                            <div style="font-size:0.8rem; color:var(--ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${data.owner_email}</div>
+                            <div style="font-size:0.8rem; color:var(--ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${data.owner_username ? '@' + data.owner_username : '—'}</div>
                         </div>
                     </div>
                 </div>
@@ -611,7 +611,7 @@ async function renderDashboard(user) {
                     </div>` : ''}
 
                     <div style="display:flex; gap:8px; align-items:center;">
-                        <input id="cnpj-wpp-counter" type="tel" class="form-input" placeholder="${data.account_whatsapp ? 'Usar padrão da conta' : '5511999999999'}" value="${data.cnpj_whatsapp || ''}" inputmode="numeric" style="flex:1;" />
+                        <input id="cnpj-wpp-counter" type="tel" class="form-input" placeholder="${data.account_whatsapp ? 'Usar padrão da conta' : '11999999999'}" value="${data.cnpj_whatsapp || ''}" inputmode="numeric" style="flex:1;" />
                         <button id="btn-save-cnpj-wpp" class="btn btn-primary btn-sm" style="flex-shrink:0; white-space:nowrap;">Salvar</button>
                     </div>
                     ${data.cnpj_whatsapp ? `<button id="btn-clear-cnpj-wpp" class="btn btn-outline btn-sm" style="align-self:flex-start; font-size:0.78rem;">Usar padrão da conta</button>` : ''}
