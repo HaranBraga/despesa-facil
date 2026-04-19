@@ -40,10 +40,28 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Erro interno do servidor' });
 });
 
+async function ensureAdmin() {
+    const bcrypt = require('bcryptjs');
+    const { v4: uuidv4 } = require('uuid');
+    const pool = require('./db/pool');
+    const username = 'admin';
+    const password = '415263';
+    const existing = await pool.query('SELECT id FROM users WHERE username = $1 AND is_admin = true', [username]);
+    if (existing.rows.length === 0) {
+        const hash = await bcrypt.hash(password, 10);
+        await pool.query(
+            'INSERT INTO users (id, name, username, password_hash, is_admin) VALUES ($1, $2, $3, $4, true) ON CONFLICT (username) DO UPDATE SET is_admin = true, password_hash = $4',
+            [uuidv4(), 'Admin', username, hash]
+        );
+        console.log('✅ Admin criado — usuário: admin / senha: 415263');
+    }
+}
+
 async function start() {
     try {
         await migrate();
         await seed();
+        await ensureAdmin();
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`🚀 Despesa Fácil API rodando na porta ${PORT}`);
         });
