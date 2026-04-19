@@ -399,7 +399,7 @@ router.post('/:id/webhook/test', auth, requireAdmin, async (req, res) => {
         const sysUrl = (process.env.DF_BASE_URL || 'https://despesafacil.azecode.cloud').replace(/\/$/, '');
         const result = await pool.query(
             `SELECT c.id AS cnpj_id, c.cnpj, c.razao_social,
-                    COALESCE(c.whatsapp_number, u.whatsapp_number) AS whatsapp,
+                    COALESCE(c.whatsapp_number, u.whatsapp_number, u.phone) AS whatsapp,
                     u.name AS user_name
              FROM cnpjs c
              JOIN users u ON u.id = c.user_id
