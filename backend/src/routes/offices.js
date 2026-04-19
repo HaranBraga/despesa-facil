@@ -77,8 +77,8 @@ router.post('/users/register', auth, requireAdmin, async (req, res) => {
         const hash = await bcrypt.hash(password, 10);
         const phoneVal = phone || null;
         const result = await pool.query(
-            'INSERT INTO users (id, name, username, phone, whatsapp_number, password_hash, office_id, is_admin) VALUES ($1,$2,$3,$4,$4,$5,$6,$7) RETURNING id, name, username, phone, office_id',
-            [uuidv4(), name, username.toLowerCase(), phoneVal, hash, office_id, false]
+            'INSERT INTO users (id, name, username, phone, whatsapp_number, password_hash, office_id, is_admin) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, name, username, phone, office_id',
+            [uuidv4(), name, username.toLowerCase(), phoneVal, phoneVal, hash, office_id, false]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
