@@ -81,15 +81,6 @@ const alterStatements = [
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_number VARCHAR(20)`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true`,
   `ALTER TABLE expenses ADD COLUMN IF NOT EXISTS locked BOOLEAN DEFAULT FALSE`,
-  // Tabela de API Keys para integração N8N
-  `CREATE TABLE IF NOT EXISTS api_keys (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    key_hash VARCHAR(255) NOT NULL,
-    description VARCHAR(255),
-    office_id UUID REFERENCES accounting_offices(id) ON DELETE CASCADE,
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT NOW()
-  )`,
   `CREATE TABLE IF NOT EXISTS accounting_office_settings (
     office_id UUID PRIMARY KEY REFERENCES accounting_offices(id) ON DELETE CASCADE,
     reminder_whatsapp_hour INTEGER DEFAULT 9,
